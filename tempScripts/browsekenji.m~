@@ -1,0 +1,64 @@
+    %     %% borwse kenji data
+    %     list = importdata('~/data/kenji/list');
+    %     load('~/data/kenji/Beh_time_ind.mat');
+    %      nonSleepTrials{i} = Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),list{i}) , 4);
+    %         if ~isempty(nonSleepTrials{i})
+    %             fprintf('\n ********* filebase: %s ************** \n', list{i});
+    %             subTrialNames = nonSleepTrials{i};
+    %             for kSubTr = 1 : length(subTrialNames)
+    %                 fprintf('\n subtrial %d of %d \n', kSubTr, length(subTrialNames));
+    %                 if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl'])
+    %                     try
+    %                         gt = GenericTrial(list{i}, subTrialNames{kSubTr});
+    %                         gt = gt.Load({{'PF'}});
+    %                         PlotPlaceFields(gt.pfObject, [],[],1);
+    %                         set(gcf, 'Name', [list{i}, ' ' gt.maze.name]);
+    %                     catch
+    %                         fprintf(' ********* ')
+    %                     end
+    %                 end
+    %             end
+    %         end
+
+    %%
+
+
+    list = importdata('~/data/kenji/list');
+    load('~/data/kenji/Beh_time_ind.mat');
+    arenas = {'bigSquare', 'midSquare', 'linear'};
+    fp = fopen('~/data/analysis/kenji/stats','a');
+    fprintf(fp, ['********* stats for :' arenas{1}, ', ', arenas{2}, '  & ', arenas{3} '****** \n']);
+    fclose(fp);
+    for i = 1 : length(list)
+        %         keyboard;
+        nonSleepTrials = Beh((strcmp(Beh(:,5) ,'bigSquare') | strcmp(Beh(:,5) ,'midSquare') | strcmp(Beh(:,5) ,'linear')) & strcmp(Beh(:,2),list{i}) , 4);
+        if ~isempty(nonSleepTrials)
+            fprintf('\n ********* filebase: %s ************** \n', list{i});
+            str = ['\n fielbase : ' list{i} '\n'];
+            subTrialNames = nonSleepTrials;
+            gt = GenericTrial(list{i});
+            gt = gt.Load({{'CluRes'}});
+            clu = gt.clu;
+            res = gt.res;
+            for kSubTr = 1 : length(subTrialNames)
+                fprintf('\n subtrial %d of %d \n', kSubTr, length(subTrialNames));
+                gt = GenericTrial(list{i}, subTrialNames{kSubTr});
+                [~, idx] = SelectPeriods(res, gt.trialPeriods, 'd',1,1);
+                kClu = clu(idx);
+                str = [str; ' 
+                if kSubTr == 1
+                    uniqueClu = unique(kClu);
+                else
+                    uniqueClu = intersect(uniqueClu, unique(kClu));
+                end
+                nClus = NClusters(gt);
+            end
+            fp = fopen('~/data/analysis/kenji/stats','a');
+            str = [str, ' nCluster = ' num2str(nClus) '\n common units :' num2str(uniqueClu') '\n'];
+            str = [str, '\n', repmat('-+', 1, 20)];
+            fprintf(fp, sprintf(str));
+            fclose(fp);
+            fclose('all');
+        end
+        clear nonSleepTrials;
+    end

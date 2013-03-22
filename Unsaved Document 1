@@ -1,0 +1,38 @@
+
+
+
+
+[tr, units,pf, par] = LoadTestData
+gt = GenericTrial(tr)
+gt = gt.Load({{'PF'}})
+
+
+
+
+ [sc,bc] = GetSpikeCounts(gt, [], units.linearPyrCluIdx(ismember(units.linearPyrCluIdx,gt.pfObject.acceptedUnits)));
+
+tic, posterior = decode_bayesian_poisson(gt.pfObject.smoothRateMap, sc);toc
+
+
+decodedPos = decodedPosMAP(gt, posterior);
+
+figure;
+plot(decodedPos(:,1), decodedPos(:,2),'.');
+
+figure;
+for kBin = 1 : size(posterior,3)
+imagesc(sq(posterior(:,:,kBin)));
+pause(.05);
+drawnow;
+end
+
+bcidx = round(bc * gt.trackingSampleRate)+1;
+bcidx(end) = [];
+xy = gt.position(:,7,[1,2]);
+xy = xy(bcidx,:);
+for kBin = 1 : size(decodedPos,1) - 1
+predErr(kBin) = norm(xy(kBin,:) - decodedPos(kBin,:));
+end
+figure
+plot(predErr);
+title('500ms bins')

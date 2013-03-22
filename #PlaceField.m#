@@ -1,0 +1,23 @@
+classdef PlaceField < GenericTrial 
+    
+    properties
+        datsetType;
+        Pars;
+        com;
+        smoothRateMap;
+        selectedPairs;
+        stablePFUnits;
+        stablePairs;
+        spatialCoherence;
+        sparsity;
+    end
+    
+    
+        methods
+            placeField = PlaceField(varargin);
+            [filebase] = DefaultArgs(varargin, {[]});
+            if isempty(filebase)
+                placefield.filebase
+        end
+        
+end

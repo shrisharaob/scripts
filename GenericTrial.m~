@@ -1,0 +1,221 @@
+classdef GenericTrial
+    % class to structure general recording data 
+    %-------
+    % History:
+    %  Shrisha - Created
+    
+    properties 
+        
+        datasetType;
+        
+        filebase;
+        
+        % data location on disk, all raw data files go here : ~/data/<filebase> 
+        % all analysis files go here : ~/data/analysis/<filebase>/
+        % subfields paths.data & paths.analysis
+        paths;        
+        
+        % tag identifying the type of trial within a session
+        trialType;
+        
+        % tag to identify trial subtypes, if any
+        trialSubtype;
+                
+        % recording system sample rate
+        sampleRate
+        
+        %
+        lfpSampleRate;
+
+        % lfp
+        lfp;
+        
+        % state
+        statePeiods;
+        
+        % position tracking sample rate
+        trackingSampleRate;
+        
+        % tracking data
+        position;   % nSamples x nMarkers x  nSpatialDims
+               
+        % units classified as pyr
+        pyrCluIdx;
+        
+        % linear cluster indices for all electrodes
+        clu;
+        
+        res;
+        
+        % each row of ElClu addressed by the linear Cluster index clu gives
+        % the electrode# and Cluster# on that electrode
+        elClu; 
+        
+        % cell array of placefields objects
+        pfObject ;
+        
+        %
+        ccg;
+        
+
+        
+    end
+    
+    
+    methods 
+        function genericTrial = GenericTrial(arg, varargin)
+            % arg is the filebase name string
+            
+            [datasetType, trialName, trialSubtype, sampleRate, lfpSampleRate] = DefaultArgs(varargin, {'GenericTrial', [], [], [], []});
+            
+            fileBase = arg;
+            if isempty(arg)
+                genericTrial.filebase = '';
+                genericTrial.datasetType = '';
+            elseif isa(arg, 'GenericTrial')
+                propertyNames = properties('GenericTrial');
+                for kProperty = 1 : length(propertyNames)
+                    genericTrial.(propertyNames{kProperty}) = arg.(propertyNames{kProperty});
+                end
+            elseif isa(arg, 'MTATrial') 
+                % convert MTATrial to GenericTrial class ;                       
+                % add OR expressions here isa(arg, <new class name to extend to other classes
+                
+%                 genericTrial = GenericTrial(arg.name);
+                genericTrial = genericTrial.Convert2Generic(arg);
+            else 
+                % creat the object
+                genericTrial.datasetType = datasetType;
+                genericTrial.filebase = fileBase;
+                genericTrial.paths.data = ['~/data/', fileBase, '/'];
+                if ~DirExists('~/data/', fileBase)
+                    % if filebase not found in ~/data/ search in ~/data/nlx/ folder
+                    if DirExists('~/data/nlx/', fileBase)
+                        genericTrial.paths.data = ['~/data/nlx/', fileBase, '/'];
+                    end
+                else
+                    error('\n %s filebase not found in either ~/data/ or ~/data/nlx directories \n', fileBase);
+                end
+                par = LoadPar([genericTrial.paths.data, fileBase]);
+                genericTrial.paths.analysis = ['~/data/analysis/', fileBase];
+                % create a subfolder under analysis folder with  name
+                %  <filebase>, in case it does not exist
+                if ~DirExists('~/data/analysis', fileBase);
+                    mkdir([genericTrial.paths.analysis, fileBase]);
+                end
+
+                genericTrial.trialType = trialName;
+                genericTrial.trialSubtype = trialSubtype;
+                genericTrial.sampleRate = par.SampleRate;
+                genericTrial.lfpSampleRate = par.lfpSampleRate;
+                genericTrial.lfp = {};
+%                 genericTrial.trackingSampleRate = anyTrialObj.xyzSampleRate;
+                if FileExists([genericTrial.paths.data, generictrial.filebase, '.whl'])
+                    % .whl contains the tracking data nSamples x (x,y)
+                    % position loaded as nSamples x nMarkers x  nSpatialDims
+                     = importdata([genericTrial.paths.data, generictrial.filebase, '.whl']); 
+                     genericTrial.position
+                else
+                    message('\n position tracking data not available for %s \n', genericTrial.filebase);
+                end
+                
+                % [genericTrial.res, genericTrial.clu, genericTrial.elClu, ~] = LoadCluRes([dataPath]);
+                genericTrial.clu = {};
+                genericTrial.res = {};
+                genericTrial.pfObject = {};
+                genericTrial.ccg = {};
+
+            end
+        end % END of class constructor
+        %%
+        function genericTrial = Convert2Generic(genericTrial,anyTrialObj)
+            % subroutine to convert data classes into GenericTrial class
+            trClass = class(anyTrialObj);
+            switch trClass
+                case 'MTATrial'
+                    genericTrial.datasetType = 'MTA';
+                    genericTrial.filebase = anyTrialObj.name;
+                    genericTrial.paths.data = [anyTrialObj.path.nlx, genericTrial.filebase, '/'];
+                    genericTrial.paths.analysis = [anyTrialObj.path.analysis, genericTrial.filebase, '/'];
+                    if ~DirExists('~/data/analysis', genericTrial.filebase);
+                        mkdir([genericTrial.paths.analysis, fileBase]);
+                    end
+                    genericTrial.trialType = anyTrialObj.trialName;
+                    genericTrial.trialSubtype = [];
+                    genericTrial.sampleRate = anyTrialObj.sampleRate;
+                    genericTrial.lfpSampleRate = anyTrialObj.lfpSampleRate;
+                    genericTrial.lfp = anyTrialObj.lfp;
+                    genericTrial.trackingSampleRate = anyTrialObj.xyzSampleRate;
+                    genericTrial.position = anyTrialObj.xyz;
+                    genericTrial.clu = anyTrialObj.clu;
+                    genericTrial.res = anyTrialObj.res;
+                    genericTrial.pfObject = anyTrialObj.Pfs;
+                    genericTrial.ccg = anyTrialObj.ccg;
+                case 'GenericTrial'
+                    genericTrial = anyTrialObj;
+                otherwise
+                    error('not a valid trial class ');
+            end
+        end
+        
+        function genericTrial  = Load(genericTrial, loadProperty, varargin)
+            % general load function 
+            % returns GenericTrial object with specified fields loaded 
+            % loadProperty - cell array {{'<load property1 name>', '<arg1>', '<arg2>'}, {<load property2 name>', '<arg1>', '<arg2>'}}
+            
+%             %%
+%             if ~IS_OVERWRITE
+%                 switch loadProperty{1}
+%                     case 'PF' | 'PlaceFiled' % place filed
+%                         
+%                         % if PF are already computed load 
+%                         if FileExists([dataPath])
+%                             load();
+%                         end
+%                                                     
+%                 end
+%                 
+%             else % if overwrite
+              %%  
+              nPropsToLoad = length(loadProperty);
+              for kProperty = 1 : nPropsToLoad
+                  curLoadProperty = loadProperty{kProperty};
+                  switch curLoadProperty{1}
+                      case 'PF' | 'PlaceFiled'
+                          if strcmp(genericTrial.datasetType, 'MTA')
+                              mtaPFObj = LoadMTAPFObject(genericTrial.filebase, genericTrial.trialType);
+                              genericTrial.pfObject = GenericPF(mtaPFObj);
+                          else
+                              if length(curLoadProperty) > 1
+                                  genericTrial.pfObect = GenericPF(genericTrial, curLoadProperty{2:end});
+                              else
+                                  genericTrial.pfObect = GenericPF(genericTrial);
+                              end
+                          end
+                          
+                      case 'cr' | 'CluRes'
+                          if strcmp(genericTrial.datasetType, 'MTA')
+                              if length(curLoadProperty) > 1
+                                  genericTrial = Convert2Generic(MTATrial(genericTrial.filebase, {{'CluRes', curLoadProperty{2:end}},genericTrial.trialType}));
+                              else
+                                  genericTrial = Convert2Generic(MTATrial(genericTrial.filebase, {{'CluRes', genericTrial.trialType},genericTrial.trialType}));
+                              end
+                          else
+                              [genericTrial.res, genericTrial.clu, genericTrial.elClu] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
+                          end
+                          
+                  end
+              end
+        end
+            
+    end %END of methods
+            
+    
+end % END of classdef 
+            
+            
+            
+            
+            
+            
+                    
