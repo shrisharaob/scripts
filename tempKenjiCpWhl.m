@@ -140,7 +140,7 @@ load('~/data/kenji/Beh_time_ind.mat');
                 str = [str, 'nCluster = ' nClus '\n common units :' uniqueClu '\n'];
                 fwrite(fp, str);
                 fclose(fp);  
-               
+                
         end
     end
                 
