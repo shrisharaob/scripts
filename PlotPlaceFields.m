@@ -16,14 +16,19 @@
     filebase = pfObject.filebase;
     %     posOfDots = regexp(filebase,'\.');
     % %     filebase = filebase(1: posOfDots(1) -1);
-    %     units  = load(['~/data/analysis/' filebase '/' filebase '.SelectCells.mat']);
-    %     elClu = units.acceptedElClu;
-    %    linearCluIdx = units.linearPyrCluIdx;
+    if FileExists([pfObject.paths.analysis, pfObject.filebase, '.SelectCells.mat'])
+       units  = load(['~/data/analysis/' filebase '/' filebase '.SelectCells.mat']);
+       elClu = units.acceptedElClu;
+       linearCluIdx = units.linearPyrCluIdx;
+    else 
+       linearCluIdx = 1 : length(pfObject.rateMap);
+       elClu = nan(length(linearCluIdx), 2);
+    end
 
-    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {1:size(pfObject.smoothRateMap,3), 0, 0, 5, [], 84});
+    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 5, [], 84});
     mazeDiameter = mazeDiameter * 10;
 
-    nCells = length(pfObject.rateMap);
+    nCells = length(cellCluIdx);
     if ~IS_COUNTOUR
         if(iscell(pfObject)) % when there are multiple types of pfObj
 
@@ -39,15 +44,15 @@
             end
         else
             for mCell = 1 : nCells
-                %                 linIdx = ismember(linearPyrCluIdx,cellCluIdx(mCell));
-                %                 elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
-                %                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
-                %                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
-               clf;
+                linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
+                elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
+%                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
+%                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
+                clf;
                 subplot(1,2,1)
                 try
-                    smoothedRateMap = pfObject.smoothRateMap(:,:,cellCluIdx(mCell));
-                    imagesc(pfObject.xBin,pfObject.yBin,smoothedRateMap);
+                    smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
+                    imagesc(pfObject.xBin,pfObject.yBin,sq(smoothedRateMap));
                     text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(smoothedRateMap(:))),'color','w','FontWeight', 'bold');
                     set(gca,'YDir','normal');
                     hold on;
@@ -58,7 +63,7 @@
                 end
                 
                 subplot(1,2,2)
-                rateMap = pfObject.rateMap{mCell};
+                rateMap = pfObject.rateMap{linIdx};
                 imagesc(pfObject.xBin,pfObject.yBin,rateMap);
                 text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
                 set(gca,'YDir','normal');

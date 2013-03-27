@@ -254,6 +254,7 @@ classdef GenericTrial
                 case 'MTA'
                     markerNo = 7;
             end
+            
             switch genericTrial.datasetType
                 case 'kenji'
                     xPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 1)));

@@ -1,6 +1,8 @@
 function pfPars = FindPFPars(arg, varargin)
 % pfPars = FindPFPars(trial/pfObject, varargin)
 %varargin - [pyrCluIdx, smoothFactor, IF_SAVE]
+
+if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 5});
     
     pfPars.com = [];
@@ -37,8 +39,10 @@ function pfPars = FindPFPars(arg, varargin)
             kRateMap = pfObject.rateMap{pyrCluIdx(kUnit)}; %%% FIX INDEXING
             % discard cells with firing rate less then 8
             if isempty(kRateMap)
-                IS_DISCARD(kUnit)
-            IS_DISCARD(kUnit) = max(kRateMap(:)) < absThresh;
+                IS_DISCARD(kUnit) = 1;
+            else
+                IS_DISCARD(kUnit) = max(kRateMap(:)) < absThresh;
+            end
         end
         nAcceptedUnits = sum(~IS_DISCARD);
         acceptedUnits = pyrCluIdx(~IS_DISCARD);
@@ -117,6 +121,8 @@ function pfPars = FindPFPars(arg, varargin)
        
         %% compute sparsity
         occupancy = arg.occupancy;
+        if isempty(occupancy)
+            occupancy = Occupancy(
         for kUnit = 1 : nAcceptedUnits
             curOccupancy = occupancy{acceptedUnits(kUnit)};
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);

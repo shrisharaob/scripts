@@ -79,7 +79,7 @@ comB = pfPars.pkLoc(pfPars.acceptedUnits == cellPair(2), :);
         dirEpochs{lPair}.b2aPeriods = b2aPeriods;
 %         keyboard;
     end
-    filebase = trial.name;
+    filebase = trial.filebase;
     
     save(['~/data/analysis/' filebase '/' filebase '.' mfilename '.' trial.trialName '.mat'], 'dirEpochs');
 end

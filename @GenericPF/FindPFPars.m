@@ -1,7 +1,9 @@
 function pfPars = FindPFPars(arg, varargin)
 % pfPars = FindPFPars(trial/pfObject, varargin)
 %varargin - [pyrCluIdx, smoothFactor, IF_SAVE]
-    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 5});
+
+if nargin < 1, help FindPFPars; return; end
+    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 2});
     
     pfPars.com = [];
     pfPars.smoothRateMap = [];
@@ -118,9 +120,14 @@ function pfPars = FindPFPars(arg, varargin)
         pfPars.spatialCoherence = zr;
        
         %% compute sparsity
-        occupancy = arg.occupancy;
+        occupancy = pfObject.occupancy;
         for kUnit = 1 : nAcceptedUnits
-            curOccupancy = occupancy{acceptedUnits(kUnit)};
+            if isempty(occupancy)
+                gt = GenericTrial(pfObject.filebase, pfObject.trialName);
+                curOccupancy = Occupancy(gt);
+            else
+                curOccupancy = occupancy{acceptedUnits(kUnit)};
+            end
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);
 %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
