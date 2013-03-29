@@ -201,7 +201,6 @@ classdef GenericTrial
                             end
                         end
                 end
-
                 switch genericTrial.datasetType
                     case 'kenji'
                         [nRows, nclmns] = size(xy);
@@ -219,9 +218,7 @@ classdef GenericTrial
                         genericTrial.goodPosPeriods = goodPeriods;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
                 end
-                
             end
-            
             genericTrial.clu = [];
             genericTrial.res = [];
             genericTrial.pfObject = {};
@@ -299,6 +296,8 @@ classdef GenericTrial
                 genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;
                 genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;
             end
+            load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
+            genericTrial.pyrCluIdx = linearPyrCluIdx;
         case 'GenericTrial'
             genericTrial = anyTrialObj;
         otherwise

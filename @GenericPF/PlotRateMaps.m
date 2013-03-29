@@ -1,21 +1,10 @@
 
-    function PlotPlaceFields(pfObject, varargin)
+    function PlotRateMaps(pfObject, varargin)
     % PlotPlaceFields(pfObject, varargin)
     % varargin - [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter]
     if nargin<1, help PlotPlaceFields; return; end
-    if ~isa(pfObject,'GenericPF')
-        if isa(pfObject, 'MTAPlaceField') || isa(pfObject, 'MTATrial')
-            pfObject = GenericPF(pfObject);
-        end
-    end
-    nTypes = length(pfObject);
-    if nTypes >1
-        pfObject = pfObject{end};
-    end
-
+  
     filebase = pfObject.filebase;
-    %     posOfDots = regexp(filebase,'\.');
-    % %     filebase = filebase(1: posOfDots(1) -1);
     if FileExists([pfObject.paths.analysis, pfObject.filebase, '.SelectCells.mat'])
        units  = load(['~/data/analysis/' filebase '/' filebase '.SelectCells.mat']);
        elClu = units.acceptedElClu;
@@ -25,43 +14,30 @@
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 5, [], 84});
+    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 0, 5, [], 84});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
     if ~IS_COUNTOUR
-        if(iscell(pfObject)) % when there are multiple types of pfObj
-            for mCell = 1 : nCells
-                linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
-                elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
-                for kType = 1: nTypes
-                    pfObject{kType}.plot(cellCluIdx(mCell));
-                    subplotfit(kType, nTypes);
-                    title(elCluS);
-                end
-                if IF_WAITFORBTNPRESS, waitforbuttonpress; end
-            end
-        else
+       
             for mCell = 1 : nCells
                 linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
                 elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
 %                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
 %                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
                 clf;
-                subplot(1,2,1)
-                try
-                    smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
-                    imagesc(pfObject.xBin,pfObject.yBin,sq(smoothedRateMap));
-                    text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(smoothedRateMap(:))),'color','w','FontWeight', 'bold');
-                    set(gca,'YDir','normal');
-                    hold on;
-                    if strcmp(pfObject.maze.name, 'cof')
-                        DrawCircle(0,0, mazeDiameter / 2,'w');
+                if IF_Srmap
+                    try
+                        rateMap= pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
+                    catch err
                     end
-                catch err
+                else
+                    rateMap = pfObject.rateMap{linIdx};
                 end
-                subplot(1,2,2)
-                rateMap = pfObject.rateMap{linIdx};
-                imagesc(pfObject.xBin,pfObject.yBin,rateMap);
+                
+%                 if strcmp(pfObject.maze.name, 'linear')
+                    
+                
+                imagescnan({pfObject.xBin,pfObject.yBin,rateMap});
                 text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
                 set(gca,'YDir','normal');
                 hold on;
@@ -69,14 +45,11 @@
                     DrawCircle(0,0, mazeDiameter / 2,'w');
                 end
                 title(num2str(mCell));
-                    
-                    
-                %                 title(elCluStr);
+%                                 title(elCluStr);
+                
                 if IF_WAITFORBTNPRESS, waitforbuttonpress; end
             end
-        end
     else
-        %         if(iscell(pfObject))
         rateThreshPar = 0.707;
         colors = GenColormap(nCells);
         IS_AUTO_COLOR =0;
@@ -106,6 +79,5 @@
                 fprintf('\n *** the specified unit with cluster ID %d was discarded *** \n', cellCluIdx(mCell));
             end
         end
-        %         end
     end
     end

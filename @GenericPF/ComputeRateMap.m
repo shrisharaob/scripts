@@ -90,7 +90,7 @@ RateMap(SOcc<OccThresh) = NaN;
 
         
         rateMap = RateMap;
-        varargout{1} = SOcc;
+        varargout{1} = conv2(Smoother1, Smoother2, Occ./sum(Occ(:)),'same');;
         varargout{2} = Bin1;
         varargout{3} = Bin2;
     end

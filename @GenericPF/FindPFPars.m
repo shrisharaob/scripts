@@ -13,6 +13,7 @@ if nargin < 1, help FindPFPars; return; end
     pfPars.spatialCoherence = [];
     pfPars.sparsity = [];
     pfPars.pkLoc = [];
+    pfPars.pkDist = [];
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
     
@@ -95,7 +96,7 @@ if nargin < 1, help FindPFPars; return; end
             comA = pfPars.com(acceptedUnits == unitA, :,:);
             comB = pfPars.com(acceptedUnits == unitB, :,:);
             pfPars.comDist(kPair) = norm(comA - comB);
-            pfPars.pkLocDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
+            pfPars.pkDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
         end
         %% spatial coherence
         nAcceptedUnits = sum(~IS_DISCARD);
@@ -118,7 +119,6 @@ if nargin < 1, help FindPFPars; return; end
         %fisher z transform
         zr = atan(spatialCorretaltion);
         pfPars.spatialCoherence = zr;
-       
         %% compute sparsity
         occupancy = pfObject.occupancy;
         for kUnit = 1 : nAcceptedUnits

@@ -41,7 +41,8 @@ Y = round((pos(:,2)-Ymin)*k(2))+1;
 %% Push back in any stray bins
 X(X>Nbin) = Nbin;
 Y(Y>Nbin) = Nbin;
-
+X(isnan(X)) =[];
+Y(isnan(Y)) = [];
 
 %% Occupancy
 occupancy = Accumulate([X Y],1,msize); %./trial.xyzSampleRate;

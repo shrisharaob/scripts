@@ -53,6 +53,11 @@ classdef GenericPF
         % center of mass
         com;
         
+        % peak location 
+        pkLoc;
+        
+        % distance of the peaks
+        pkDist;
                 
         % accepted units are the place cells which satisfy an absolute rate
         % threshold and overlap criterion
@@ -176,14 +181,16 @@ classdef GenericPF
                     end
                 end
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods, 'c');
+                %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);
                 for kClu = 1 : nClus
                     fprintf('\n computing rate maps for unit %d of %d units \n', kClu, nClus);
-                    nSpikes = length(trial.res(trial.clu == kClu));
+%                     nSpikes = length(trial.res(trial.clu == kClu));
+                    nSpikes = length(kRes(trial.clu(resIdx) == kClu));
                     if nSpikes > 10
-                        %convert spike times to to tracking sample rate
                         cluKRes = trial.clu(resIdx);
+                        pos(isnan(pos(:, 1)), :) = [];
                         [genericPF.rateMap{kClu}, genericPF.occupancy{kClu}, xBin, yBin] = ...
                             GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos,[],.03);
                         if ~isempty(xBin), genericPF.xBin = xBin; end 
@@ -245,6 +252,8 @@ classdef GenericPF
                genericPF.rateMapPeak = pfPars.pkLoc;
                genericPF.acceptedUnits = pfPars.acceptedUnits;
                genericPF.comDist = pfPars.comDist;
+               genericPF.pkLoc = pfPars.pkLoc;
+               genericPF.pkDist = pfPars.pkDist;
                if isempty(genericPF.maze)
                    load([genericPF.paths.data, genericPF.filebase, '.miscPar.mat']);
                    genericPF.maze = miscPar.maze;
