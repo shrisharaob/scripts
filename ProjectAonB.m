@@ -49,38 +49,45 @@ comB = pfObject.pkLoc(pfObject.acceptedUnits == cellPair(2), :);
                 velocity = diff(allTrajSegs{kTrajSeg}, 1, 1);
                 [nVelRows, nVelClmns] = size(velocity);
                 a2bDir = sign(velocity * a2bVector');
-                a2bDir(a2bDir == 0) = 1; 
-                t = flipud(a2bDir);
-                a2bDir = [ -1 * a2bDir(1); a2bDir];
-                t = [-1* t(1);t];
                 
-                a2bBeginIndx = find(diff(a2bDir) == 2);
-                a2bEndIndx = find(flipud(diff(t) == 2));
-                b2aBeginIndx = find(diff(a2bDir) == -2);
-                b2aEndIndx = find(flipud(diff(t) ==-2));
-                if length(a2bBeginIndx) > length(a2bEndIndx)
-                      if a2bBeginIndx(1) > a2bEndIndx(1)
-                          a2bBeginIndx(1) = [];
-                      else
-                          a2bBeginIndx(end) = [];
-                      end
-                elseif length(a2bBeginIndx) < length(a2bEndIndx)
-                    if a2bBeginIndx(1) > a2bEndIndx(1)
-                        a2bEndIndx(1) = [];
-                    else
-                        a2bEndIndx(end) = [];
-                    end
-                end
-                INVALID_A2B = a2bBeginIndx == a2bEndIndx;
-                INVALID_B2A = b2aBeginIndx == b2aEndIndx;
-                a2bBeginIndx(INVALID_A2B) = [];
-                a2bEndIndx(INVALID_A2B) = [];
-                b2aBeginIndx(INVALID_B2A) = [];
-                b2aEndIndx(INVALID_B2A) = [];
-                                
-                a2bEpoch = [a2bBeginIndx, a2bEndIndx];
-                b2aEpoch = [b2aBeginIndx, b2aEndIndx];
-                
+%                 a2bDir(a2bDir == 0) = 1; 
+%                 t = flipud(a2bDir);
+%                 a2bDir = [ -1 * a2bDir(1); a2bDir];
+%                 t = [-1* t(1);t];
+%                 
+%                 a2bBeginIndx = find(diff(a2bDir) == 2);
+%                 a2bEndIndx = find(flipud(diff(t) == 2));
+%                 b2aBeginIndx = find(diff(a2bDir) == -2);
+%                 b2aEndIndx = find(flipud(diff(t) ==-2));
+%                 if length(a2bBeginIndx) > length(a2bEndIndx)
+%                       if a2bBeginIndx(1) > a2bEndIndx(1)
+%                           a2bBeginIndx(1) = [];
+%                       else
+%                           a2bBeginIndx(end) = [];
+%                       end
+%                 elseif length(a2bBeginIndx) < length(a2bEndIndx)
+%                     if a2bBeginIndx(1) > a2bEndIndx(1)
+%                         a2bEndIndx(1) = [];
+%                     else
+%                         a2bEndIndx(end) = [];
+%                     end
+%                 end
+%                 INVALID_A2B = a2bBeginIndx == a2bEndIndx;
+%                 INVALID_B2A = b2aBeginIndx == b2aEndIndx;
+%                 a2bBeginIndx(INVALID_A2B) = [];
+%                 a2bEndIndx(INVALID_A2B) = [];
+%                 b2aBeginIndx(INVALID_B2A) = [];
+%                 b2aEndIndx(INVALID_B2A) = [];
+%                                 
+%                 a2bEpoch = [a2bBeginIndx, a2bEndIndx];
+%                 b2aEpoch = [b2aBeginIndx, b2aEndIndx];
+                  
+                    inOutIdx = InOut(a2bDir);
+                    a2bEpoch = inOutIdx{1};
+                    b2aEpoch = inOutIdx{2};
+                 
+
+
                 if ~isempty(a2bEpoch)
                     a2bStart = find(ismember(allTrajs, curTrajSeg(a2bEpoch(:, 2), :), 'rows'));
                     a2bEnd = find(ismember(allTrajs, curTrajSeg(a2bEpoch(:, 1), :), 'rows'));
