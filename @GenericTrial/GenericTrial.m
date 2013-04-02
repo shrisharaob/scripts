@@ -192,7 +192,6 @@ classdef GenericTrial
                             try 
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
-                                xy(inValidIdx,:) = nan;
                             catch err
                                 fprintf('\n *************************************************** \n ')
                                 fprintf([genericTrial.paths.data, genericTrial.trialName '.whl not found']);
@@ -208,14 +207,15 @@ classdef GenericTrial
                         xy = [xy(:, 1), xy(:,3), xy(:,2), xy(:,4)]; % the .whl format is inconsistent across dasetTypes
                         genericTrial = genericTrial.ProcessKenji;
                         pos = xy(:,1);
-                        pos(pos ~= -1) = 1;
+                        pos(~inValidIdx) = 1;
                         t = flipud(pos);
                         t = [-1* t(1);t];
                         pos = [ -1 * pos(1); pos];
                         posBeginIndx = find(diff(pos) == 2);
                         posEndIndx = find(flipud(diff(t) == 2));
-                        goodPeriods = [posBeginIndx, posEndIndx];
+                        goodPeriods = [posBeginIndx+1, posEndIndx-1];
                         genericTrial.goodPosPeriods = goodPeriods;
+                        xy(inValidIdx,:) = nan;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
                 end
             end
@@ -292,6 +292,7 @@ classdef GenericTrial
             genericTrial.ccg = anyTrialObj.ccg;
             genericTrial.maze.name = anyTrialObj.Maze.name;
             genericTrial.maze.boundaries = anyTrialObj.Maze.boundaries;
+            generictrial.goodPosPeriods = anyTrialObj.xyzPeriods;
             for i = 1:length(anyTrialObj.Bhv.States),
                 genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;
                 genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;

@@ -1,5 +1,7 @@
 function CompareSessionPF(filebase, trialTypes, cluIdx,  varargin)
     % sessions - cell array containing sessions to compare
+    % script to vizualize pfs for the same units across aenviornments
+    
     [filebase, IF_WAITFORBUTTONPRESS, IF_REPORTFIG] = DefaultArgs(varargin, {'jg05-20120315', 0, 0 });
     units  = load(['~/data/analysis/' filebase '/' filebase '.SelectedPyrCells.mat']);
     
@@ -28,6 +30,7 @@ function CompareSessionPF(filebase, trialTypes, cluIdx,  varargin)
         if IF_WAITFORBUTTONPRESS, try waitforbuttonpress; catch err ; end, end
         if IF_REPORTFIG
             MyReportfig(gcf, [filebase '.' mfilename '.selectedPlaceCells.mat'], 0, [ 'clu#:'  num2str(units.linearPyrCluIdx(idx))]);
+        end
     end
 end
     

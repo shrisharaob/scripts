@@ -7,9 +7,9 @@ fullpath = ['/data/homes/shrisha/data/nlx/jg05-20120315/' filebase];
 par = LoadPar(fullpath);
 trialnames = session.list_trialNames;
 trial = MTATrial(filebase, {{'CluRes', session.sampleRate}}, trialName);
-units = load([analysisFolderPath '/' filebase '/' filebase '.SelectedPyrCells.mat']);
-% pfPars = [];
-pfPars = load(['~/data/analysis/' filebase '/' filebase '.FindPFPars.' trialName '.mat']);
+% units = load([analysisFolderPath  filebase '/' filebase '.SelectedPyrCells.mat']);
+% % pfPars = [];
+% pfPars = load(['~/data/analysis/' filebase '/' filebase '.FindPFPars.' trialName '.mat']);
 end
 
 %ss =tr.Bhv.getState('walk').state;

@@ -37,8 +37,7 @@
                     end
                     overlappingPFCells = cellPairs(kPair,:);
                     a2bTimes = round(a2bTimes .* trial.sampleRate / trial.xyzSampleRate) + 1;
-                    % load Clu Res for times when trajectories were from 
-                    % A -> B
+                    % load Clu Res for times when trajectories were inside the PF
                     [a2bRes,a2nResInd] = SelectPeriods(trial.res, a2bTimes,'d', 1, 1);
                     %             [resB,indB] = SelectPeriods(trial.res,timesCellA,'d',1,1);
                     if isempty(a2bRes),   fprintf(' \n no trajectories from %d to %d \n' , overlappingPFCells(1), overlappingPFCells(2)); end
@@ -149,12 +148,8 @@
         end
     end
         if IF_SAVE
-            if isempty(trial.trialSubType)
-                fileName = [trial.filebase, '.', trial.trialName '.' mfilename, '.mat'];
-            else
-                fileName = [trial.filebase, '.', trial.trialName '.' trial.trialSubType, '.', mfilename, '.mat'];
-            end
-            save([trial.paths.analysis, fileName]);
+            save([trial.paths.analysis, trial.filebase, '.',  mfilename
+            save(['~/data/analysis/' filebase '/' mfilename '.' trial.trialName '.mat'], 'ccgSegsA2B2A');
         end
     end
     
