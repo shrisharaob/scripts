@@ -19,18 +19,31 @@ function idx = FindIdxInOut(y)
     yf = [~yf(1); yf];
     inIdx = find(diff(y) == 1);
     outIdx = find(flipud(diff(yf) == 1));
-    if length(inIdx) == length(outIdx)
-        eqIdx = bsxfun(@eq, inIdx, outIdx);
-        inIdx(eqIdx) = [];
-        outIdx(eqIdx) = [];
-    elseif length(inIdx) > length(outIdx)
-        lenDiff = length(inIdx) - length(outIdx);
-        gtIdx = bsxFun(@gt, inIdx, [outIdx; zeros(lenDiff, 1)]);
-        inIdx(gtIdx) = [];
-    elseif length(inIdx) < length(outIdx)
-        lenDiff = -1 * length(inIdx) + length(outIdx);
-        ltIdx = bsxFun(@lt, outIdx, [inIdx; zeros(lenDiff, 1)]);
-        outIdx(ltIdx) = [];
+    idx= ResolveLenDiff(inIdx, outIdx);
+end
+
+function out = ResolveLenDiff(a, b)
+    if length(a) == length(b)
+        eqIdx = bsxfun(@eq, a, b);
+        a(eqIdx) = [];
+        b(eqIdx) = [];
+    else
+        if length(a) > length(b)
+            lenDiff = length(a) - length(b);
+            b = [b; zeros(lenDiff, 1)];
+            gtIdx = bsxfun(@gt, a, b);
+            ltIdx = bsxfun(@lt, b, a);
+            ltIdx(end: -1 : end-lenDiff) = 0;
+        elseif length(a) < length(b)
+            lenDiff = -1 * length(a) + length(b);
+            a = [a; zeros(lenDiff, 1)];
+            ltIdx = bsxfun(@lt, b, a);
+            gtIdx = bsxfun(@gt, a, b);
+            ltIdx(end: -1 : end-lenDiff) = 0;
+        end
+        inValidIdx = (gtIdx | ltIdx);
+        a(inValidIdx) = [];
+        b(inValidIdx) = [];
     end
-    idx= [inIdx, outIdx];
+    out = [a, b];
 end
