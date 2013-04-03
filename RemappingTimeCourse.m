@@ -10,3 +10,4 @@
     res = SelectPeriods(gt.res, gt.trialPeriods, 'd', [], 1);
     res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
     res = 
+    
