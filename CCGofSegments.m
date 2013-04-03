@@ -1,5 +1,5 @@
 
-    function ccgSegsA2B2A = CCGofSegments(trial, epochs, varargin)
+    function ccgSegsA2B2A = CCGofSegments(trial, varargin)
     % ccgSegs = CcgOfSegments(trial, pfPars, epochs, varargin)
     % epochs = cell (1 x nPairs) 
     % epochs : dir epochs returned by ProjectAonB
@@ -14,8 +14,8 @@ else
     cellPairs =pfObject.selectedPairs;
     
 end
-    
-
+    % load dirEpochs 
+    load([trial.paths.analysis, trial.filebase '.ProjectAonB.' trial.trialName '.mat']);
     nPairs = size(cellPairs, 1);
 
     if nPairs ~= 0 && ~isempty(nPairs)
@@ -29,16 +29,16 @@ end
                 str = fprintf([repmat('\b', 1, length(strOld)), 'Pair %d of %d '], kPair, nPairs);
                 idx = ismember(pfObject.selectedPairs ,cellPairs(kPair,:), 'rows');
                 if sum(idx) == 0; continue; end                
-                if ~isempty(epochs{idx})
+                if ~isempty(dirEpochs{idx})
                     if kDir == 1 % a2b;
-                        if isfield(epochs{kPair}, 'a2bPeriods')
-                            a2bTimes = epochs{idx}.a2bPeriods;
+                        if isfield(dirEpochs{kPair}, 'a2bPeriods')
+                            a2bTimes = dirEpochs{idx}.a2bPeriods;
                         else
                             continue;
                         end
                     else %b2a
-                        if isfield(epochs{idx}, 'b2aPeriods')
-                            a2bTimes = epochs{idx}.b2aPeriods;
+                        if isfield(dirEpochs{idx}, 'b2aPeriods')
+                            a2bTimes = dirEpochs{idx}.b2aPeriods;
                         else
                             continue;
                         end
@@ -125,10 +125,10 @@ end
                             line([lowPassPkTime, lowPassPkTime], ylim, 'Color', 'm','LineWidth',1.5);
                             axis tight;
                             %%
-                            elClus = acceptedElClu([overlappingPFCells],:);
-                            
+%                             elClus = acceptedElClu([overlappingPFCells],:);
+                            elClus = [trial.elClu(cellPairs(kPair, 1),:); trial.elClu(cellPairs(kPair, 2), :)];
                             if IF_REPORT_FIG
-                                filebase = trial.name;
+                                filebase = trial.filebase;
                                 elCluStr =sprintf('(El, Clu) : (%d,%d) (%d,%d) \n', elClus(1,1), elClus(1,2), elClus(2,1), elClus(2,2));
                                 if kDir == 1
                                     filename = [filebase '.' mfilename '.ccgSegs.a2b.' trial.trialName '.' fileTag ];

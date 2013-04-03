@@ -29,7 +29,8 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                         genericTrial = genericTrial.Convert2Generic(MTATrial(genericTrial.filebase, {{'CluRes', genericTrial.sampleRate}},genericTrial.trialName));
                     end
                 else
-                    [genericTrial.res, genericTrial.clu, genericTrial.elClu] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
+                    [genericTrial.res, genericTrial.clu, map] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
+                    genericTrial.elClu = map(:,[2, 3]);
                 end
 
             case 'ccgSegsA2B' % load ccg for A -> B & B -> A epochs
