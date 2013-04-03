@@ -32,7 +32,7 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                     [genericTrial.res, genericTrial.clu, map] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
                     genericTrial.elClu = map(:,[2, 3]);
                 end
-
+                fprintf('\n done \n');       
             case 'ccgSegsA2B' % load ccg for A -> B & B -> A epochs
                 if ~isempty(genericTrial.trialSubType)
                     filename = [genericTrial.paths.analysis, genericTrial.filebase, '.CCGofSegments.', genericTrial.trialName, '.', genericTrial.trialSubType '.mat'];
