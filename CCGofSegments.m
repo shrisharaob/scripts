@@ -1,12 +1,20 @@
+
     function ccgSegsA2B2A = CCGofSegments(trial, epochs, varargin)
     % ccgSegs = CcgOfSegments(trial, pfPars, epochs, varargin)
     % epochs = cell (1 x nPairs) 
     % epochs : dir epochs returned by ProjectAonB
     if nargin<1, help CCGofSegments; return; end
-    [IF_REPORT_FIG, pairs2analyse, IF_SAVE, trialName, fileTag] = DefaultArgs(varargin, {0, [1:size(pfObject.selectedPairs, 1)],1, 'crt1', []});
+    [IF_REPORT_FIG, pairs2analyse, IF_SAVE, fileTag] = DefaultArgs(varargin, {0, [1:size(trial.pfObject.selectedPairs, 1)],1, []});
     pfObject = trial.pfObject;
+    
+if FileExists(['~/data/analysis/' trial.filebase '/' trial.filebase '.SelectedPyrCells.mat'])
+    load(['~/data/analysis/' trial.filebase '/' trial.filebase '.SelectedPyrCells.mat']);
     cellPairs = pfObject.selectedPairs(pairs2analyse, :);
-    load(['~/data/analysis/' trial.name '/' trial.name '.SelectedPyrCells.mat']);
+else 
+    cellPairs =pfObject.selectedPairs;
+    
+end
+    
 
     nPairs = size(cellPairs, 1);
 
@@ -20,6 +28,7 @@
                 strOld = strNew;
                 str = fprintf([repmat('\b', 1, length(strOld)), 'Pair %d of %d '], kPair, nPairs);
                 idx = ismember(pfObject.selectedPairs ,cellPairs(kPair,:), 'rows');
+                if sum(idx) == 0; continue; end                
                 if ~isempty(epochs{idx})
                     if kDir == 1 % a2b;
                         if isfield(epochs{kPair}, 'a2bPeriods')
@@ -36,9 +45,12 @@
                       
                     end
                     overlappingPFCells = cellPairs(kPair,:);
-                    a2bTimes = round(a2bTimes .* trial.sampleRate / trial.xyzSampleRate) + 1;
+                    a2bTimes = round(a2bTimes .* trial.sampleRate / trial.trackingSampleRate) + 1;
                     % load Clu Res for times when trajectories were from 
                     % A -> B
+                    if isempty(trial.res)
+                        trial = trial.Load({{'CluRes'}});
+                    end
                     [a2bRes,a2nResInd] = SelectPeriods(trial.res, a2bTimes,'d', 1, 1);
                     %             [resB,indB] = SelectPeriods(trial.res,timesCellA,'d',1,1);
                     if isempty(a2bRes),   fprintf(' \n no trajectories from %d to %d \n' , overlappingPFCells(1), overlappingPFCells(2)); end

@@ -1,10 +1,21 @@
-function inOutIdx = InOut(y)
+function inOutIdx = InOut(y, varargin)
      % inoutIdx = InOut(y)
      % returns the in and out indices of a binary time series
+    [alphabets] = DefaultArgs(varargin, {[-1, 1]});
      inOutIdx = [];
      if length(y) < 2, return; end
      a = unique(y);
-     if length(a) > 2, fprintf('\n input is not a binary time series \n'); return; end
+     if length(a) > 2 , fprintf('\n input is not a binary time series \n'); return; end
+     if length(a) == 1  % if the whole series contains only one state
+         if a == alphabets(1)
+             inOutIdx{1} = [1, length(y)];
+             inOutIdx{2}= [];
+         else
+             inOutIdx{2} = [1, length(y)];
+             inOutIdx{1}= [];
+         end
+         return;
+     end
      if size(y, 2) == length(y), y = y';end % clmn vector
      y(y == a(1)) = 0;
      y(y == a(2)) = 1;
