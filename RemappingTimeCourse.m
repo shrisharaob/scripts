@@ -1,4 +1,4 @@
-    % load ([gt.paths.data, gt.filebase '.thpar.mat'] )
+    load ([gt.paths.data, gt.filebase '.thpar.mat'] )
     thetaPhase = SelectPeriods(ThPh, gt.goodPosPeriods, 'c', 1); % theta phase in lfp sample rate
     binSize = 10; % 10 deg
     nBins = 360 / binSize;
@@ -9,6 +9,6 @@
     end
     res = SelectPeriods(gt.res, gt.trialPeriods, 'd', [], 1);
     res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
-    res = 
+%     res = 
       for kBin = 1 : nBins
-		   sc(kBin) = 
+		
