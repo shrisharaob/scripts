@@ -1,4 +1,4 @@
-function PlotPFPars(pfObject, pfPars, cellPair)
+function PlotPFPars(pfObject, cellPair)
 % PlotPFPars(pfObj/trial, pfPars, cellPair)
 %%
 if ~isa(pfObject,'MTAPlaceField')
@@ -33,8 +33,8 @@ end
     end  % this code ensures that only one pfObject is considered
 
     filebase = pfObject.filebase;
-    posOfDots = regexp(filebase,'\.');
-    filebase = filebase(1: posOfDots(1) -1);
+%     posOfDots = regexp(filebase,'\.');
+%     filebase = filebase(1: posOfDots(1) -1);
 
     load(['~/data/analysis/' filebase '/' filebase  '.ccgAllcells' '.' trialName '.mat'], 'ccg');
     units = load(['~/data/analysis/' filebase '/' filebase '.SelectedPyrCells.mat']);
@@ -44,16 +44,16 @@ end
 %       
 %     elClus = units.acceptedElClu;
 %     elCluStr =[ '(El, Clu) : (' num2str(elClus(1,1)) ',' num2str(elClus(1,2)) ') (' num2str(elClus(2,1)) ',' num2str(elClus(2,2)) ') \n'];
-    kPair = ismember(pfPars.selectedPairs, cellPair,'rows');
+    kPair = ismember(pfObject.selectedPairs, cellPair,'rows');
         if sum(kPair) ~= 0
             subplot(2,3,1);
-            PlotPlaceFields(pfObject, pfPars, pfPars.selectedPairs(kPair, 1));
+            PlotPlaceFields(pfObject, pfObject, pfObject.selectedPairs(kPair, 1));
             subplot(2,3,2);
-            PlotPlaceFields(pfObject, pfPars, pfPars.selectedPairs(kPair,2));
+            PlotPlaceFields(pfObject, pfObject, pfObject.selectedPairs(kPair,2));
             subplot(2,3,3);
-            PlotPlaceFields(pfObject, pfPars, pfPars.selectedPairs(kPair, 1), 1, 0, [], 'b');
+            PlotPlaceFields(pfObject, pfObject, pfObject.selectedPairs(kPair, 1), 1, 0, [], 'b');
             hold on;
-            PlotPlaceFields(pfObject, pfPars, pfPars.selectedPairs(kPair, 2), 1, 0, [], 'r');
+            PlotPlaceFields(pfObject, pfObject, pfObject.selectedPairs(kPair, 2), 1, 0, [], 'r');
             subplot(2, 3, 4)
             bar(ccg.TimeAx, ccg.Out(:, 1, 2, kPair));
             axis tight;
