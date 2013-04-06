@@ -21,11 +21,7 @@ function [nClusters, nElClus] = NClusters(arg)
         if Fp==-1
             error(['Could not open file ']);
         end
-         nElClus(kCluFile) = fscanf(Fp, '%d', 1) -2;
-        nClusters = nElClus(kCluFile) + nClusters;
-       
-        if nElClus(kCluFile) < 0, nElClus(kCluFile) = 0; end
-        fclose(Fp);
+        nClusters = fscanf(Fp, '%d', 1) + nClusters - 2;
     end
-   
+    
 end

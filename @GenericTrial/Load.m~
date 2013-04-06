@@ -32,12 +32,10 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                    
                     [res, clu, map] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
                     genericTrial.elClu = map(:,[2, 3]);
-                     if length(curLoadProperty) > 1 | ~isempty(genericTrial.trialPeriods)
-                        [genericTrial.res, resIdx] = SelectPeriods(res, ...
-                                                                   genericTrial.trialPeriods, 'd', 1, 1);
-                         genericTrial.clu = clu(resIdx);
+                    if length(curLoadProperty) > 1% the second arg specifies if only clures for the trial is to be loaded
+                        [genericTrial.res, resIdx] = SelectPeriods(res, genericTrial.trialPeriods .* genericTrial.sampleRate ./ genericTriao , 'd', 1, 1);
+                        genericTrial.clu = clu(resIdx);
                     else
-
                         genericTrial.res = res;
                         genericTrial.clu = clu;
                     end

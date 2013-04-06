@@ -68,6 +68,9 @@ classdef GenericTrial
         % the electrode# and Cluster# on that electrode
         elClu;
         
+        %electrode position
+        elPos;
+        
         % cell array of placefields objects
         pfObject ;
         
@@ -217,6 +220,7 @@ classdef GenericTrial
                         genericTrial.goodPosPeriods = goodPeriods;
                         xy(inValidIdx,:) = nan;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
+                       
                 end
             end
             genericTrial.clu = [];
@@ -261,12 +265,31 @@ classdef GenericTrial
                 case 'MTA'
                     
             end
-%             if genericTrial
+            %             if genericTrial
             miscPar.maze = genericTrial.maze;
             save([genericTrial.paths.data, genericTrial.filebase, '.miscPar.mat'], 'miscPar');
-        end % END of class constructor
-        
-        %%
+            if FileExists(['~/data/', genericTrial.datasetType, '/ElePosition.txt'])
+                elPos = importdata(['~/data/', genericTrial.datasetType, '/ElePosition.txt']);
+                roi = {'EC2','EC3', 'EC4', 'EC5', 'DG', 'CA1', 'CA3'};
+                [~, nElClu] = NClusters(genericTrial);
+                cluStartId = cumsum([1, nElClu]); % linear cluster id of the first non-noise cluster on each electrode cluStrtId -by- nElectrodes
+                rowId = find(~cellfun(@isempty, regexp(elPos, genericTrial.filebase)));
+%                 cluStartId(nElClu == 0) = [];
+                for iRegion = 1 : length(roi)  % look for shanks in regions of interest
+                    if ~isempty(rowId)
+                        rowCell = regexp(elPos{rowId}, '\s', 'split');
+                        genericTrial.elPos(iRegion).shank = find(strcmp(rowCell(:,5:end),roi{iRegion}));
+                        genericTrial.elPos(iRegion).region = roi{iRegion};                        
+                        if length(genericTrial.elPos(iRegion).shank) > 1 && nElClu(iRegion) > 0 % roi on several shanks, cluster Ids in the shank
+                            genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank(1)) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
+                        elseif ~isempty(genericTrial.elPos(iRegion).shank)  && nElClu(iRegion) > 0
+                                genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
+                        end
+                    end
+                end
+            end
+        end % END of class constructor 
+    %%
     function genericTrial = Convert2Generic(genericTrial,anyTrialObj)
     % subroutine to convert data classes into GenericTrial class
     trClass = class(anyTrialObj);

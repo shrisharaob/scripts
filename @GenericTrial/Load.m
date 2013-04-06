@@ -21,7 +21,7 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                 end
                 
             case 'CluRes'
-                fprintf('\n loading CluRes ... \n');
+                fprintf('\n loading CluRes ... ');
                 if strcmp(genericTrial.datasetType, 'MTA')
                     if length(curLoadProperty) > 1
                         genericTrial = genericTrial.Convert2Generic(MTATrial(genericTrial.filebase, {{'CluRes', curLoadProperty{2:end}},genericTrial.trialName}));
@@ -32,17 +32,16 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                    
                     [res, clu, map] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
                     genericTrial.elClu = map(:,[2, 3]);
-                     if length(curLoadProperty) > 1
-                        [genericTrial.res, resIdx] = SelectPeriods(res, ...
-                                                                   genericTrial.trialPeriods, 'd', 1, 1);
-                         genericTrial.clu = clu(resIdx);
-                    else
-
-                        genericTrial.res = res;
-                        genericTrial.clu = clu;
+                    genericTrial.res = res;
+                    genericTrial.clu = clu;
+                    if length(curLoadProperty) > 1 % the second arg specifies if only clures for the trial is to be loaded
+                        if curLoadProperty{2}
+                            [genericTrial.res, resIdx] = SelectPeriods(res, genericTrial.trialPeriods .* genericTrial.sampleRate ./ genericTrial.lfpSampleRate, 'd', 1, 1);
+                            genericTrial.clu = clu(resIdx);
+                        end
                     end
                 end
-                fprintf('\n done \n');       
+                fprintf(' done !! \n');       
             case 'ccgSegsA2B' % load ccg for A -> B & B -> A epochs
                 if ~isempty(genericTrial.trialSubType)
                     filename = [genericTrial.paths.analysis, genericTrial.filebase, '.CCGofSegments.', genericTrial.trialName, '.', genericTrial.trialSubType '.mat'];
