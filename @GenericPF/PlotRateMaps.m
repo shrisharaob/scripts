@@ -36,18 +36,19 @@
                 
 %                 if strcmp(pfObject.maze.name, 'linear')
                     
-                
-                imagescnan({pfObject.xBin,pfObject.yBin,rateMap});
-                text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
-                set(gca,'YDir','normal');
-                hold on;
-                if strcmp(pfObject.maze.name, 'cof')
-                    DrawCircle(0,0, mazeDiameter / 2,'w');
+                if ~isempty(rateMap)
+                    imagescnan({pfObject.xBin,pfObject.yBin,rateMap});
+                    text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
+                    set(gca,'YDir','normal');
+                    hold on;
+                    if strcmp(pfObject.maze.name, 'cof')
+                        DrawCircle(0,0, mazeDiameter / 2,'w');
+                    end
+                    title(num2str(mCell));
+                    %                                 title(elCluStr);
+                    
+                    if IF_WAITFORBTNPRESS, waitforbuttonpress; end
                 end
-                title(num2str(mCell));
-%                                 title(elCluStr);
-                
-                if IF_WAITFORBTNPRESS, waitforbuttonpress; end
             end
     else
         rateThreshPar = 0.707;

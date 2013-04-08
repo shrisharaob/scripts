@@ -1,0 +1,13 @@
+for i = 1 : 23
+    if ~isempty(rr{i})
+        bn = 1;
+        for kk = 1 : length(rr{i})
+            kkr = rr{i};
+            if ~cellfun(@isempty(kkr(kk))
+                plot(bn, kkr(kk),'*');
+                hold on;
+            end
+        end
+    end
+end
+

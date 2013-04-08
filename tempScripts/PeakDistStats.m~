@@ -1,4 +1,4 @@
-function rr = RateRemapping(varargin)
+function rr = PeakDistStats(varargin)
     %
     % list = importdata('~/data/kenji/list');
     load('~/data/kenji/Beh_time_ind.mat');
