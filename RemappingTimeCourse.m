@@ -1,7 +1,7 @@
 function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     % RemappingTimeCourse(gt, varargin)
 
-    [binSize, roi, tolerence, IF_OVERWRITE] = DefaultArgs(varargin, { 10,  {'CA1','CA3'}, 1.5e-2});
+    [binSize, roi, tolerence, IF_OVERWRITE] = DefaultArgs(varargin, { 10,  {'CA1','CA3'}, 1.5e-2,1});
     %binSize in degrees
     % .1 ~= 5 degrees
     fprintf('\n loading thpar...');

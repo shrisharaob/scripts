@@ -116,7 +116,7 @@ if nargin < 1, help FindPFPars; return; end
             clear avgNeigbRate;
         end
         
-        %fisher z transform
+        %fisher z transform - ( var[rEstimator] ~ 1/rTrue) 
         zr = atan(spatialCorretaltion);
         pfPars.spatialCoherence = zr;
         %% compute sparsity

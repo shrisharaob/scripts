@@ -257,10 +257,10 @@ classdef GenericTrial
             end
             switch genericTrial.datasetType
                 case 'kenji'
-                    xPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 1)));
-                    yPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 2)));
-                    genericTrial.maze.boundaries = [0, xPxRange; 0, yPxRange];
-                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [xPxRange, yPxRange];
+                    xPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 1)), max(genericTrial.position(~inValidIdx, markerNo, 1))];
+                    yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
+                    genericTrial.maze.boundaries = [xPxRange; yPxRange];
+                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
                     genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
                 case 'MTA'
                     
