@@ -13,6 +13,8 @@ function regionClu = GetRegionClu(trial, roi)
         if ~isempty(idx)
             regionClu{ii} = trial.elPos(idx).clu;
         end
-    end
-
+    end   
+%     if length(roi) == 1
+%         regionClu = regionClu{1};
+%     end
 end

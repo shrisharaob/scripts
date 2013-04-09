@@ -68,6 +68,9 @@ classdef GenericTrial
         % the electrode# and Cluster# on that electrode
         elClu;
         
+        %electrode position
+        elPos;
+        
         % cell array of placefields objects
         pfObject ;
         
@@ -192,7 +195,6 @@ classdef GenericTrial
                             try 
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
-                                xy(inValidIdx,:) = nan;
                             catch err
                                 fprintf('\n *************************************************** \n ')
                                 fprintf([genericTrial.paths.data, genericTrial.trialName '.whl not found']);
@@ -201,7 +203,6 @@ classdef GenericTrial
                             end
                         end
                 end
-
                 switch genericTrial.datasetType
                     case 'kenji'
                         [nRows, nclmns] = size(xy);
@@ -209,19 +210,19 @@ classdef GenericTrial
                         xy = [xy(:, 1), xy(:,3), xy(:,2), xy(:,4)]; % the .whl format is inconsistent across dasetTypes
                         genericTrial = genericTrial.ProcessKenji;
                         pos = xy(:,1);
-                        pos(pos ~= -1) = 1;
+                        pos(~inValidIdx) = 1;
                         t = flipud(pos);
                         t = [-1* t(1);t];
                         pos = [ -1 * pos(1); pos];
                         posBeginIndx = find(diff(pos) == 2);
                         posEndIndx = find(flipud(diff(t) == 2));
-                        goodPeriods = [posBeginIndx, posEndIndx];
+                        goodPeriods = [posBeginIndx+1, posEndIndx-1];
                         genericTrial.goodPosPeriods = goodPeriods;
+                        xy(inValidIdx,:) = nan;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
+                       
                 end
-                
             end
-            
             genericTrial.clu = [];
             genericTrial.res = [];
             genericTrial.pfObject = {};
@@ -254,23 +255,41 @@ classdef GenericTrial
                 case 'MTA'
                     markerNo = 7;
             end
-            
             switch genericTrial.datasetType
                 case 'kenji'
-                    xPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 1)));
-                    yPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 2)));
-                    genericTrial.maze.boundaries = [0, xPxRange; 0, yPxRange];
-                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [xPxRange, yPxRange];
+                    xPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 1)), max(genericTrial.position(~inValidIdx, markerNo, 1))];
+                    yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
+                    genericTrial.maze.boundaries = [xPxRange; yPxRange];
+                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
                     genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
                 case 'MTA'
                     
             end
-%             if genericTrial
+            %             if genericTrial
             miscPar.maze = genericTrial.maze;
             save([genericTrial.paths.data, genericTrial.filebase, '.miscPar.mat'], 'miscPar');
-        end % END of class constructor
-        
-        %%
+            if FileExists(['~/data/', genericTrial.datasetType, '/ElePosition.txt'])
+                elPos = importdata(['~/data/', genericTrial.datasetType, '/ElePosition.txt']);
+                roi = {'EC2','EC3', 'EC4', 'EC5', 'DG', 'CA1', 'CA3'};
+                [~, nElClu] = NClusters(genericTrial);
+                cluStartId = cumsum([1, nElClu]); % linear cluster id of the first non-noise cluster on each electrode cluStrtId -by- nElectrodes
+                rowId = find(~cellfun(@isempty, regexp(elPos, genericTrial.filebase)));
+%                 cluStartId(nElClu == 0) = [];
+                for iRegion = 1 : length(roi)  % look for shanks in regions of interest
+                    if ~isempty(rowId)
+                        rowCell = regexp(elPos{rowId}, '\s', 'split');
+                        genericTrial.elPos(iRegion).shank = find(strcmp(rowCell(:,5:end),roi{iRegion}));
+                        genericTrial.elPos(iRegion).region = roi{iRegion};                        
+                        if length(genericTrial.elPos(iRegion).shank) > 1 && nElClu(iRegion) > 0 % roi on several shanks, cluster Ids in the shank
+                            genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank(1)) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
+                        elseif ~isempty(genericTrial.elPos(iRegion).shank)  && nElClu(iRegion) > 0
+                                genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
+                        end
+                    end
+                end
+            end
+        end % END of class constructor 
+    %%
     function genericTrial = Convert2Generic(genericTrial,anyTrialObj)
     % subroutine to convert data classes into GenericTrial class
     trClass = class(anyTrialObj);
@@ -296,10 +315,13 @@ classdef GenericTrial
             genericTrial.ccg = anyTrialObj.ccg;
             genericTrial.maze.name = anyTrialObj.Maze.name;
             genericTrial.maze.boundaries = anyTrialObj.Maze.boundaries;
+            generictrial.goodPosPeriods = anyTrialObj.xyzPeriods;
             for i = 1:length(anyTrialObj.Bhv.States),
                 genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;
                 genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;
             end
+            load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
+            genericTrial.pyrCluIdx = linearPyrCluIdx;
         case 'GenericTrial'
             genericTrial = anyTrialObj;
         otherwise
@@ -310,8 +332,6 @@ classdef GenericTrial
     
     
 end %END of methods
-
-
 end % END of classdef
 
 

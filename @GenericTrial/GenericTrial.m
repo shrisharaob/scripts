@@ -188,10 +188,15 @@ classdef GenericTrial
 %                             end
 %                         end
                         if isempty(genericTrial.trialName)
-                            fprintf('\n trialName not specified, choose from\n');
-                            Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5, 7])
-                            return;
-                        else
+                            fprintf(['\n trialName not specified, choose from :\n \n']);
+                            disp(Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5]));
+                            trialName = input(['\n enter trial name  :'],'s');
+                           trialNameStr = regexp(genericTrial.filebase, '\.', 'split');
+                           trialName = [trialNameStr{1}, '.', trialName];
+                           
+
+                           %        return;
+                        end
                             try 
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
@@ -201,7 +206,7 @@ classdef GenericTrial
                                 fprintf('\n *****************************************************\n');
                                 return;
                             end
-                        end
+                        
                 end
                 switch genericTrial.datasetType
                     case 'kenji'
@@ -332,8 +337,6 @@ classdef GenericTrial
     
     
 end %END of methods
-
-
 end % END of classdef
 
 

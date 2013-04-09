@@ -13,6 +13,11 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                     mtaPFObj = LoadMTAPFObject(genericTrial.filebase, genericTrial.trialName);
                     genericTrial.pfObject = GenericPF(mtaPFObj);
                 else
+% keyboard;
+                if isempty(genericTrial.trialName)
+                         error(['\n trial name not specified  !!! ' ...
+                                '\n']);  
+               end
                     if length(curLoadProperty) > 1
                         genericTrial.pfObject = GenericPF(genericTrial, curLoadProperty{2:end});
                     else

@@ -63,7 +63,7 @@ load('~/data/kenji/Beh_time_ind.mat');
             subTrialNames = nonSleepTrials{i};
             for kSubTr = 1 : length(subTrialNames)
                 fprintf('\n subtrial %d of %d \n', kSubTr, length(subTrialNames));
-                if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl'])
+                if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl']) && FileExists(['~/data/kenji/whl/', list{i}, '.eegTime'])
                     try 
                         gt = GenericTrial(list{i}, subTrialNames{kSubTr});
                         gt = gt.Load({{'PF', [], [],1}});
@@ -71,7 +71,7 @@ load('~/data/kenji/Beh_time_ind.mat');
                     catch err
                         fp = fopen('~/data/analysis/kenji/logFilePF','a');
                         str = sprintf(['\n' subTrialNames{kSubTr}: 'not done']);
-                        str = [str '\n' err.message];
+%                         str = [str '\n' err.message];
                         fwrite(fp, str);
                         fclose(fp);
                     end

@@ -13,16 +13,18 @@ function genericTrial = ProcessKenji(genericTrial)
             end
         end
     end
-    
-    
-    % 
+    %
     load('~/data/kenji/Beh_time_ind.mat');
     trialNames = Beh(strcmp(Beh(:,2),genericTrial.filebase), 4);
-    trialPeriods =[0; cumsum(str2num(char(Beh(strcmp(Beh(:,2),genericTrial.filebase), 7))))];
-    trialPeriods = [trialPeriods(1:end-1), trialPeriods(2:end)-1];
-    trialPeriods = trialPeriods .* genericTrial.lfpSampleRate; % trialPeriods @lfp fs
-    
-    genericTrial.trialPeriods = trialPeriods(ismember(trialNames,genericTrial.trialName),:);
+    rowNo  = find(~cellfun(@isempty, regexp(genericTrial.trialName, trialNames)));
+    times = load(['~/data/kenji/whl/', genericTrial.filebase, '.eegTime']);
+    trialPeriods = [0; round(times(:,2))];
+%     trialPeriods =[0; cumsum(str2num(char(Beh(strcmp(Beh(:,2),genericTrial.filebase), 7))))];
+  trialPeriods = [trialPeriods(1:end-1), trialPeriods(2:end)-1];
+%     trialPeriods = trialPeriods .* genericTrial.lfpSampleRate; % trialPeriods @lfp fs
+%     
+    genericTrial.trialPeriods = trialPeriods(rowNo,:);
     
 end
         
+

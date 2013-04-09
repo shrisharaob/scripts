@@ -28,6 +28,8 @@ function NavigatePlots(plotFunc, loopPar, varargin)
         if nDisplayed ~= 1, clf; end
         if iscell(plotFunc.args)
             feval(plotFuncHandle, plotFunc.args{:} , loopPar(kLoopIndx, :));
+        elseif  isempty(plotFunc.args)
+            feval(plotFuncHandle, loopPar(kLoopIndx, :));
         else
             feval(plotFuncHandle, plotFunc.args , loopPar(kLoopIndx, :));
         end

@@ -16,7 +16,7 @@ if nargin < 1, help FindPFPars; return; end
     pfPars.pkDist = [];
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
-    
+    pfPars.ratePk = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
 %         pyrCluIdx = pfObject.acceptedUnits;
@@ -51,6 +51,7 @@ if nargin < 1, help FindPFPars; return; end
             kRateMap = pfObject.rateMap{acceptedUnits(kUnit)};
             smoothedRateMap = SmoothSurface(kRateMap, smoothFactor);
             [maxSmoothedRate, linIdx] = max(smoothedRateMap(:));
+            pfPars.ratePk(kUnit) = maxSmoothedRate;
             [i,j]=ind2sub(size(smoothedRateMap), linIdx);
             maxRateXLoc = pfObject.xBin(i);
             maxRateYLoc = pfObject.yBin(j);

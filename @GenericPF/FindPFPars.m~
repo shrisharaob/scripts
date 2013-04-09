@@ -3,7 +3,7 @@ function pfPars = FindPFPars(arg, varargin)
 %varargin - [pyrCluIdx, smoothFactor, IF_SAVE]
 
 if nargin < 1, help FindPFPars; return; end
-    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 5});
+    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 1});
     
     pfPars.com = [];
     pfPars.smoothRateMap = [];
@@ -13,6 +13,7 @@ if nargin < 1, help FindPFPars; return; end
     pfPars.spatialCoherence = [];
     pfPars.sparsity = [];
     pfPars.pkLoc = [];
+    pfPars.pkDist = [];
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
     
@@ -95,7 +96,7 @@ if nargin < 1, help FindPFPars; return; end
             comA = pfPars.com(acceptedUnits == unitA, :,:);
             comB = pfPars.com(acceptedUnits == unitB, :,:);
             pfPars.comDist(kPair) = norm(comA - comB);
-            pfPars.pkLocDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
+            pfPars.pkDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
         end
         %% spatial coherence
         nAcceptedUnits = sum(~IS_DISCARD);
@@ -115,16 +116,18 @@ if nargin < 1, help FindPFPars; return; end
             clear avgNeigbRate;
         end
         
-        %fisher z transform
+        %fisher z transform - ( var[rEstimator] ~ 1/rTrue) 
         zr = atan(spatialCorretaltion);
         pfPars.spatialCoherence = zr;
-       
         %% compute sparsity
-        occupancy = arg.occupancy;
-        if isempty(occupancy)
-            occupancy = Occupancy(
+        occupancy = pfObject.occupancy;
         for kUnit = 1 : nAcceptedUnits
-            curOccupancy = occupancy{acceptedUnits(kUnit)};
+            if isempty(occupancy)
+                gt = GenericTrial(pfObject.filebase, pfObject.trialName);
+                curOccupancy = Occupancy(gt);
+            else
+                curOccupancy = occupancy{acceptedUnits(kUnit)};
+            end
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);
 %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
