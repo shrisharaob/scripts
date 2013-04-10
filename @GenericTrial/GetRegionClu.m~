@@ -4,7 +4,7 @@ function regionClu = GetRegionClu(trial, roi, varargin)
     % roi - cell array containing the regions or char str 
 % IF_CAT - concatinates all the clusters into a singel vector, else
 % returns roi clus in different cells 
-%[IF_CAT] = DefaultArgs(varargin, {0});
+[IF_CAT] = DefaultArgs(varargin, {0});
 
 
     if ~iscell(roi) == 1
@@ -22,10 +22,10 @@ function regionClu = GetRegionClu(trial, roi, varargin)
 %     if length(roi) == 1
 %         regionClu = regionClu{1};
 %     end
-%keyboard;
-%if IF_CAT
+keyboard;
+if IF_CAT
     %for kRoi = 1 : leength(roi)
-    %regionClu = cell2mat(regionClu);
-    %end
+regionClu = cell2mat(regionClu);
+end
 end
  

@@ -88,10 +88,8 @@ classdef GenericTrial
             % genericTrial = GenericTrial(arg.name);
             [trialName, datasetType, mazePar, trackingSampleRate, trialSubType, sampleRate, lfpSampleRate] = DefaultArgs(varargin, { [], 'default', [], [], [], [], []});
             
-            fileBase = arg;
-            if isempty(arg)
-                genericTrial.filebase = '';
-                genericTrial.datasetType = '';
+            if nargin < 1 
+               return; % return empty object
             elseif isa(arg, 'GenericTrial')
                 propertyNames = properties('GenericTrial');
                 for kProperty = 1 : length(propertyNames)
@@ -107,6 +105,7 @@ classdef GenericTrial
                 
                 % creat the object
                 genericTrial.datasetType = datasetType;
+                fileBase = arg;
                 genericTrial.filebase = fileBase;
                 
                 switch genericTrial.datasetType
@@ -191,21 +190,25 @@ classdef GenericTrial
                             fprintf(['\n trialName not specified, choose from :\n \n']);
                             disp(Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5]));
                             trialName = input(['\n enter trial name  :'],'s');
-                           trialNameStr = regexp(genericTrial.filebase, '\.', 'split');
-                           trialName = [trialNameStr{1}, '.', trialName];
-                           
-
-                           %        return;
+                            trialNameStr = regexp(genericTrial.filebase, '\.', 'split');
+                            genericTrial.trialName = [trialNameStr{1}, '.', trialName];
+                            if ~FileExists(['~/data/kenji/whl/', genericTrial.filebase, '.eegTime'])
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                fprintf(['\n ~/data/kenji/whl/',  genericTrial.filebase, '.eegTime not found !!! \n']);
+                               fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                return;
+                            end
+                            %        return;
                         end
-                            try 
+                        try
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
                             catch err
-                                fprintf('\n *************************************************** \n ')
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 fprintf([genericTrial.paths.data, genericTrial.trialName '.whl not found']);
-                                fprintf('\n *****************************************************\n');
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 return;
-                            end
+                        end
                         
                 end
                 switch genericTrial.datasetType
