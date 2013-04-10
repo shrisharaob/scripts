@@ -21,15 +21,18 @@ function Remapping(varargin)
         if ~isempty(gt.pfObject)
             ratePk{kTr} = gt.pfObject.ratePk;
             clus = cell2mat(gt.GetRegionClu(roi));
-            trCluIdx{kTr}= clus(ismember(clus, gt.pfObject.idealPFUnits));
+            linCluIdx =  1 : size(gt.pfObject.rateMap, 2);
+            trCluIdx{kTr}= clus(ismember(clus, linCluIdx(gt.pfObject.idealPFUnits)));
         end
     end
     refTr = 1;
     for kTr = setdiff(1 : nTrials, refTr)
         if ~isempty(trCluIdx{kTr})
-            hist2(MakeUniformDistr(ratePk{refTr}), MakeUniformDistr(ratePk{kT}));
+            hist2([MakeUniformDistr(ratePk{refTr}), MakeUniformDistr(ratePk{kTr})]);
+%             xlabel(['trial :', ]);
+%             ylabel(['trial# 
             waitforbuttonpress;
-            clf;
+%             clf;
         end
     end
 end

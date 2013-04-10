@@ -24,7 +24,11 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                         genericTrial.pfObject = GenericPF(genericTrial);
                     end
                 end
-                
+            if FileExists([genericTrial.paths.analysis, genericTrial.filebase, 'SelectCells.mat'])
+                load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
+            else
+                genericTrial.pyrCluIdx = 1 : size(genericTrial.pfObject.rateMap, 2);
+            end
             case 'CluRes'
                 fprintf('\n loading CluRes ... ');
                 if strcmp(genericTrial.datasetType, 'MTA')

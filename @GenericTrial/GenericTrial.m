@@ -41,7 +41,7 @@ classdef GenericTrial
         % lfp
         lfp;
         
-        % state
+        % statep
         states;
         
         % Maze parameters name, boundaries
@@ -296,6 +296,7 @@ classdef GenericTrial
                     end
                 end
             end
+
         end % END of class constructor 
     %%
     function genericTrial = Convert2Generic(genericTrial,anyTrialObj)

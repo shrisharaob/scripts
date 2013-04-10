@@ -89,7 +89,7 @@ function out = SelectCells(trial, varargin)
     % cluindx 2 are the pyr cells
     pyrCellClusterIdx = acceptedElClu(MOGout.cluIndx == 1,:);
     linearPyrCluIdx = linearCluIdx(ismember(acceptedElClu,pyrCellClusterIdx,'rows'));
-    save([trial.paths.analysis, '/', trial.filebase '.' mfilename '.mat'],'linearPyrCluIdx','acceptedElClu');
+    save([trial.paths.analysis, trial.filebase '.' mfilename '.mat'],'linearPyrCluIdx','acceptedElClu');
     nPairs = nchoosek(length(linearPyrCluIdx), 2);
     cellPairs = nchoosek(linearPyrCluIdx, 2);
 
