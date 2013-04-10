@@ -1,4 +1,3 @@
-
 classdef GenericTrial
     % class to structure general recording data
     % use GenericTrial(<filebase>) to add a new filebase / a list of
@@ -89,10 +88,8 @@ classdef GenericTrial
             % genericTrial = GenericTrial(arg.name);
             [trialName, datasetType, mazePar, trackingSampleRate, trialSubType, sampleRate, lfpSampleRate] = DefaultArgs(varargin, { [], 'default', [], [], [], [], []});
             
-            fileBase = arg;
-            if isempty(arg)
-                genericTrial.filebase = '';
-                genericTrial.datasetType = '';
+            if nargin < 1 
+               return; % return empty object
             elseif isa(arg, 'GenericTrial')
                 propertyNames = properties('GenericTrial');
                 for kProperty = 1 : length(propertyNames)
@@ -108,6 +105,7 @@ classdef GenericTrial
                 
                 % creat the object
                 genericTrial.datasetType = datasetType;
+                fileBase = arg;
                 genericTrial.filebase = fileBase;
                 
                 switch genericTrial.datasetType
@@ -189,20 +187,29 @@ classdef GenericTrial
 %                             end
 %                         end
                         if isempty(genericTrial.trialName)
-                            fprintf('\n trialName not specified, choose from\n');
-                            Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5, 7])
-                            return;
-                        else
-                            try 
+                            fprintf(['\n trialName not specified, choose from :\n \n']);
+                            disp(Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5]));
+                            trialName = input(['\n enter trial name  :'],'s');
+                            trialNameStr = regexp(genericTrial.filebase, '\.', 'split');
+                            genericTrial.trialName = [trialNameStr{1}, '.', trialName];
+                            if ~FileExists(['~/data/kenji/whl/', genericTrial.filebase, '.eegTime'])
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                fprintf(['\n ~/data/kenji/whl/',  genericTrial.filebase, '.eegTime not found !!! \n']);
+                               fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                return;
+                            end
+                            %        return;
+                        end
+                        try
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
                             catch err
-                                fprintf('\n *************************************************** \n ')
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 fprintf([genericTrial.paths.data, genericTrial.trialName '.whl not found']);
-                                fprintf('\n *****************************************************\n');
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 return;
-                            end
                         end
+                        
                 end
                 switch genericTrial.datasetType
                     case 'kenji'
@@ -258,10 +265,10 @@ classdef GenericTrial
             end
             switch genericTrial.datasetType
                 case 'kenji'
-                    xPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 1)));
-                    yPxRange = range(sq(genericTrial.position(~inValidIdx, markerNo, 2)));
-                    genericTrial.maze.boundaries = [0, xPxRange; 0, yPxRange];
-                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [xPxRange, yPxRange];
+                    xPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 1)), max(genericTrial.position(~inValidIdx, markerNo, 1))];
+                    yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
+                    genericTrial.maze.boundaries = [xPxRange; yPxRange];
+                    miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
                     genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
                 case 'MTA'
                     
@@ -333,8 +340,6 @@ classdef GenericTrial
     
     
 end %END of methods
-
-
 end % END of classdef
 
 

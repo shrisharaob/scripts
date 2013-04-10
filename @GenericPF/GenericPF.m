@@ -107,6 +107,7 @@ classdef GenericPF
                        genericPF.(pfProps{kProp}) = arg.(trialProps{simPropIdx});
                     end
                 end
+                
             elseif isa(arg, 'GenericPF')
                 propertyNames = properties(arg);
                 for kProperty = 1 : length(propertyNames)

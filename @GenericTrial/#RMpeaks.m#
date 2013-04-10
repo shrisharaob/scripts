@@ -6,4 +6,3 @@ if ~isempty(rm1)
 rmp1(i) = nanmax(rm1(:));            
 end
 
-end
