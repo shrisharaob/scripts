@@ -14,7 +14,7 @@
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 0, 5, [], 84});
+    [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 5, [], 84, pfObject.acceptedUnits});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
     if ~IS_COUNTOUR

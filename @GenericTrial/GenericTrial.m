@@ -175,17 +175,7 @@ classdef GenericTrial
                         xy = importdata([genericTrial.paths.data, genericTrial.filebase, '.whl']);
                     case 'kenji'
                         load('~/data/kenji/Beh_time_ind.mat'); % loads Beh
-%                         files = dir(genericTrial.paths.data);
-%                         nWhlFiles = 0;
-%                         for kFile = 1 : length(files)
-%                             if ~files(kFile).isdir
-%                                 [~,~,ext] = fileparts(files(kFile).name);
-%                                 if strcmp(ext, '.whl')
-%                                     nWhlFiles = nWhlFiles + 1;
-%                                     whlFileNames{nWhlFiles} = files(kFile).name;
-%                                 end
-%                             end
-%                         end
+
                         if isempty(genericTrial.trialName)
                             fprintf(['\n trialName not specified, choose from :\n \n']);
                             disp(Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5]));

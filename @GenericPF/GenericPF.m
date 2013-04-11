@@ -179,17 +179,19 @@ classdef GenericPF
                     statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
                     switch genericPF.datasetType
                         case 'kenji'
-                            % set t0, since the filebase is concatinated
-                            % data from several sessions
-                            %posStatePeriods = posStatePeriods -
-                            %posStatePeriods(1,1) + 1; 
-                            % good pos periods starts with index 1
-                            startIdx = posStatePeriods(1,1);
-                            posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods+startIdx);
-                    end
+                          % add trial start time to goodPosPeriods
+                          % to convert it to samples wrt filebse start point        
+                            trialStartTime_pos = ...
+                                round(trial.trialPeriods(1, 1) .* ...
+                                      trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                            posStatePeriods = ...
+                                IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
+                       end
                 end
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), ...
-                                    posStatePeriods-startIdx +1, 'c');
+                                    posStatePeriods - trialStartTime_pos, ...
+                                    'c');
+keyboard;
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);

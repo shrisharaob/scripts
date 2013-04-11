@@ -48,14 +48,14 @@ classdef GenericPF
         %
         maze 
 
-        % maximum peak of the rateMap
-        rateMapPeak;
-        
         %
         smoothRateMap;
         
         % center of mass
         com;
+       
+       % maximum peak of the smoothed rateMap
+        ratePk; 
         
         % peak location 
         pkLoc;
@@ -107,6 +107,7 @@ classdef GenericPF
                        genericPF.(pfProps{kProp}) = arg.(trialProps{simPropIdx});
                     end
                 end
+                
             elseif isa(arg, 'GenericPF')
                 propertyNames = properties(arg);
                 for kProperty = 1 : length(propertyNames)
@@ -180,8 +181,12 @@ classdef GenericPF
                         case 'kenji'
                             % set t0, since the filebase is concatinated
                             % data from several sessions
-                            posStatePeriods = posStatePeriods - posStatePeriods(1,1) + 1; 
-                            posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods);
+                            %posStatePeriods = posStatePeriods -
+                            %posStatePeriods(1,1) + 1; 
+                            % good pos periods starts with index 1
+%                             trialstartIdx = posStatePeriods(1,1);
+                            trialStartIdx = trial.trialPeriods(1, 1) ./ trial.lfpSampleRate .* trial.trackingSampleRate;
+                            posStatePeriods = IntersectRanges(posStatePeriods,  + );
                     end
                 end
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods, 'c');
@@ -253,7 +258,7 @@ classdef GenericPF
                genericPF.idealPFPairs = pfPars.idealPFPairs;
                genericPF.spatialCoherence = pfPars.spatialCoherence;
                genericPF.sparsity = pfPars.sparsity;
-               genericPF.rateMapPeak = pfPars.pkLoc;
+               genericPF.ratePk = pfPars.ratePk;
                genericPF.acceptedUnits = pfPars.acceptedUnits;
                genericPF.comDist = pfPars.comDist;
                genericPF.pkLoc = pfPars.pkLoc;
