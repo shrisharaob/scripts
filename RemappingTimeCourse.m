@@ -59,7 +59,6 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     fprintf('done !! \n');
     dotProd = popVec' * refVector;
     save([gt.paths.analysis, gt.filebase, gt.trialName, mfilename, '.mat'], 'refVector', 'popVec', 'dotProd');
-    
     %% figures
     figure;
     bar(xx, [count, count],'FaceColor', 'k');
