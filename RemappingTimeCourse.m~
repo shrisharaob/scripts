@@ -37,7 +37,7 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     nDims = nRows * nClmns;
     popVec = zeros(nDims, length(thetaBoundaries) - 1);
     refVector = zeros(nDims, 1);
-    clu = clus(~cellfun(@isempty,gt.pfObject.rateMap(clus))); % remove clus for with no rate maps 
+    validClu = clus(~cellfun(@isempty,gt.pfObject.rateMap(clus))); % remove clus for with no rate maps 
     refVector = sum(reshape(cell2mat(gt.pfObject.rateMap(clus)), ...
                             nRows, nClmns, length(clus)), 3);
     refVector = refVector(:);
@@ -45,13 +45,24 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     %   refVector = refVector + length(res(clu == clus(mClu))) / (sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate) ; % divide by time spent
     %    end
     fprintf('\n computing popvector...');
+    thetaPeriods = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 ...
+                                                      : end)]; 
+    if strcmp(gt.datasetType, 'kenji')
+        markerNo = 1;
+    elseif strcmp(gt.datasetType, 'MTA')
+        markerNo = 7;
+    end
     for kPopVec = 1 : length(thetaBoundaries) - 1
         % population vector for each theta cycle, nDims -by- nClycles 
         % nDims = nClus
-        for kClu = 1 : length(clus)
-            curRes = SelectPeriods(res(), thetaBoundaries(kPopVec));
-            popVec(kClu, kPopVec) = sum(curRes >= thetaBoundaries(kPopVec) ...
-                                        & curRes <= thetaBoundaries(kPopVec + 1));
+        for kClu = 1 : length(validClu)
+            curRes = SelectPeriods(res(clu == validClu(kClu)), ...
+                                   thetaPeriods(kPopVec, :));
+            if ~isempty(curRes)
+                pos = SelectPeriods(gt.position(:, markerNo, :), ...
+                                    round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+                popVec(kPopVec) = popVec(kPopVec) + SpkCntAtPos(gt, curRes, pos); 
+            end
         end
     end
     fprintf('done !! \n');

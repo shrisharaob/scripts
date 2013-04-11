@@ -14,8 +14,8 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
         gt = gt.LoadPF;
     end
     roiClus = cell2mat(gt.GetRegionClu(roi)); % shd also add
-    clus = clus(ismember(clus, gt.pyrCluIdx(gt.pfObject.acceptedUnits)));
-    res = gt.res(CompareVectors(gt.clu, clus)); % load res only for the units in roi
+    roiClus= roiClus(ismember(roiClus, gt.pyrCluIdx(gt.pfObject.acceptedUnits)));
+    res = gt.res(CompareVectors(gt.clu, roiClus)); % load res only for the units in roi
     res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
     [res, resIdx] = SelectPeriods(res, gt.trialPeriods, 'd');
     clu = gt.clu(resIdx);
@@ -37,9 +37,9 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     nDims = nRows * nClmns;
     popVec = zeros(nDims, length(thetaBoundaries) - 1);
     refVector = zeros(nDims, 1);
-    validClu = clus(~cellfun(@isempty,gt.pfObject.rateMap(clus))); % remove clus for with no rate maps 
-    refVector = sum(reshape(cell2mat(gt.pfObject.rateMap(clus)), ...
-                            nRows, nClmns, length(clus)), 3);
+    validClu = roiClus(~cellfun(@isempty,gt.pfObject.rateMap(roiClus))); % remove clus for with no rate maps 
+    refVector = sum(reshape(cell2mat(gt.pfObject.rateMap(roiClus)), ...
+                            nRows, nClmns, length(roiClus)), 3);
     refVector = refVector(:);
     %    for mClu = 1 : length(clus)
     %   refVector = refVector + length(res(clu == clus(mClu))) / (sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate) ; % divide by time spent
@@ -54,7 +54,6 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     end
     for kPopVec = 1 : length(thetaBoundaries) - 1
         % population vector for each theta cycle, nDims -by- nClycles 
-        % nDims = nClus
         for kClu = 1 : length(validClu)
             curRes = SelectPeriods(res(clu == validClu(kClu)), ...
                                    thetaPeriods(kPopVec, :));
