@@ -1,4 +1,4 @@
-function varargout = PlotTrajectories(trial,  varargin)
+function varargout = PlotTraj(trial,  varargin)
     % plots trajectories in the specified periods 
     % PlotTrajectories(trial)
     %[trajPeriods,markerNo, plotColor, IF_PLOT_ALL, state, IF_PLOT]

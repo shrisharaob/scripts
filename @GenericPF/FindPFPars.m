@@ -133,7 +133,7 @@ if nargin < 1, help FindPFPars; return; end
 %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
         end
-        pfPars.sparsity = 1 ./ sparsity; % 0 is uniform firing
+        pfPars.sparsity = sparsity; % 1 is uniform firing
         maxSparsity = 0.3;
         minCoherence = 0.6;
         pfPars.idealPFUnits = ~IS_DISCARD & ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) ...

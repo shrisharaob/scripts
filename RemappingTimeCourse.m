@@ -10,41 +10,65 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     if isempty(gt.res)
         gt =gt.LoadCR;
     end
-    clus = cell2mat(gt.GetRegionClu(roi)); % shd also add 
+    if isempty(gt.pfObject.rateMap)
+        gt = gt.LoadPF;
+    end
+    roiClus = cell2mat(gt.GetRegionClu(roi)); % shd also add
+    clus = clus(ismember(clus, gt.pyrCluIdx(gt.pfObject.acceptedUnits)));
     res = gt.res(CompareVectors(gt.clu, clus)); % load res only for the units in roi
     res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
     [res, resIdx] = SelectPeriods(res, gt.trialPeriods, 'd');
     clu = gt.clu(resIdx);
     [res, resIdx] = SelectPeriods(res, round(gt.goodPosPeriods .* gt.lfpSampleRate ...
-        ./ gt.trackingSampleRate) + 1 + res(1),'d');
+        ./ gt.trackingSampleRate) + 1 + res(1),'d', 1, 1);
     clu = clu(resIdx);
-    stateThPh = ThPh(res);
-%     nBins = 360 / binSize;
-%     bins = linspace(-pi, pi, nBins);
-%     [count, binIdx] = hist(stateThPh, bins);
-%     xx = [bins, bins(2:end)+2*pi, bins(end) + 2*pi + 2 * pi / nBins];
-%     [~, minCIdx] = min(count);
-%     minPh = xx(minCIdx);
-%     thetaBoundaries = find(IsEqual(stateThPh, minPh, tolerence, 0)); % in lfp sample rate
-    thetaBoundaries = find(IsEqual(stateThPh,pi, tolerence, 0));
-    popVec = zeros(length(clus), length(thetaBoundaries) - 1);
-    refVector = zeros(length(clus), 1);
-    for mClu = 1 : length(clus)
-        refVector(mClu) =length(res(clu == clus(mClu))) / (sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate) ; % divide by time spent
+    [trialThPh, thIdx] = SelectPeriods(ThPh, gt.trialPeriods, 'c', 1);
+    nBins = 360 / binSize;
+    bins = linspace(-pi, pi, nBins);
+    [count, binIdx] = hist(trialThPh, bins);
+    xx = [bins, bins(2:end)+2*pi, bins(end) + 2*pi + 2 * pi / nBins];
+    [~, minCIdx] = min(count);
+    minPh = xx(minCIdx);
+    thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); % in lfp sample rate
+                                                                      %    thetaBoundaries = find(IsEqual(trialThPh,pi, tolerence,
+                                                                      %    0));% indeices of thetapeak
+
+    [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
+    nDims = nRows * nClmns;
+    popVec = zeros(nDims, length(thetaBoundaries) - 1);
+    refVector = zeros(nDims, 1);
+    validClu = clus(~cellfun(@isempty,gt.pfObject.rateMap(clus))); % remove clus for with no rate maps 
+    refVector = sum(reshape(cell2mat(gt.pfObject.rateMap(clus)), ...
+                            nRows, nClmns, length(clus)), 3);
+    refVector = refVector(:);
+    %    for mClu = 1 : length(clus)
+    %   refVector = refVector + length(res(clu == clus(mClu))) / (sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate) ; % divide by time spent
+    %    end
+    fprintf('\n computing popvector...');
+    thetaPeriods = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 ...
+                                                      : end)]; 
+    if strcmp(gt.datasetType, 'kenji')
+        markerNo = 1;
+    elseif strcmp(gt.datasetType, 'MTA')
+        markerNo = 7;
     end
-       fprintf('\n computing popvector...');
     for kPopVec = 1 : length(thetaBoundaries) - 1
         % population vector for each theta cycle, nDims -by- nClycles 
         % nDims = nClus
-        for kClu = 1 : length(clus)
-            curRes = res(clu == clus(kClu));
-            popVec(kClu, kPopVec) = sum(curRes >= thetaBoundaries(kPopVec) & curRes <= thetaBoundaries(kPopVec + 1));
+        for kClu = 1 : length(validClu)
+            curRes = SelectPeriods(res(clu == validClu(kClu)), ...
+                                   thetaPeriods(kPopVec, :));
+            if ~isempty(curRes)
+                pos = SelectPeriods(gt.position(:, markerNo, :), ...
+                                    round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+                popVec(kPopVec) = popVec(kPopVec) + SpkCntAtPos(gt, curRes, pos); 
+            end
         end
     end
-       fprintf('done !! \n');
+    fprintf('done !! \n');
     dotProd = popVec' * refVector;
     save([gt.paths.analysis, gt.filebase, gt.trialName, mfilename, '.mat'], 'refVector', 'popVec', 'dotProd');
-
+    
     %% figures
     figure;
     bar(xx, [count, count],'FaceColor', 'k');

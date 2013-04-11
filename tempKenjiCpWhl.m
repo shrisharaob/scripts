@@ -50,7 +50,7 @@
 % %     
 % % end
 % % 
-%% copute place fields for all kenji
+%% compute place fields for all kenji
 list = importdata('~/data/kenji/list');
 load('~/data/kenji/Beh_time_ind.mat');
 

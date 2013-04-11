@@ -1,6 +1,6 @@
-function varargout = PlotTrajectories(trial,  varargin)
+function varargout = PlotTraj(trial,  varargin)
     % plots trajectories in the specified periods 
-    % PlotTrajectories(trial)
+    % PlotTraj(trial)
     %[trajPeriods,markerNo, plotColor, IF_PLOT_ALL, state, IF_PLOT]
     [trajPeriods,markerNo, plotColor, IF_PLOT_ALL, state, IF_PLOT] = DefaultArgs(varargin, {[], 7, [],0, 'walk', 1});
     IF_PLOT_ALL = isempty(trajPeriods);

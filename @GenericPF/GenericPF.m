@@ -191,7 +191,6 @@ classdef GenericPF
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), ...
                                     posStatePeriods - trialStartTime_pos, ...
                                     'c');
-keyboard;
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);

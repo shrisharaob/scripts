@@ -4,12 +4,12 @@ function NavigatePlots(plotFunc, loopPar, varargin)
 % [IF_REPORTFIG, IF_WAITFORBUTTONPRESS,IF_GCF, filebase, fileTag ]  -                         
 % [ 0, 1, 0, '', []]
 %
-[IF_REPORTFIG, IF_WAITFORBUTTONPRESS,IF_GCF, filebase, fileTag ] = DefaultArgs(varargin, {0, 1, 0,[],[]});
+[IF_REPORTFIG, IF_WAITFORBUTTONPRESS,IF_GCF, filebase, fileTag ] = DefaultArgs(varargin, {0, 1, 0,'jg05-20120315',[]});
  fieldNames = fieldnames(plotFunc);
  
     plotFuncHandle = plotFunc.(fieldNames{1});
 
-   IS_FULL_CYCLE = 0; 
+    
    persistent IS_DONE;
    IS_DONE = 0;
    nDisplayed= 0;
@@ -84,24 +84,20 @@ function NavigatePlots(plotFunc, loopPar, varargin)
         else return;
         end
 
-        if IF_REPORTFIG && ~IS_FULL_CYCLE
-            if isempty(filebase)
-                if isa(plotFunc.args{1}, 'GenericPF')
-                   filebase = plotFunc.args{1}.filebase;
-                else
-                   filebase = input('enter filebase :');
-                end
-            end
+        if IF_REPORTFIG
             if isempty(fileTag)
+                if nDisplayed == nItems
+                    IS_DONE = 1;
+                end
                 fileName = [filebase '.' func2str(plotFuncHandle)];
             else
                 fileName = [filebase '.' func2str(plotFuncHandle), '.' fileTag '.'];
             end
-            if nDisplayed == nItems
-                IS_FULL_CYCLE = 1;
-            end
             reportfig(gcf,fileName , 0, [num2str(nDisplayed)], [],0);
-        end           
+        end
+        
+
+            
     end
 end
     

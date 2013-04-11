@@ -317,7 +317,6 @@ function DisplayAuxData(Data)
             warning('AuxData has to be cell array where each row is : xaxis, yaxis, data, display_func');
             close 
             return;
-
         end
         
         switch Data{4} %switch by functions
@@ -335,3 +334,4 @@ function DisplayAuxData(Data)
         
 
 
+return
