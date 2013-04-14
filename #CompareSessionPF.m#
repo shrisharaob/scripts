@@ -2,8 +2,7 @@ function CompareSessionPF(filebase, trialTypes, cluIdx,  varargin)
     % sessions - cell array containing sessions to compare
     % script to vizualize pfs for the same units across aenviornments
         
-    [filebase, IF_WAITFORBUTTONPRESS, IF_REPORTFIG] = DefaultArgs(varargin, ...
-                                                      {'jg05-20120315', 0, 0 } );
+    [filebase, IF_WAITFORBUTTONPRESS, IF_REPORTFIG] = DefaultArgs(varargin, {'jg05-20120315', 0, 0 });
     units  = load(['~/data/analysis/' filebase '/' filebase '.SelectedPyrCells.mat']);
     nTypes = length(trialTypes);
     varNames = genvarname(cellstr(repmat('pfObj', nTypes, 1)));

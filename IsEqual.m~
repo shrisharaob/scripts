@@ -23,8 +23,8 @@ function IS_EQUAL = IsEqual(a, b, varargin)
     if ~IF_ALL
         ktt =  double(IS_EQUAL);
         for ii = 1 : length(ktt) - 1
-            if mtt(ii)
-                ktt(ii) = mtt(ii+1)==0;
+            if IS_EQUAL(ii)
+                ktt(ii) =IS_EQUAL(ii+1)==0;
             end
         end
         IS_EQUAL = ktt;

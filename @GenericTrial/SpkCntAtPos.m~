@@ -39,4 +39,5 @@
     spikep(:,1) = X(indx);
     spikep(:,2) = Y(indx);
     spkCnt = Accumulate(spikep,1,msize);
+    spkCnt = spkCnt(:);
 end

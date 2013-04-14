@@ -2,7 +2,7 @@
     % Justin's code
 
     [Nbin,Smooth,type] = DefaultArgs(varargin,{50,[],'xy'});
-
+    po(isnan(pos)) = 0;
 
     %% Constraint to maze is forced
     switch type
@@ -34,10 +34,13 @@
     Y(Y>Nbin) = Nbin;
 
     %% spike count
+    spkCnt = zeros(msize);
     spiket = spiket;
     indx = spiket(find(spiket>0 & spiket<=length(X)));
-    spikep(:,1) = X(indx);
-    spikep(:,2) = Y(indx);
-    spkCnt = Accumulate(spikep,1,msize);
-    spkCnt = spkCnt(:);
+   if ~isempty(indx)
+        spikep(:,1) = X(indx);
+        spikep(:,2) = Y(indx);
+        spkCnt = Accumulate(spikep,1,msize);
+   end
+   spkCnt = spkCnt(:);
 end

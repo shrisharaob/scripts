@@ -1,5 +1,5 @@
 
-function PlotRateMaps(pfObject, varargin)
+    function PlotRateMaps(pfObject, varargin)
     % PlotPlaceFields(pfObject, varargin)
     % varargin - [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter]
     if nargin<1, help PlotPlaceFields; return; end

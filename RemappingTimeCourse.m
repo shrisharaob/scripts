@@ -19,7 +19,7 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
     [res, resIdx] = SelectPeriods(res, gt.trialPeriods, 'd');
     clu = gt.clu(resIdx);
-    [res, resIdx] = SelectPeriods(res, round(gt.goodPosPeriods .* gt.lfpSampleRate ./ gt.trackingSampleRate) + 1 + res(1),'d', 1, 1);
+    [res, resIdx] = SelectPeriods(res, round(gt.goodPosPeriods .* gt.lfpSampleRate ./ gt.trackingSampleRate) + 1 + gt.trialPeriods(1,1),'d', 1, 1);
     clu = clu(resIdx);
     [trialThPh, thIdx] = SelectPeriods(ThPh, gt.trialPeriods, 'c', 1);
     nBins = 360 / binSize;
@@ -31,7 +31,6 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); 
     % in lfp sample rate thetaBoundaries = find(IsEqual(trialThPh,pi,
     % tolerence, 0));% indeices of thetapeak
-
     [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
     nDims = nRows * nClmns;
     popVec = zeros(nDims, length(thetaBoundaries) - 1);
@@ -49,10 +48,16 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     for kPopVec = 1 : length(thetaBoundaries) - 1
         % population vector for each theta cycle, nDims -by- nClycles 
         for kClu = 1 : length(validClu)
-            curRes = SelectPeriods(res(clu == validClu(kClu)), thetaPeriods(kPopVec, :));
+            curRes = SelectPeriods(res(clu == validClu(kClu)), thetaPeriods(kPopVec, :),'d');
             if ~isempty(curRes)
-                pos = SelectPeriods(gt.position(:, markerNo, :), round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
-                popVec(kPopVec) = popVec(kPopVec) + SpkCntAtPos(gt, curRes, pos); 
+                kClu
+                tic
+                position = SelectPeriods(gt.position(:, markerNo, :), round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+                toc
+                if ~(all(isnan(pos(:))))
+                    fprintf('*');
+                    popVec(:, kPopVec) = popVec(:, kPopVec) + SpkCntAtPos(gt, curRes, pos); 
+                end
             end
         end
     end

@@ -24,7 +24,7 @@ function IS_EQUAL = IsEqual(a, b, varargin)
         ktt =  double(IS_EQUAL);
         for ii = 1 : length(ktt) - 1
             if IS_EQUAL(ii)
-                ktt(ii) =IS_EQUAL(ii+1)==0;
+                ktt(ii) = IS_EQUAL(ii+1) == 0;
             end
         end
         IS_EQUAL = ktt;
