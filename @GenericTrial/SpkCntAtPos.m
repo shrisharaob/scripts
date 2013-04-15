@@ -2,7 +2,7 @@
     % Justin's code
 
     [Nbin,Smooth,type] = DefaultArgs(varargin,{50,[],'xy'});
-    po(isnan(pos)) = 0;
+    pos(isnan(pos)) = 0;
 
     %% Constraint to maze is forced
     switch type

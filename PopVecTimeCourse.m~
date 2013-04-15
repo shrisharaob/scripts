@@ -1,4 +1,4 @@
-function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
+function [popVec, refVector] = PopVecTimeCourse(gt, varargin)
     % RemappingTimeCourse(gt, varargin)
 
     [binSize, roi, tolerence, IF_OVERWRITE] = DefaultArgs(varargin, { 10,  {'CA3'}, 1e-1,1});

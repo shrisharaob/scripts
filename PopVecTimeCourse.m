@@ -1,4 +1,4 @@
-function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
+function [popVec, refVector] = PopVecTimeCourse(gt, varargin)
     % RemappingTimeCourse(gt, varargin)
 
     [binSize, roi, tolerence, IF_OVERWRITE] = DefaultArgs(varargin, { 10,  {'CA3'}, 1e-1,1});
@@ -39,7 +39,7 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     % in lfp sample rate thetaBoundaries = find(IsEqual(trialThPh,pi,
     % tolerence, 0));% indices of thetapeak
     [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
-    nDims = nRows * nClmns;
+    nDims = length(validClu);
     popVec = zeros(nDims, length(thetaBoundaries) - 1);
     refVector = zeros(nDims, 1);
    

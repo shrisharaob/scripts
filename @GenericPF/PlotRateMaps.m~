@@ -1,5 +1,5 @@
-
-    function PlotRateMaps(pfObject, varargin)
+%
+function PlotRateMaps(pfObject, varargin)
     % PlotPlaceFields(pfObject, varargin)
     % varargin - [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter]
     if nargin<1, help PlotPlaceFields; return; end
@@ -84,9 +84,9 @@
                 smoothedRateMap = pfObject.smoothRateMap(:,:,idx2);
                 maxRate = max(smoothedRateMap(:));
                 if nContours == 1
-                    contour(pfObject.xbin,pfObject.ybin, smoothedRateMap,[maxRate, maxRate].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[maxRate, maxRate].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
                 else
-                    contour(pfObject.xbin,pfObject.ybin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end
                 hold on;
                 if strcmp(pfObject.mazeName, 'cof')

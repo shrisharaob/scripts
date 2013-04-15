@@ -1,0 +1,3 @@
+function y = Nan2Zero(a)
+% replace all nan's by yero
+
