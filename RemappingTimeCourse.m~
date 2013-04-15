@@ -4,17 +4,17 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     [binSize, roi, tolerence, IF_OVERWRITE] = DefaultArgs(varargin, { 10,  {'CA3'}, 1e-1,1});
     %binSize in degrees
     % .1 ~= 5 degrees
-    fprintf('\n loading thpar...');
-    load ([gt.paths.data, gt.filebase '.thpar.mat'] );
-    fprintf('done !! \n');
+    sK.roi = roi;
+    if ~SearchKenji(sK, gt.filebase, gt.trialName), return; end;
     if isempty(gt.res)
         gt =gt.LoadCR;
     end
-    if isempty(gt.pfObject.rateMap)
-        gt = gt.LoadPF;
-    end
     roiClus = cell2mat(gt.GetRegionClu(roi)); % shd also add
     roiClus= roiClus(ismember(roiClus, gt.pyrCluIdx(gt.pfObject.acceptedUnits))); % clus in roi & with PFs
+    if isempty(roiClus), return; end; % no clusters in the roi
+    if isempty(gt.pfObject)
+        gt = gt.LoadPF;
+    end
     roiPFClu = unique(gt.clu(CompareVectors(gt.clu, roiClus)));
     validClu = roiPFClu(~cellfun(@isempty,gt.pfObject.rateMap(roiPFClu))); % remove clus for with no rate maps
     validClu = validClu(ismember(validClu, gt.pyrCluIdx(gt.pfObject.idealPFUnits)));
@@ -25,7 +25,9 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     clu = clu(resIdx);
     [res, resIdx] = SelectPeriods(res, round(gt.goodPosPeriods .* gt.lfpSampleRate ./ gt.trackingSampleRate) + 1 + gt.trialPeriods(1,1),'d', 1, 1);
     clu = clu(resIdx);
- 
+    fprintf('\n loading thpar...');
+    load ([gt.paths.data, gt.filebase '.thpar.mat'] );
+    fprintf('done !! \n'); 
     [trialThPh, thIdx] = SelectPeriods(ThPh, gt.trialPeriods, 'c', 1);
     nBins = 360 / binSize;
     binEdges = linspace(-pi, pi, nBins);

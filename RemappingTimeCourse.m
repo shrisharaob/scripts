@@ -42,10 +42,10 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     nDims = nRows * nClmns;
     popVec = zeros(nDims, length(thetaBoundaries) - 1);
     refVector = zeros(nDims, 1);
-   
     % refVector = sum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(roiClus))), nRows, nClmns, length(roiClus)), 3);
     refVector = nansum(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, validClu)), 3);
     refVector = refVector(:);
+    refVector = refVector ./ norm(refVector);
     fprintf('\n computing popvector...');
     thetaPeriods = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 : end)]; 
     if strcmp(gt.datasetType, 'kenji')
@@ -77,6 +77,6 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     % line([minPh, minPh]+2*pi, ylim, 'Color', 'g');
     figure;
     plot(linspace(0,sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate, length(dotProd)), dotProd);   
-    
+end    
 
 
