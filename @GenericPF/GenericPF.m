@@ -181,16 +181,11 @@ classdef GenericPF
                         case 'kenji'
                           % add trial start time to goodPosPeriods
                           % to convert it to samples wrt filebse start point        
-                            trialStartTime_pos = ...
-                                round(trial.trialPeriods(1, 1) .* ...
-                                      trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
-                            posStatePeriods = ...
-                                IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
+                            trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                            posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
                        end
                 end
-                pos = SelectPeriods(sq(trial.position(:,markerNo,:)), ...
-                                    posStatePeriods - trialStartTime_pos, ...
-                                    'c');
+                pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);

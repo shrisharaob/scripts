@@ -1,4 +1,5 @@
-classdef GenericTrial
+
+ classdef GenericTrial
     % class to structure general recording data
     % use GenericTrial(<filebase>) to add a new filebase / a list of
     % filebases
@@ -41,7 +42,7 @@ classdef GenericTrial
         % lfp
         lfp;
         
-        % state
+        % statep
         states;
         
         % Maze parameters name, boundaries
@@ -86,12 +87,12 @@ classdef GenericTrial
         function genericTrial = GenericTrial(arg, varargin)
             % arg is the filebase name string
             % genericTrial = GenericTrial(arg.name);
-            [trialName, datasetType, mazePar, trackingSampleRate, trialSubType, sampleRate, lfpSampleRate] = DefaultArgs(varargin, { [], 'default', [], [], [], [], []});
+            [trialName, datasetType, mazePar, trackingSampleRate, ...
+             trialSubType, sampleRate, lfpSampleRate, state] = ...
+                DefaultArgs(varargin, { [], 'default', [], [], [], [], [], {'RUN'}});
             
-            fileBase = arg;
-            if isempty(arg)
-                genericTrial.filebase = '';
-                genericTrial.datasetType = '';
+            if nargin < 1 
+               return; % return empty object
             elseif isa(arg, 'GenericTrial')
                 propertyNames = properties('GenericTrial');
                 for kProperty = 1 : length(propertyNames)
@@ -107,6 +108,7 @@ classdef GenericTrial
                 
                 % creat the object
                 genericTrial.datasetType = datasetType;
+                fileBase = arg;
                 genericTrial.filebase = fileBase;
                 
                 switch genericTrial.datasetType
@@ -176,31 +178,32 @@ classdef GenericTrial
                         xy = importdata([genericTrial.paths.data, genericTrial.filebase, '.whl']);
                     case 'kenji'
                         load('~/data/kenji/Beh_time_ind.mat'); % loads Beh
-%                         files = dir(genericTrial.paths.data);
-%                         nWhlFiles = 0;
-%                         for kFile = 1 : length(files)
-%                             if ~files(kFile).isdir
-%                                 [~,~,ext] = fileparts(files(kFile).name);
-%                                 if strcmp(ext, '.whl')
-%                                     nWhlFiles = nWhlFiles + 1;
-%                                     whlFileNames{nWhlFiles} = files(kFile).name;
-%                                 end
-%                             end
-%                         end
+
                         if isempty(genericTrial.trialName)
-                            fprintf('\n trialName not specified, choose from\n');
-                            Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5, 7])
-                            return;
-                        else
-                            try 
+                            fprintf(['\n trialName not specified, choose from :\n \n']);
+                            disp(Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),genericTrial.filebase) , [4, 5]));
+                            trialName = input(['\n enter trial name  :'],'s');
+                            trialNameStr = regexp(genericTrial.filebase, '\.', 'split');
+                            genericTrial.trialName = [trialNameStr{1}, '.', trialName];
+                            if ~FileExists(['~/data/kenji/whl/', genericTrial.filebase, '.eegTime'])
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                fprintf(['\n ~/data/kenji/whl/',  genericTrial.filebase, '.eegTime not found !!! \n']);
+                               fprintf(['\n' repmat('*', 1, 50) '\n '])
+                                return;
+                            end
+                            %        return;
+                        end
+                        try
                                 xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
                                 inValidIdx = xy(:,1) == -1;
                             catch err
-                                fprintf('\n *************************************************** \n ')
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 fprintf([genericTrial.paths.data, genericTrial.trialName '.whl not found']);
-                                fprintf('\n *****************************************************\n');
+                                fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 return;
-                            end
+                        end
+                        for mState = 1 : length(state)
+                            genericTrial.states{mState} =  GenericState(genericTrial, state{mState}); 
                         end
                 end
                 switch genericTrial.datasetType
@@ -288,6 +291,9 @@ classdef GenericTrial
                     end
                 end
             end
+            
+
+
         end % END of class constructor 
     %%
     function genericTrial = Convert2Generic(genericTrial,anyTrialObj)

@@ -1,0 +1,29 @@
+classdef GenericState
+
+    properties
+        
+        name;
+
+        statePeriods;
+
+    end
+
+    methods
+        function gs = GenericState(trial, varargin)
+            [state] = DefaultArgs(varargin, {'RUN'});
+            gs.name = state;
+                switch genericPF.datasetType
+                    case  'MTA'
+                        mtaTrial = MTATrial(genericPF.filebase, [], genericPF.trialName);
+                        if strcmp(state, 'RUN'),  state = 'walk'; else
+                            error('\n no %s state in filebase %s', state, genericPF.filebase); end
+                        statePeriods = mtaTrial.statePeriods(state); %% state periods starts with 0
+                        markerNo = 7;
+                    case 'default'
+                        statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]);
+                    case  'kenji'
+                        if strcmp(genericPF.datasetType, 'kenji')
+                            statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]); % @lfp fs
+                            statePeriods = IntersectRanges(statePeriods, genericPF.trialPeriods);
+                        end
+                end

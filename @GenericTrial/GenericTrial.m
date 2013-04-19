@@ -1,4 +1,5 @@
-classdef GenericTrial
+
+ classdef GenericTrial
     % class to structure general recording data
     % use GenericTrial(<filebase>) to add a new filebase / a list of
     % filebases
@@ -86,7 +87,9 @@ classdef GenericTrial
         function genericTrial = GenericTrial(arg, varargin)
             % arg is the filebase name string
             % genericTrial = GenericTrial(arg.name);
-            [trialName, datasetType, mazePar, trackingSampleRate, trialSubType, sampleRate, lfpSampleRate] = DefaultArgs(varargin, { [], 'default', [], [], [], [], []});
+            [trialName, datasetType, mazePar, trackingSampleRate, ...
+             trialSubType, sampleRate, lfpSampleRate, state] = ...
+                DefaultArgs(varargin, { [], 'default', [], [], [], [], [], {'RUN'}});
             
             if nargin < 1 
                return; % return empty object
@@ -199,7 +202,7 @@ classdef GenericTrial
                                 fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 return;
                         end
-                        
+                     
                 end
                 switch genericTrial.datasetType
                     case 'kenji'
@@ -218,7 +221,6 @@ classdef GenericTrial
                         genericTrial.goodPosPeriods = goodPeriods;
                         xy(inValidIdx,:) = nan;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
-                       
                 end
             end
             genericTrial.clu = [];
@@ -259,7 +261,10 @@ classdef GenericTrial
                     yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
                     genericTrial.maze.boundaries = [xPxRange; yPxRange];
                     miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
-                    genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
+                    genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor; 
+                    for mState = 1 : length(state)
+                        genericTrial.states{mState} =  GenericState(genericTrial, state{mState}); 
+                    end
                 case 'MTA'
                     
             end
@@ -286,6 +291,8 @@ classdef GenericTrial
                     end
                 end
             end
+            
+
 
         end % END of class constructor 
     %%

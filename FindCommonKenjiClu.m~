@@ -1,46 +1,32 @@
-  load('~/data/kenji/Beh_time_ind.mat');
-    elPos = importdata(['~/data/', 'kenji', '/ElePosition.txt']);
-    [roi, IF_PLOT] = DefaultArgs(varargin, {{'CA3'}, 1});
-    rowId = find(~cellfun(@isempty, regexp(elPos, roi)));
-    list = cell(length(rowId));
-    for kk = 1 : length(rowId)
-        rowCell = regexp(elPos{rowId(kk)}, '\s', 'split');
-        list{kk} = rowCell{2};
-    end
-    list = list(:);
-    list(cellfun(@isempty,list)) = [];
-    rmpk =  {};
-    for i = 1 : length(list)
-        nonSleepTrials{i} = Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),list{i}) & (strcmp(Beh(:,5) ,'bigSquare') | strcmp(Beh(:,5) ,'midSquare')) , 4);
-        if ~isempty(nonSleepTrials{i})
-            fprintf('\n ********* filebase: %s ************** \n', list{i});
-            subTrialNames = nonSleepTrials{i};
-            cnt = 1;
-            for kSubTr = 1 : length(subTrialNames)
-                fprintf('\n subtrial %d of %d \n', kSubTr, length(subTrialNames));
-                if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl'])
-                    try
-                        gt = GenericTrial(list{i}, subTrialNames{kSubTr});
-                        %                         fprintf(fp, '\n trialname : %s', subTrialNames{kSubTr});fclose(fp);
-                        gt = gt.LoadPF;
-                        [rmpk{cnt}, kCluIdx{cnt}] = RmPeak(gt, roi);
-                        if cnt == 1, commonIdx = kCluIdx{1}; end
-                        commonIdx = intersect(commonIdx, kCluIdx{cnt});
+function FindCommonKenjiClu(varargin)
 
-    %                     clus{cnt} = kIdx{1};
-                        cnt = cnt + 1;
-                    catch err
-                        fp = fopen('~/data/analysis/kenji/logFilePFr','a');
-                        str = sprintf(['\n' subTrialNames{kSubTr}: 'not done']);
-                        %                         str = [str '\n' err.message];
-                        fwrite(fp, str);
-                        fclose(fp);
-                    end
+    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}});
+    searchStruct.roi = roi;
+    searchStruct.arena = arena;
+    list = SearchKenji(searchStruct);
+    for i = 1 : length(list)
+        trialNames = list(strcmp(list(:, 1), list(i,1)), 2);
+        if ~isempty(trialNames)
+            fprintf('\n ********* filebase: %s ************** \n', list{i});
+            cnt = 1;
+            for kTr = 1 : length(trialNames)
+                fprintf('subtrial %d of %d \n', kTr, length(trialNames));
+                try
+                    gt = GenericTrial(list{i}, trialNames{kTr});
+                    gt = gt.LoadPF;
+                    kClu{kTr} = gt.pyrCluIdx(gt.pfObject.idealPFUnits);
+                    if cnt == 1, commonClus = kClu{1}; end
+                    commonClus = intersect(commonClus, kClu{cnt});
+                    cnt = cnt + 1;
+                catch err
+                    fprintf('error  !!!!! \n');
                 end
             end
-
-            for ktr = 1 : cnt - 1
-                   sIdx{ktr} = ismember(kCluIdx{ktr}, commonIdx);
-            end
-  
+            %          for mTr = 1 : cnt - 1
+            %   sIdx{mTr} = ismember(kClu{mTr}, commonClus);
+            % end
+            save(['~/data/analysis/kenji/', list{i, 1},'/', list{i, 1}, '.',  char(roi), '.commonClus.mat'], 'commonClus');
+        end
+    end
 end
+

@@ -35,9 +35,7 @@ function [popVec, refVector] = RemappingTimeCourse(gt, varargin)
     xx = [binEdges, binEdges(2 : end) + 2*pi];
     [~, minCIdx] = min(count);
     minPh = xx(minCIdx);
-    thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); 
-    % in lfp sample rate thetaBoundaries = find(IsEqual(trialThPh,pi,
-    % tolerence, 0));% indices of thetapeak
+    thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); % in lfp sample rate 
     [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
     nDims = nRows * nClmns;
     popVec = zeros(nDims, length(thetaBoundaries) - 1);

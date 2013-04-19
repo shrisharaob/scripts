@@ -50,6 +50,7 @@ if nargin < 1, help FindPFPars; return; end
         for kUnit = 1 : nAcceptedUnits
             kRateMap = pfObject.rateMap{acceptedUnits(kUnit)};
             smoothedRateMap = SmoothSurface(kRateMap, smoothFactor);
+            %            smoothedRateMap(
             [maxSmoothedRate, linIdx] = max(smoothedRateMap(:));
             pfPars.ratePk(kUnit) = maxSmoothedRate;
             [i,j]=ind2sub(size(smoothedRateMap), linIdx);

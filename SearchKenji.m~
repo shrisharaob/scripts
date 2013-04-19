@@ -37,8 +37,7 @@ function out = SearchKenji(args, varargin)
             for kMatch = 1 : size(out,1)
                 kTrialNames = out(strcmp(out(:, 1), out{kMatch, 1}), 2);
                 for ktr = 1 : size(kTrialNames, 1)
-                    if ~FileExists(['~/data/kenji/' out{kMatch, 1} '/' kTrialNames{ktr} '.whl']) ...
-                            || ~FileExists(['~/data/kenji/whl/',out{kMatch, 1}, '.eegTime'])
+                    if ~FileExists(['~/data/kenji/' out{kMatch, 1} '/' kTrialNames{ktr} '.whl'])  || ~FileExists(['~/data/kenji/whl/',out{kMatch, 1}, '.eegTime'])
                         INVALID(kMatch)  = true;
                     end
                 end
@@ -57,14 +56,18 @@ function out = SearchKenji(args, varargin)
             INVALID = false(1,size(filebase,1));
             for kBase = 1 : size(filebase,1)
                 rowId = find(~cellfun(@isempty, regexp(elPos, filebase(kBase, 1))));
-                for mRoi = 1 : length(args.roi)
-                    rowCell = regexp(elPos{rowId}, '\s', 'split');
-                    INVALID(kBase) =  ~any(cellfun(@any,regexp(rowCell, args.roi{mRoi})));
-                end
+                if ~isempty(rowId)
+                    for mRoi = 1 : length(args.roi)
+                        rowCell = regexp(elPos{rowId}, '\s', 'split');
+                        INVALID(kBase) =  ~any(cellfun(@any,regexp(rowCell, args.roi{mRoi})));
+                    end
+                else
+                    INVALID(kBase) = true;
+                end            
             end
             filebase(INVALID) = [];
             out(~ismember(out(:,1), filebase), :) = [];
-%             out{:,3} = Beh(ismember(Beh(:, [2, 4]), out, 'rows'), 5);  
+            %             out{:,3} = Beh(ismember(Beh(:, [2, 4]), out, 'rows'), 5);  
         end
     end
     
@@ -80,3 +83,4 @@ function out = SearchKenji(args, varargin)
     end
 
 end
+

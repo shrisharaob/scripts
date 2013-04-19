@@ -1,37 +1,32 @@
-function Remapping(varargin)
+function Remapping(filebase, varargin)
 % Remapping(trial)
 % 
-    [filebase, arena, roi] = DefaultArgs(varargin, {[], {'bigSquare'}, {'CA3'}});
+    [arena, roi] = DefaultArgs(varargin, {[], {'bigSquare'}, {'CA3'}});
 %     gt = GenericTrial();
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
-    if ~isempty(filebase)
-%         gt = genericTfilebase;
-        matches = matches(strcmp(matches(:, 1), filebase), :);
-    end
+    matches = matches(strcmp(matches(:, 1), filebase), :);
     nTrials = length(matches);
     refTr = 1;
+
     for kTr = 1 : nTrials
-        if isempty(filebase)
-            gt = GenericTrial(matches{kTr, 1}, matches{kTr, 2});
-        else 
-            gt = GenericTrial(filebase, matches{kTr, 2});
+        gt = GenericTrial(filebase, matches{kTr, 2});
+        if kTr == 1
+            load([gt.paths.analysis, '.', gt.filebase, GenFiletag(roi, arena), '.commonClus.mat']);
         end
         fprintf(['\n trial :' gt.trialName ]);
         gt = gt.LoadPF;
-       
         if ~isempty(gt.pfObject)
-            roiClus = cell2mat(gt.GetRegionClu(roi));
-            roiPFUnits{kTr} = ismember(gt.pfObject.acceptedUnits, roiClus);
-            acceptedPFUnits{kTr} = gt.pfObject.acceptedUnits;
-            roiPFPairs{kTr} = gt.pfObject.selectedPairs(ismember(gt.pfObject.selectedPairs, nchoosek(roiClus, 2), 'rows'), :);
+            %       roiClus = cell2mat(gt.GetRegionClu(roi));
+            %roiPFUnits{kTr} = ismember(gt.pfObject.acceptedUnits, roiClus);
+            %acceptedPFUnits{kTr} = gt.pfObject.acceptedUnits;
+            roiPFPairs{kTr} = gt.pfObject.selectedPairs(ismember(gt.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
             ratePk{kTr} = gt.pfObject.ratePk; % (ismember(gt.pfObject.acceptedUnits, trCluIdx{kTr}));
             pkDist{kTr} = gt.pfObject.pkDist;
         end
     end
-%     trCluIdx{kTr}= clus(ismember(clus, linCluIdx(gt.pfObject.idealPFUnits)));
-
+   
     for kTr = setdiff(1 : nTrials, refTr)
         if ~isempty(roiPFUnits{kTr})
             refPk = ratePk{refTr};

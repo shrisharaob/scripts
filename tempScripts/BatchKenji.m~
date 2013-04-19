@@ -1,35 +1,80 @@
-function BatchKenji(funcHandle)
-%% compute funch
-        list = importdata('~/data/kenji/list');
-        load('~/data/kenji/Beh_time_ind.mat');
-        for i = 1 : length(list);
-            nonSleepTrials{i} = Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),list{i}) , 4);
-            if ~isempty(nonSleepTrials{i})
-                fprintf('\n ********* filebase: %s ************** \n', list{i});
-                subTrialNames = nonSleepTrials{i};
-                
-                for kSubTr = 1 : length(subTrialNames)
-                    fprintf('\n subtrial %d of %d \n', kSubTr, length(subTrialNames));
-                    if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl']) && FileExists(['~/data/kenji/whl/' list{i} '.eegTime'])
-                        try
-                            gt = GenericTrial(list{i}, subTrialNames{kSubTr});
-                            gt = gt.Load({{'PF'}});
-                            fprintf('\n computing pfPars\n');
-                            gt.pfObject.FindPFPars(1:length(gt.pfObject.rateMap),[],[],1);
-                            if kSubTr == 1
-                                fp = fopen('~/data/analysis/kenji/pfParsLogFile','a');
-                                fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
-                                fclose(fp);
+function BatchKenji(funcHandle, varargin)
+    %% compute funch
+    [roi, arena, IF_LOAD_GT, funcArgs, type] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0, {}, 'passFb'});
+    %   list = importdata('~/data/kenji/list');
+    %   load('~/data/kenji/Beh_time_ind.mat');
+    sK.roi = roi;
+    sK.arena = arena;
+    matches = SearchKenji(sK);
+    filebases = unique(matches(:,1));
+    for i = 1 : length(filebases);
+        %  nonSleepTrials{i} = Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),list{i}) , 4);
+        trialNames = matches(strcmp(matches(:,1), filebases(i)), 2);
+        switch type
+            case 'allTrials'
+              if ~isempty(trialNames{i})
+                    fprintf('\n ********* filebase: %s ************** \n', filebases{i});
+
+                    for lTr = 1 : length(trialNames)
+                        fprintf('\n subtrial %d of %d \n', lTr, length(trialNames));
+                        if FileExists(['~/data/kenji/' filebases{i} '/' trialNames{lTr} '.whl']) && FileExists(['~/data/kenji/whl/' filebases{i} '.eegTime'])
+                            try
+                                if IF_LOAD_GT
+                                    gt = GenericTrial(filebases{i}, trialNames{lTr});
+                                    feval(funcHandle, gt, funcArgs{:});
+                                else
+                                    feval(funcHandle, filebases{i}, funcArgs{:});
+                                end
+                                if lTr == 1
+                                    fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
+                                    fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
+                                end
+                                fprintf(fp, ['\n ::: '  gt.trialName]);
+                                fclose(fp)
+                            catch err
+
                             end
-                            %                          PlotPlaceFields(gt.pfObject, [],[],1);
-                            %set(gcf, 'Name', [list{i}, ' ' gt.maze.name]);
-                            fprintf(fp, ['\n ::: '  gt.trialName]); 
-                        catch
-                            fprintf('\n whl |& eegTime not found !!!') 
+                        else
+                            fprintf('\n error !!!')
                         end
                     end
+              end
+                
+            case 'allBases'
+                if ~isempty(trialNames{i})
+                    fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
+                    %                 try
+                    for lTr = 1 : length(trialNames)
+                        if IF_LOAD_GT
+                            if FileExists(['~/data/kenji/' filebases{i} '/' trialNames{lTr} '.whl']) && FileExists(['~/data/kenji/whl/' filebases{i} '.eegTime'])
+                                fprintf('\n subtrial %d of %d \n', lTr, length(trialNames));
+                                gt = GenericTrial(filebases{i}, trialNames{lTr});
+                                feval(funcHandle, gt, funcArgs{:});
+                                if lTr == 1
+                                    fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
+                                    fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
+                                end
+                            end
+                        else
+                            feval(funcHandle, filebases{i}, funcArgs{:});
+                            fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
+                            fprintf(fp, ['\n ::: '  filebases{i}]);
+                            fclose(fp);
+                        end
+                    end
+                    
                 end
-            end
-            fclose('all');
+                %                 catch err
+                %                     fprintf('\n error!!!')
+                %                 end
+            case 'passFb' % just passs the filebase as an argument and all the subtrials are taken care 
+                fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
+                feval(funcHandle, filebases{i}, funcArgs{:});
+                fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
+                fprintf(fp, ['\n ::: '  filebases{i}]);
+                fclose(fp);
         end
+    end
+    fclose('all');
 end
+

@@ -16,7 +16,7 @@ if nargin < 1, help FindPFPars; return; end
     pfPars.pkDist = [];
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
-    
+    pfPars.ratePk = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
 %         pyrCluIdx = pfObject.acceptedUnits;
@@ -51,6 +51,7 @@ if nargin < 1, help FindPFPars; return; end
             kRateMap = pfObject.rateMap{acceptedUnits(kUnit)};
             smoothedRateMap = SmoothSurface(kRateMap, smoothFactor);
             [maxSmoothedRate, linIdx] = max(smoothedRateMap(:));
+            pfPars.ratePk(kUnit) = maxSmoothedRate;
             [i,j]=ind2sub(size(smoothedRateMap), linIdx);
             maxRateXLoc = pfObject.xBin(i);
             maxRateYLoc = pfObject.yBin(j);
@@ -132,7 +133,7 @@ if nargin < 1, help FindPFPars; return; end
 %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
         end
-        pfPars.sparsity = sparsity;
+        pfPars.sparsity = sparsity; % 1 is uniform firing
         maxSparsity = 0.3;
         minCoherence = 0.6;
         pfPars.idealPFUnits = ~IS_DISCARD & ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) ...

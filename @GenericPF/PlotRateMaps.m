@@ -24,7 +24,7 @@ function PlotRateMaps(pfObject, varargin)
                 elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
 %                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
 %                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
-                clf;
+                %clf;
                 if IF_Srmap
                     try
                         rateMap= pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
