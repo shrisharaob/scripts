@@ -1,14 +1,12 @@
 function CompareTrials(filebase, varargin)
 
     [arena, roi, IF_SmthRM, IF_REPORTFIG] = DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, 1, 1});
-    %     gt = GenericTrial();
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
     matches = matches(strcmp(matches(:, 1), filebase), :);
     nTrials = size(matches, 1);
     refTr = 1;
-
     if nTrials == 1, return; end;
     for kTr = 1 : nTrials
         gt = GenericTrial(filebase, matches{kTr, 2});
@@ -18,34 +16,29 @@ function CompareTrials(filebase, varargin)
         if length(commonClus) == 1, return; end; % if only one common unit across the trials
         fprintf(['\n trial :' gt.trialName ]);
         gta{kTr} = gt.LoadPF;
-%         if ~isempty(gt.pfObject)
-%             if IF_SmthRM
-%                 rm{kTr} = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
-%             else
-%                 rm{kTr} = gt.pfObject.rateMap(ismember(gt.pfObject.acceptedUnits, commonClus));
-%             end
-%             for lClu = 1 : length(commonClus)
-%                 subplot(1, nTrials, lClu);
-%                 gt.pfObject.PlotRateMaps(0, 0, 1, [],[],[], commonClus(lClu));
-%             end;
-%         end
+        sparsity(:, kTr) = gta{kTr}.pfObject.sparsity(ismember(gta{kTr}.pfObject.acceptedUnits, commonClus));
+        if kTr == refTr
+            [~, sRank] = sort(sparsity(:, refTr), 'ascend');
+            commonClus = commonClus(sRank);
+        end
     end
-% keyboard;
-hFig = figure;
+    sparsity = sparsity(sRank, :); 
+    hFig = figure;
     for lClu = 1 : length(commonClus)
         if IF_SmthRM
             for mTr = 1 : nTrials
                 subplot(1, nTrials, mTr);
-%                 currm = rm{mTr};
                 curgt = gta{mTr};
-%                 imagesc(currm(:, :, lClu));
                 curgt.pfObject.PlotRateMaps(0, 0, 1, [],[],[], commonClus(lClu));
                 axis square;
+                srm = gta{mTr}.pfObject.smoothRateMap(:,:,ismember(gta{mTr}.pfObject.acceptedUnits, commonClus(lClu)));
+                mapEntropy(lClu, mTr) = Entropy(srm);
             end
         end
-%         waitforbuttonpress;
-    if IF_REPORTFIG
-        reportfig(hFig, [mfilename, GenFiletag(roi, arena) '.ratesMaps'], 1, filebase);
-    end
+        % waitforbuttonpress;
+        if IF_REPORTFIG
+            reportfig(hFig, [mfilename, filebase, GenFiletag(roi,arena)], 0, [filebase, '    sparsity : ' num2str(sparsity(lClu, :)), 'entr  ' num2str(mapEntropy(lClu, :))]);
+        end
     end
 end
+

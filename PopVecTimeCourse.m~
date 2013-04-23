@@ -75,8 +75,8 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
         nDims = nRows * nClmns;
         
         refVector = zeros(nDims, 1);
-        % refVector = sum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(roiClus))), nRows, nClmns, length(roiClus)), 3);
-        refVector = nansum(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)), 3);
+        refVector = nansum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(commonClus))), nRows, nClmns, length(commonClus)), 3);
+        % refVector = nansum(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)), 3);
         refVector = refVector(:);
         % refVector = refVector ./ norm(refVector);
         fprintf('\n computing popvector...');

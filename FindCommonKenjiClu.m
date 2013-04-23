@@ -1,6 +1,6 @@
 function FindCommonKenjiClu(varargin)
-
-    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}});
+% this script returns clusters which are active acros trils in all filebases
+    [roi, arena] = DefaultArgs(varargin, {{'CA1'}, {'bigSquare'}});
     searchStruct.roi = roi;
     searchStruct.arena = arena;
     list = SearchKenji(searchStruct);
@@ -23,9 +23,6 @@ function FindCommonKenjiClu(varargin)
                     fprintf('error  !!!!! \n');
                 end
             end
-            %          for mTr = 1 : cnt - 1
-            %   sIdx{mTr} = ismember(kClu{mTr}, commonClus);
-            % end
             filetag = [];
             for mRoi = 1 : length(roi)
                 if mRoi == 1

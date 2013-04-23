@@ -1,6 +1,6 @@
-function out = ComparePVs(filebase)
+function out = ComparePVs(filebase, varargin)
 
-    [roi, arena] = DefaultArgs(varargin, {'CA3', {'bigSquare', 'linear'}});
+    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare', 'linear'}});
     filetag = [];
     for mRoi = 1 : length(roi)
         if mRoi == 1
@@ -18,11 +18,13 @@ function out = ComparePVs(filebase)
     matches = SearchKenji(sK);
     matches = matches(strcmp(matches(:, 1), filebase), :);
     trialNames = matches(:, 2);
-    pv = genvarname(cellstr(repmat('pv', nTypes, 1)));
-    rv = genvarname(cellstr(repmat('rv', nTypes, 1)));
+    pvNames = genvarname(cellstr(repmat('pv', length(trialNames), 1)));
+    rvNames = genvarname(cellstr(repmat('rv', length(trialNames), 1)));
+    %    distNames = genVarNames(cellstr(repmat('rv', length(trialNames), 1)));
     for mTr = 1 : length(trialNames)
-        load(['~/data/analysis/kenji/' filebase, '/', filebase, '.', trialName{mTr}, '.' filetag, 'PopVecTimeCourse.mat']
-        eval([pv{mtr} '=' popVector]);
-        eval([rv{mtr} '=' refVector]);
+        load(['~/data/analysis/kenji/' filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
+        eval([pvNames{mTr} '= popVec;']);
+        eval([rvNames{mTr} '= refVector;']);
     end
+    distance = norm(rv - rv2);    
 end

@@ -1,6 +1,7 @@
 function BatchKenji(funcHandle, varargin)
     %% evaluate func for all kenji
-    [roi, arena, IF_LOAD_GT, funcArgs, type] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0, {}, 'passFb'});
+    [roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE] = ...
+        DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 1});
     %   list = importdata('~/data/kenji/list');
     %   load('~/data/kenji/Beh_time_ind.mat');
     sK.roi = roi;
@@ -62,16 +63,21 @@ function BatchKenji(funcHandle, varargin)
                     end
                     
                 end
-                %                 catch err
-                %                     fprintf('\n error!!!')
-                %                 end
-            case 'passFb' % just passs the filebase as an argument and all the subtrials are taken care 
+            case 'passFb' % pass the filebase as an argument and all the subtrials are taken care 
                 fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
-                feval(funcHandle, filebases{i}, funcArgs{:});
-                fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
-                fprintf(fp, ['\n ::: '  filebases{i}]);
-                fclose(fp);
+                goodUnits(i).filebase = filebases{i};
+                try
+                    fout =feval(funcHandle, filebases{i}, funcArgs{:});
+                    goodUnits(i).clu = fout;
+                catch err
+                    fprintf('error .......  !!!!!!');
+                end
+                
         end
+    end
+keyboard;
+    if IF_SAVE
+        save(['~/data/analysis/kenji/', func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'goodUnits');
     end
     fclose('all');
 end

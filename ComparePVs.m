@@ -1,6 +1,6 @@
 function out = ComparePVs(filebase, varargin)
 
-    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare', 'linear'}});
+    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}});
     filetag = [];
     for mRoi = 1 : length(roi)
         if mRoi == 1
@@ -26,5 +26,6 @@ function out = ComparePVs(filebase, varargin)
         eval([pvNames{mTr} '= popVec;']);
         eval([rvNames{mTr} '= refVector;']);
     end
-    distance = norm(rv - rv2);    
+keyboard;
+    %    distance = norm(rv - rv2);    
 end

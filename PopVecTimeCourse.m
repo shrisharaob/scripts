@@ -1,7 +1,7 @@
 function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
     % population vector time course for the entire filebase, considers only the common clus
 
-    [commonClus, binSize, roi, tolerence, IF_OVERWRITE, arena] = DefaultArgs(varargin, {[],  10,  {'CA3'}, 1e-1,1, {'bigSquare', 'linear'}});
+    [commonClus, binSize, roi, tolerence, IF_OVERWRITE, arena] = DefaultArgs(varargin, {[],  10,  {'CA3'}, 1e-1,1, {'bigSquare'}});
     %binSize in degrees
     % .1 ~= 5 degrees
     %    if FileExists(
