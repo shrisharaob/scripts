@@ -1,7 +1,7 @@
 %
 function PlotRateMaps(pfObject, varargin)
     % PlotPlaceFields(pfObject, varargin)
-    % varargin - [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter]
+    % varargin - [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
     if nargin<1, help PlotPlaceFields; return; end
   
     filebase = pfObject.filebase;
@@ -24,7 +24,7 @@ function PlotRateMaps(pfObject, varargin)
                 elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
 %                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
 %                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
-                clf;
+                %clf;
                 if IF_Srmap
                     try
                         rateMap= pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
@@ -89,10 +89,14 @@ function PlotRateMaps(pfObject, varargin)
                     contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end
                 hold on;
-                if strcmp(pfObject.mazeName, 'cof')
-                    DrawCircle(0,0, mazeDiameter / 2,'k');
+                if strcmp(pfObject.maze.name, 'cof')
+                    DrawCircle(0,0, maze.dims / 2,'k');
                 end
-                plot(pfObject.com(idx2, 2), pfObject.com(idx2, 1), '*k'); % x an y are reversed in Justins code
+                if strcmp(pfObject.datasetType, 'MTA')
+                    plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
+                else
+                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
+                end
                 grid on
                 if IF_WAITFORBTNPRESS, waitforbuttonpress; end
             else

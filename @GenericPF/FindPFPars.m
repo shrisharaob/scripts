@@ -1,10 +1,10 @@
 function pfPars = FindPFPars(arg, varargin)
 % pfPars = FindPFPars(trial/pfObject, varargin)
-%varargin - [pyrCluIdx, smoothFactor, IF_SAVE]
+%varargin - [pyrCluIdx, smoothFactor, IF_OVERWRITE]
+    if nargin < 1, help FindPFPars; return; end
+    [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
+        = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
 
-if nargin < 1, help FindPFPars; return; end
-    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh] = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 1});
-    
     pfPars.com = [];
     pfPars.smoothRateMap = [];
     pfPars.selectedPairs = [];
@@ -19,7 +19,7 @@ if nargin < 1, help FindPFPars; return; end
     pfPars.ratePk = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
-%         pyrCluIdx = pfObject.acceptedUnits;
+        %         pyrCluIdx = pfObject.acceptedUnits;
     elseif isa(arg, 'GenericTrial')
         pfObject = GenericPF(arg);
     elseif isa(arg, 'MTATrial')
@@ -37,8 +37,10 @@ if nargin < 1, help FindPFPars; return; end
     nAcceptedUnits = 0;
     if ~isempty(nUnits) && nUnits ~= 0
         for kUnit = 1 : nUnits
-            kRateMap = pfObject.rateMap{pyrCluIdx(kUnit)}; %%% FIX INDEXING
-            % discard cells with firing rate less then 8
+            kRateMap = pfObject.rateMap{pyrCluIdx(kUnit)};
+            % remove cells non-pyramidal cells from further
+            % analysis and cells with firing rate less than .5 for
+            % the complete trial
             if isempty(kRateMap)
                 IS_DISCARD(kUnit) = 1;
             else
@@ -50,13 +52,13 @@ if nargin < 1, help FindPFPars; return; end
         for kUnit = 1 : nAcceptedUnits
             kRateMap = pfObject.rateMap{acceptedUnits(kUnit)};
             smoothedRateMap = SmoothSurface(kRateMap, smoothFactor);
-            %            smoothedRateMap(
             [maxSmoothedRate, linIdx] = max(smoothedRateMap(:));
             pfPars.ratePk(kUnit) = maxSmoothedRate;
             [i,j]=ind2sub(size(smoothedRateMap), linIdx);
             maxRateXLoc = pfObject.xBin(i);
             maxRateYLoc = pfObject.yBin(j);
-            rateThresh = .707 * maxSmoothedRate;
+            %            rateThresh = .707 * maxSmoothedRate;
+            rateThresh = nSTD * std(smoothedRateMap(:));
             threshMask(:,:,kUnit) = kRateMap > rateThresh;
             maskXY = threshMask(:,:,kUnit);
             z = find(maskXY);
@@ -88,17 +90,19 @@ if nargin < 1, help FindPFPars; return; end
         end
         pfPars.selectedPairs = cellPairs(IS_PF_OVERLAP,:);
         pfPars.IS_DISCARD = IS_DISCARD;
-        pfPars.acceptedUnits = acceptedUnits; % units that passed the absolute threshold criterion 
+        pfPars.acceptedUnits = acceptedUnits; 
         %%  compute place field overlap params
         nOverlappingPairs = sum(IS_PF_OVERLAP);
-        for kPair = 1 : nOverlappingPairs
-            units = pfPars.selectedPairs(kPair, :);
+        %for kPair = 1 : nOverlappingPairs
+         for mPair = 1 : nPairs
+             %            units = pfPars.selectedPairs(kPair, :);
+            units = cellPairs(mPair, :);
             unitA = units(1);
             unitB = units(2);
-            comA = pfPars.com(acceptedUnits == unitA, :,:);
-            comB = pfPars.com(acceptedUnits == unitB, :,:);
-            pfPars.comDist(kPair) = norm(comA - comB);
-            pfPars.pkDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
+            comA = pfPars.com(acceptedUnits == unitA, :);
+            comB = pfPars.com(acceptedUnits == unitB, :);
+            pfPars.comDist(mPair) = norm(comA - comB);
+            pfPars.pkDist(mPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :) - pfPars.pkLoc(acceptedUnits == unitB, :));  
         end
         %% spatial coherence
         nAcceptedUnits = sum(~IS_DISCARD);
@@ -131,22 +135,23 @@ if nargin < 1, help FindPFPars; return; end
                 curOccupancy = occupancy{acceptedUnits(kUnit)};
             end
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);
-%             smoothedRateMap(isnan(smoothedRateMap)) = 0;
+            %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
+            jointEntropy(kUnit) = Entropy(smoothedRateMap);
         end
         pfPars.sparsity = sparsity; % 1 is uniform firing
-        maxSparsity = 0.3;
-        minCoherence = 0.6;
-        pfPars.idealPFUnits = ~IS_DISCARD & ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) ...
-            & ismember(pyrCluIdx,acceptedUnits(zr > minCoherence)); 
+        pfPars.idealPFUnits = ~IS_DISCARD & ...
+            ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) & ...
+            ismember(pyrCluIdx,acceptedUnits(zr > minCoherence)) & ...
+            ismember(pyrCluIdx, acceptedUnits(jointEntropy < maxEntropy)); 
         if sum(pfPars.idealPFUnits) > 1
             pfPars.idealPFPairs = ismember(pfPars.selectedPairs, nchoosek(pyrCluIdx(pfPars.idealPFUnits),2),'rows');
         else 
             pfPars.idealPFPairs = [];
         end
-            %%
-        if IF_SAVE
-            save(['~/data/analysis/' filebase '/' filebase '.' mfilename '.' trialName '.mat'], 'pfPars');
+        %%
+        if IF_OVERWRITE
+            save([pfObject.paths.analysis, pfObject.filebase '.' mfilename '.' pfObject.trialName '.mat'], 'pfPars');       
         end
     end
 end

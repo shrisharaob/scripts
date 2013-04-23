@@ -1,6 +1,6 @@
 function FindCommonKenjiClu(varargin)
 % this script returns clusters which are active acros trils in all filebases
-    [roi, arena] = DefaultArgs(varargin, {{'CA1'}, {'bigSquare'}});
+    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}});
     searchStruct.roi = roi;
     searchStruct.arena = arena;
     list = SearchKenji(searchStruct);

@@ -9,7 +9,8 @@ function AllPairRates(varargin)
         if ~isempty(goodUnits(kBase).clu)
             fprintf(['\n', repmat('+-', 1, 10), goodUnits(kBase).filebase, repmat('+-', 1, 10), '\n']); 
             baseCount = baseCount + 1;
-            %outStruct = Remapping(goodUnits(kBase).filebase, arena, roi, goodUnits(kBase).clu, 0);
+            % outStruct = Remapping(goodUnits(kBase).filebase, arena, roi, goodUnits(kBase).clu, 0);
+            % outStruct = PairRemapping(goodUnits(kBase).filebase, goodUnits(kBase).clu, arena, roi,  0, 0);
             outStruct = PairRemapping(goodUnits(kBase).filebase, goodUnits(kBase).clu, arena, roi,  0, 0);
             if ~isempty(outStruct)
                 pkDist{kBase} = outStruct.pkDist;

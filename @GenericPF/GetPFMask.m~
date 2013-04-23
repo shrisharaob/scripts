@@ -1,0 +1,9 @@
+function mask = GetPFMask(rm, varargin)
+    % returns a mask for pf 
+
+   [pos, nSTD] = DefaultArgs(varargin, {[], 3});
+   
+   thresh = 3 * std(rm(:));
+   
+
+   

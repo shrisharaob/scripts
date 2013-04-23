@@ -202,9 +202,7 @@
                                 fprintf(['\n' repmat('*', 1, 50) '\n '])
                                 return;
                         end
-                        for mState = 1 : length(state)
-                            genericTrial.states{mState} =  GenericState(genericTrial, state{mState}); 
-                        end
+                     
                 end
                 switch genericTrial.datasetType
                     case 'kenji'
@@ -223,7 +221,6 @@
                         genericTrial.goodPosPeriods = goodPeriods;
                         xy(inValidIdx,:) = nan;
                         genericTrial.position = reshape(xy, nRows, nMarkers, 2);
-                       
                 end
             end
             genericTrial.clu = [];
@@ -264,7 +261,10 @@
                     yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
                     genericTrial.maze.boundaries = [xPxRange; yPxRange];
                     miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
-                    genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
+                    genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor; 
+                    for mState = 1 : length(state)
+                        genericTrial.states{mState} =  GenericState(genericTrial, state{mState}); 
+                    end
                 case 'MTA'
                     
             end

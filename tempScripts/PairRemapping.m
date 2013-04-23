@@ -1,8 +1,8 @@
 function out = PairRemapping(filebase, varargin)
 % PairRemapping(filebase, cluIdx, arena, roi, IF_PLOT, IF_REPORTFIG)
 %
-    [cluIdx, arena, roi, IF_PLOT, IF_REPORTFIG] = DefaultArgs(varargin, ...
-                                                      {[], {'bigSquare'}, {'CA3'}, 0, 0});
+    [cluIdx, arena, roi, IF_PLOT, IF_REPORTFIG] = ...
+        DefaultArgs(varargin, {[], {'bigSquare'}, {'CA3'}, 0, 0});
     out = {};
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
@@ -21,9 +21,10 @@ function out = PairRemapping(filebase, varargin)
         fprintf(['\n trial :' gt.trialName ]);
         gt = gt.LoadPF;
         if ~isempty(gt.pfObject)
-            roiPFPairs{kTr} = gt.pfObject.selectedPairs(ismember(gt.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
-            ratePk{kTr} =  gt.pfObject.ratePk(ismember(gt.pfObject.acceptedUnits, commonClus));
-            pkDist{kTr} = gt.pfObject.pkDist(ismember(gt.pfObject.acceptedUnits, commonClus));
+            %            roiPFPairs{kTr} = gt.pfObject.accepted(ismember(gt.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
+            idealCmnPFUnits = gt.pfObject.acceptedUnits(ismember(gt.pfObject.acceptedUnits, gt.pyrCluIdx(gt.pfObject.idealPFUnits)));
+            ratePk{kTr} =  gt.pfObject.ratePk(ismember(gt.pfObject.acceptedUnits, commonClus)); %idealCmnPFUnits(ismember(idealCmnPFUnits, commonClus))));
+            pkDist{kTr} = gt.pfObject.pkDist(ismember(gt.pfObject.acceptedUnits, commonClus));  %idealCmnPFUnits(ismember(idealCmnPFUnits, commonClus))));
         end
     end
     out.pkDist = [];

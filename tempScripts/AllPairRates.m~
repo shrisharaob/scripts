@@ -2,7 +2,7 @@ function AllPairRates(varargin)
 
 
     [cluId, arena, roi, IF_REPORTFIG] = DefaultArgs(varargin, {[], {'bigSquare'}, {'CA3'}, 1});
-    load(['~/data/analysis/kenji/', GetFileTag(arena, roi), 'goodUnits.mat'); % loads goodUnits.mat
+    load(['~/data/analysis/kenji/', GenFiletag(arena, roi), 'goodUnits.mat'); % loads goodUnits.mat
     baseCount = 0;
     pkDist = cell(1, length(goodUnits));
     for kBase = 1 : length(goodUnits)

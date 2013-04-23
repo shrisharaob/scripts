@@ -140,8 +140,8 @@ classdef GenericPF
                 fileName = [genericPF.filebase, '.PF.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
             end
             
-            if ~FileExists([genericPF.paths.analysis, fileName]) && ~strcmp(genericPF.datasetType, 'MTA')
-                    fprintf('\n rate maps not precomputed \n'); IF_OVERWRITE = 1; 
+            if ~FileExists([genericPF.paths.analysis, fileName]) &&  ~strcmp(genericPF.datasetType, 'MTA')
+                fprintf('\n rate maps not precomputed \n'); IF_OVERWRITE = 1; 
             end
             
             if IF_OVERWRITE % compute rateMaps and place field parameters
@@ -214,7 +214,6 @@ classdef GenericPF
                 pfPars = FindPFPars(genericPF, 1 : nClus);
                 save([genericPF.paths.analysis, fileName], 'pfPars')
             else
-                
                 if strcmp(genericPF.datasetType, 'MTA') && isempty(genericPF.rateMap) && isempty(genericPF.xBin)
                     fprintf('\n loading rate maps ... \n');
                     mtaPFObj = LoadMTAPFObject(genericPF.filebase, genericPF.trialName);
@@ -232,21 +231,24 @@ classdef GenericPF
                     genericPF.yBin = yBin;
                 end
             
-                dotPos = regexp(fileName, '\.');
-                str1 = fileName(dotPos(2)+3 : end);
-                fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
-                
-                if FileExists([genericPF.paths.analysis, fileName])
+             %    dotPos = regexp(fileName, '\.');
+%                 str1 = fileName(dotPos(2)+3 : end);
+%                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
+             if isempty(genericPF.trialSubType)
+                 fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
+             else
+                 fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
+             end
+             if FileExists([genericPF.paths.analysis, fileName])
                     load([genericPF.paths.analysis, fileName]);
-                else                   
+             else                   
                     fprintf('\n computing place field parameters \n');
                     nClus = NClusters(genericPF);
                     pfPars = FindPFPars(genericPF, 1 : nClus);
                     save([genericPF.paths.analysis, fileName], 'pfPars')
                 end
             end
-               
-               
+                              
                genericPF.com = pfPars.com;
                genericPF.smoothRateMap = pfPars.smoothRateMap;
                genericPF.selectedPairs = pfPars.selectedPairs;

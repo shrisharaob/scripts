@@ -22,9 +22,6 @@ function PlotRateMaps(pfObject, varargin)
             for mCell = 1 : nCells
                 linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
                 elCluStr = ['El#' num2str(elClu(linIdx, 1)) ' Clu#' num2str(elClu(linIdx,2))];
-%                 pfObject.plot(linearPyrCluIdx(mCell)); %%% FIX INDEXING
-%                 smoothedRateMap = pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
-                %clf;
                 if IF_Srmap
                     try
                         rateMap= pfObject.smoothRateMap(:,:,ismember(pfObject.acceptedUnits, cellCluIdx(mCell)));
@@ -33,9 +30,6 @@ function PlotRateMaps(pfObject, varargin)
                 else
                     rateMap = pfObject.rateMap{linIdx};
                 end
-                
-%                 if strcmp(pfObject.maze.name, 'linear')
-                    
                 if ~isempty(rateMap)
                     if ~isempty(pfObject.maze.px2CmFactor)
                         xAxis = pfObject.xBin * pfObject.maze.px2CmFactor(1);

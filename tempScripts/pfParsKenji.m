@@ -14,17 +14,16 @@ for i = 1 : length(list);
                             gt = GenericTrial(list{i}, subTrialNames{kSubTr});
                             gt = gt.Load({{'PF'}});
                             fprintf('\n computing pfPars\n');
-                            gt.pfObject.FindPFPars(1:length(gt.pfObject.rateMap),[],[],1);
+                            gt.pfObject.FindPFPars(gt.pyrCluIdx,[],[],1);
                             if kSubTr == 1
                                 fp = fopen('~/data/analysis/kenji/pfParsLogFile','a');
                                 fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
-                                fclose(fp);
                             end
                             %                          PlotPlaceFields(gt.pfObject, [],[],1);
                             %set(gcf, 'Name', [list{i}, ' ' gt.maze.name]);
                             fprintf(fp, ['\n ::: '  gt.trialName]); 
                         catch
-                            fprintf('\n whl |& eegTime not found !!!') 
+                            fprintf('\n error !!!') 
                         end
                     end
                 end
