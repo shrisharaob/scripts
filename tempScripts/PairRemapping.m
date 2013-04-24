@@ -21,10 +21,12 @@ function out = PairRemapping(filebase, varargin)
         fprintf(['\n trial :' gt.trialName ]);
         gt = gt.LoadPF;
         if ~isempty(gt.pfObject)
-            %            roiPFPairs{kTr} = gt.pfObject.accepted(ismember(gt.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
-            idealCmnPFUnits = gt.pfObject.acceptedUnits(ismember(gt.pfObject.acceptedUnits, gt.pyrCluIdx(gt.pfObject.idealPFUnits)));
+            % roiPFPairs{kTr} = gt.pfObject.accepted(ismember(gt.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
+            % idealCmnPFUnits = gt.pfObject.acceptedUnits(ismember(gt.pfObject.acceptedUnits, gt.pyrCluIdx(gt.pfObject.idealPFUnits)));
+            allPairs = nchoosek(gt.pfObject.acceptedUnits, 2);
+            commonPairs = nchoosek(commonClus, 2);
             ratePk{kTr} =  gt.pfObject.ratePk(ismember(gt.pfObject.acceptedUnits, commonClus)); %idealCmnPFUnits(ismember(idealCmnPFUnits, commonClus))));
-            pkDist{kTr} = gt.pfObject.pkDist(ismember(gt.pfObject.acceptedUnits, commonClus));  %idealCmnPFUnits(ismember(idealCmnPFUnits, commonClus))));
+            pkDist{kTr} = gt.pfObject.pkDist(ismember(allPairs, commonPairs, 'rows'));   %idealCmnPFUnits(ismember(idealCmnPFUnits, commonClus))));
         end
     end
     out.pkDist = [];

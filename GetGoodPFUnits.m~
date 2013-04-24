@@ -1,7 +1,6 @@
 function out = GetGoodPFUnits(filebase, varargin)
 
-
-    [arena, roi, IF_SmthRM, IF_REPORTFIG] = DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, 1, 1});
+    [roi, arena, IF_SmthRM, IF_REPORTFIG] = DefaultArgs(varargin, { {'CA3'}, {'bigSquare'}, 1, 0 });
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
@@ -22,11 +21,18 @@ function out = GetGoodPFUnits(filebase, varargin)
                load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
             end
         end
+
         if isempty(commonClus), return; end
+        if length(commonClus) > 2
+            cellPairs = nchoosek(commonClus, 2);
+        else
+            cellPairs = [];
+        end
         fprintf(['\n trial :' gt.trialName ]);
         gta{kTr} = gt.LoadPF;
+        commonClus = commonClus(ismember(commonClus, gt.pyrCluIdx(gta{kTr}.pfObject.idealPFUnits))); 
         sparsity(:, kTr) = gta{kTr}.pfObject.sparsity(ismember(gta{kTr}.pfObject.acceptedUnits, commonClus));
-        roiPFPairs{kTr} = gta{kTr}.pfObject.selectedPairs(ismember(gta{kTr}.pfObject.selectedPairs, nchoosek(commonClus, 2), 'rows'), :);
+        roiPFPairs{kTr} = nchoosek(commonClus, 2);
     end
     for lClu = 1 : length(commonClus)
         if IF_SmthRM

@@ -54,7 +54,6 @@
     X(X>Nbin) = Nbin;
     Y(Y>Nbin) = Nbin;
 
-
     %% Occupancy
     Occ = Accumulate([X Y],1,msize)./Session.trackingSampleRate;
 

@@ -17,6 +17,7 @@ function pfPars = FindPFPars(arg, varargin)
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
     pfPars.ratePk = [];
+    pfPars.entropy = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
         %         pyrCluIdx = pfObject.acceptedUnits;
@@ -32,6 +33,13 @@ function pfPars = FindPFPars(arg, varargin)
         posOfDots = regexp(filebase,'\.');
         filebase = filebase(1: posOfDots(1) -1);
         arg = MTATrial(filebase, [],pfObject.trialName);
+%     else % if filebase name
+%         gt = GenricTrial(arg);
+%         gt = gt.LoadPF;
+%         pfObject = gt.pfObject;
+    end
+    if isempty(pyrCluIdx )
+        pyrCluIdx = 1 : length(pfObject.rateMap);
     end
     nUnits = length(pyrCluIdx);
     nAcceptedUnits = 0;
@@ -140,6 +148,7 @@ function pfPars = FindPFPars(arg, varargin)
             jointEntropy(kUnit) = Entropy(smoothedRateMap);
         end
         pfPars.sparsity = sparsity; % 1 is uniform firing
+        pfPars.entropy = jointEntropy;
         pfPars.idealPFUnits = ~IS_DISCARD & ...
             ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) & ...
             ismember(pyrCluIdx,acceptedUnits(zr > minCoherence)) & ...

@@ -1,7 +1,7 @@
 classdef GenericPF
-    % general Place field class
-% [datasetType, trialName, IF_OVERWRITE, state, markerNo] 
-% Defaults :  {'default', 'df', 0, 'RUN', 1});  
+% general Place field class
+% [datasetType, trialName, IF_OVERWRITE, state, markerNo, smoothSigma] 
+% Defaults :  {'default', 'df', 0, 'RUN', 1, 0.03 px});  
 %-------
     % History:
     %  Shrisha - Created
@@ -86,6 +86,9 @@ classdef GenericPF
         
         % measure for quantifying the spatial localization of firing
         sparsity;
+
+        % 
+        jntEntropy;
     end
     
     
@@ -94,7 +97,7 @@ classdef GenericPF
         function genericPF = GenericPF(arg, varargin)
             % class constructor
             
-            [datasetType, trialName, IF_OVERWRITE, state, markerNo] = DefaultArgs(varargin, {'default', 'df', 0, 'RUN', 1});
+            [datasetType, trialName, IF_OVERWRITE, state, markerNo, smoothSigma] = DefaultArgs(varargin, {'default', 'df', 0, 'RUN', 1, 0.03});
             mazePars = [];
             if isempty(arg)
                 genericPF.filebase = [];
@@ -133,7 +136,6 @@ classdef GenericPF
                     end
                 end
             end
-            
             if isempty(genericPF.trialSubType)
                 fileName = [genericPF.filebase, '.PF.', genericPF.trialName '.mat'];
             else
@@ -143,7 +145,6 @@ classdef GenericPF
             if ~FileExists([genericPF.paths.analysis, fileName]) &&  ~strcmp(genericPF.datasetType, 'MTA')
                 fprintf('\n rate maps not precomputed \n'); IF_OVERWRITE = 1; 
             end
-            
             if IF_OVERWRITE % compute rateMaps and place field parameters
                 if isa(arg, 'GenericTrial')
                     trial = arg;
@@ -191,13 +192,12 @@ classdef GenericPF
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);
                 for kClu = 1 : nClus
                     fprintf('\n computing rate maps for unit %d of %d units \n', kClu, nClus);
-%                     nSpikes = length(trial.res(trial.clu == kClu));
                     nSpikes = length(kRes(trial.clu(resIdx) == kClu));
                     if nSpikes > 10
                         cluKRes = trial.clu(resIdx);
-                        pos(isnan(pos(:, 1)), :) = [];
+                        pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
                         [genericPF.rateMap{kClu}, genericPF.occupancy{kClu}, xBin, yBin] = ...
-                            GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos,[],.03);
+                            GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos, [], smoothSigma);
                         if ~isempty(xBin), genericPF.xBin = xBin; end 
                         if ~isempty(yBin), genericPF.yBin = yBin; end
                     end
@@ -246,7 +246,7 @@ classdef GenericPF
                     nClus = NClusters(genericPF);
                     pfPars = FindPFPars(genericPF, 1 : nClus);
                     save([genericPF.paths.analysis, fileName], 'pfPars')
-                end
+             end
             end
                               
                genericPF.com = pfPars.com;
@@ -261,6 +261,9 @@ classdef GenericPF
                genericPF.comDist = pfPars.comDist;
                genericPF.pkLoc = pfPars.pkLoc;
                genericPF.pkDist = pfPars.pkDist;
+               if isfield(pfPars, 'entropy');
+                   genericPF.jntEntropy = pfPars.entropy;
+               end
                if isempty(genericPF.maze)
                    load([genericPF.paths.data, genericPF.filebase, '.miscPar.mat']);
                    genericPF.maze = miscPar.maze;
@@ -318,6 +321,7 @@ classdef GenericPF
     
     methods(Static)
         [rateMap, occupancy, Bin1, Bin2] = ComputeRateMap(genericTrial, cluIdx, varargin);
+        pfPars = FindPFPars(arg, varargin);
     end
     
 end
