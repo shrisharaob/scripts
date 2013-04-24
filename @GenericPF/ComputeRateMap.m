@@ -3,8 +3,7 @@
 
     [Nbin,Smooth,type] = DefaultArgs(varargin,{50,[],'xy'});
 
-    lenPos = size(pos, 1);
-    pos(isnan(pos(:,1)), :) = [];
+
     %% Constraint to maze is forced
     switch type
         case 'xy'
@@ -46,6 +45,7 @@
             end
     end
 
+
     %% rounded position
     X = round((pos(:,1)-Xmin)*k(1))+1;
     Y = round((pos(:,2)-Ymin)*k(2))+1;
@@ -59,8 +59,7 @@
 
     %% spike count
     spiket = spiket;
-    %    indx = spiket(find(spiket>0 & spiket<=length(X)));
-    indx = spiket(find(spiket>0 & spiket<=lenPos));
+    indx = spiket(find(spiket>0 & spiket<=length(X)));
     spikep(:,1) = X(indx);
     spikep(:,2) = Y(indx);
     Count = Accumulate(spikep,1,msize);

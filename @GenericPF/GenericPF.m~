@@ -1,7 +1,7 @@
 classdef GenericPF
-% general Place field class
-% [datasetType, trialName, IF_OVERWRITE, state, markerNo, smoothSigma] 
-% Defaults :  {'default', 'df', 0, 'RUN', 1, 0.03 px});  
+    % general Place field class
+% [datasetType, trialName, IF_OVERWRITE, state, markerNo] 
+% Defaults :  {'default', 'df', 0, 'RUN', 1});  
 %-------
     % History:
     %  Shrisha - Created
@@ -97,7 +97,7 @@ classdef GenericPF
         function genericPF = GenericPF(arg, varargin)
             % class constructor
             
-            [datasetType, trialName, IF_OVERWRITE, state, markerNo, smoothSigma] = DefaultArgs(varargin, {'default', 'df', 0, 'RUN', 1, 0.03});
+            [datasetType, trialName, IF_OVERWRITE, state, markerNo] = DefaultArgs(varargin, {'default', 'df', 0, 'RUN', 1});
             mazePars = [];
             if isempty(arg)
                 genericPF.filebase = [];
@@ -136,6 +136,7 @@ classdef GenericPF
                     end
                 end
             end
+            
             if isempty(genericPF.trialSubType)
                 fileName = [genericPF.filebase, '.PF.', genericPF.trialName '.mat'];
             else
@@ -145,6 +146,7 @@ classdef GenericPF
             if ~FileExists([genericPF.paths.analysis, fileName]) &&  ~strcmp(genericPF.datasetType, 'MTA')
                 fprintf('\n rate maps not precomputed \n'); IF_OVERWRITE = 1; 
             end
+            
             if IF_OVERWRITE % compute rateMaps and place field parameters
                 if isa(arg, 'GenericTrial')
                     trial = arg;
@@ -165,7 +167,6 @@ classdef GenericPF
                         if strcmp(genericPF.datasetType, 'kenji')
                             statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]); % @lfp fs
                             statePeriods = IntersectRanges(statePeriods, genericPF.trialPeriods);
-                            %                            posLoadPeriods = Stateperiods
                         end
                 end
                 genericPF.state = state;
@@ -185,22 +186,21 @@ classdef GenericPF
                           % to convert it to samples wrt filebse start point        
                             trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
                             posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
-
                        end
                 end
-                %                pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
-                pos = sq(trial.position(:, markerNo, :));
+                pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
                 [kRes, resIdx] = SelectPeriods(res, posStatePeriods, 'd',1,1);
                 for kClu = 1 : nClus
                     fprintf('\n computing rate maps for unit %d of %d units \n', kClu, nClus);
+%                     nSpikes = length(trial.res(trial.clu == kClu));
                     nSpikes = length(kRes(trial.clu(resIdx) == kClu));
                     if nSpikes > 10
                         cluKRes = trial.clu(resIdx);
-                        %pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
+                        pos(isnan(pos(:, 1)), :) = [];
                         [genericPF.rateMap{kClu}, genericPF.occupancy{kClu}, xBin, yBin] = ...
-                            GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos, [], smoothSigma);
+                            GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos,[],.03);
                         if ~isempty(xBin), genericPF.xBin = xBin; end 
                         if ~isempty(yBin), genericPF.yBin = yBin; end
                     end
@@ -214,7 +214,7 @@ classdef GenericPF
                 str1 = fileName(dotPos(2)+3 : end);
                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
                 fprintf('\n computing place field parameters\n');
-                pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);
+                pfPars = FindPFPars(genericPF, 1 : nClus);
                 save([genericPF.paths.analysis, fileName], 'pfPars')
             else
                 if strcmp(genericPF.datasetType, 'MTA') && isempty(genericPF.rateMap) && isempty(genericPF.xBin)
