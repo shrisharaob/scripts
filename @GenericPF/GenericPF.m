@@ -195,7 +195,7 @@ classdef GenericPF
                     nSpikes = length(kRes(trial.clu(resIdx) == kClu));
                     if nSpikes > 10
                         cluKRes = trial.clu(resIdx);
-                        pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
+                        %        pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
                         [genericPF.rateMap{kClu}, genericPF.occupancy{kClu}, xBin, yBin] = ...
                             GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos, [], smoothSigma);
                         if ~isempty(xBin), genericPF.xBin = xBin; end 
@@ -207,11 +207,13 @@ classdef GenericPF
                 yBin = genericPF.yBin;
                 save([genericPF.paths.analysis, fileName], 'rm', 'xBin', 'yBin');
                 clear rm;
-                dotPos = regexp(fileName, '\.');
-                str1 = fileName(dotPos(2)+3 : end);
-                fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
+                if isempty(genericPF.trialSubType)
+                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
+                else
+                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
+                end
                 fprintf('\n computing place field parameters\n');
-                pfPars = FindPFPars(genericPF, 1 : nClus);
+                pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);
                 save([genericPF.paths.analysis, fileName], 'pfPars')
             else
                 if strcmp(genericPF.datasetType, 'MTA') && isempty(genericPF.rateMap) && isempty(genericPF.xBin)
@@ -230,7 +232,6 @@ classdef GenericPF
                     genericPF.xBin = xBin;
                     genericPF.yBin = yBin;
                 end
-            
              %    dotPos = regexp(fileName, '\.');
 %                 str1 = fileName(dotPos(2)+3 : end);
 %                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
@@ -244,11 +245,10 @@ classdef GenericPF
              else                   
                     fprintf('\n computing place field parameters \n');
                     nClus = NClusters(genericPF);
-                    pfPars = FindPFPars(genericPF, 1 : nClus);
+                    pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);
                     save([genericPF.paths.analysis, fileName], 'pfPars')
              end
             end
-                              
                genericPF.com = pfPars.com;
                genericPF.smoothRateMap = pfPars.smoothRateMap;
                genericPF.selectedPairs = pfPars.selectedPairs;
@@ -270,8 +270,7 @@ classdef GenericPF
                end
 
         end % END of Class Constructor
-       
-        
+
         function genericPF = Convert2GenericPF(genericPF, anyPFObj)
                 
                 trClass = class(anyPFObj);

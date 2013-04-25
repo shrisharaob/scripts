@@ -1,0 +1,9 @@
+function SmoothRM(gpf, res, pos, varargin)
+% Skaags 1996, Hippocampus
+
+    [alpha] = DefaultArgs(varargin, {[]});
+    
+    radius = 1;
+    
+    
+    

@@ -1,10 +1,10 @@
 function pfPars = FindPFPars(arg, varargin)
 % pfPars = FindPFPars(trial/pfObject, varargin)
-%varargin - [pyrCluIdx, smoothFactor, IF_SAVE]
+%varargin - [pyrCluIdx, smoothFactor, IF_OVERWRITE]
     if nargin < 1, help FindPFPars; return; end
-    [pyrCluIdx, trialName, smoothFactor, IF_SAVE, states, absThresh, nSTD] ...
-        = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 0.5, 3});
-    
+    [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
+        = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
+
     pfPars.com = [];
     pfPars.smoothRateMap = [];
     pfPars.selectedPairs = [];
@@ -17,6 +17,7 @@ function pfPars = FindPFPars(arg, varargin)
     pfPars.acceptedUnits = [];
     pfPars.comDist = [];
     pfPars.ratePk = [];
+    pfPars.entropy = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
         %         pyrCluIdx = pfObject.acceptedUnits;
@@ -32,6 +33,13 @@ function pfPars = FindPFPars(arg, varargin)
         posOfDots = regexp(filebase,'\.');
         filebase = filebase(1: posOfDots(1) -1);
         arg = MTATrial(filebase, [],pfObject.trialName);
+%     else % if filebase name
+%         gt = GenricTrial(arg);
+%         gt = gt.LoadPF;
+%         pfObject = gt.pfObject;
+    end
+    if isempty(pyrCluIdx )
+        pyrCluIdx = 1 : length(pfObject.rateMap);
     end
     nUnits = length(pyrCluIdx);
     nAcceptedUnits = 0;
@@ -99,10 +107,10 @@ function pfPars = FindPFPars(arg, varargin)
             units = cellPairs(mPair, :);
             unitA = units(1);
             unitB = units(2);
-            comA = pfPars.com(acceptedUnits == unitA, :,:);
-            comB = pfPars.com(acceptedUnits == unitB, :,:);
-            pfPars.comDist(kPair) = norm(comA - comB);
-            pfPars.pkDist(kPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :,:) - pfPars.pkLoc(acceptedUnits == unitB, :,:));  
+            comA = pfPars.com(acceptedUnits == unitA, :);
+            comB = pfPars.com(acceptedUnits == unitB, :);
+            pfPars.comDist(mPair) = norm(comA - comB);
+            pfPars.pkDist(mPair) = norm(pfPars.pkLoc(acceptedUnits == unitA, :) - pfPars.pkLoc(acceptedUnits == unitB, :));  
         end
         %% spatial coherence
         nAcceptedUnits = sum(~IS_DISCARD);
@@ -137,19 +145,21 @@ function pfPars = FindPFPars(arg, varargin)
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);
             %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
+            jointEntropy(kUnit) = Entropy(smoothedRateMap);
         end
         pfPars.sparsity = sparsity; % 1 is uniform firing
-        maxSparsity = 0.3;
-        minCoherence = 0.6;
-        pfPars.idealPFUnits = ~IS_DISCARD & ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) ...
-            & ismember(pyrCluIdx,acceptedUnits(zr > minCoherence)); 
+        pfPars.entropy = jointEntropy;
+        pfPars.idealPFUnits = ~IS_DISCARD & ...
+            ismember(pyrCluIdx, acceptedUnits(sparsity < maxSparsity)) & ...
+            ismember(pyrCluIdx,acceptedUnits(zr > minCoherence)) & ...
+            ismember(pyrCluIdx, acceptedUnits(jointEntropy < maxEntropy)); 
         if sum(pfPars.idealPFUnits) > 1
             pfPars.idealPFPairs = ismember(pfPars.selectedPairs, nchoosek(pyrCluIdx(pfPars.idealPFUnits),2),'rows');
         else 
             pfPars.idealPFPairs = [];
         end
         %%
-        if IF_SAVE
+        if IF_OVERWRITE
             save([pfObject.paths.analysis, pfObject.filebase '.' mfilename '.' pfObject.trialName '.mat'], 'pfPars');       
         end
     end
