@@ -1,7 +1,7 @@
-%
 function PlotRateMaps(pfObject, varargin)
-    % PlotPlaceFields(pfObject, varargin)
-    % varargin - [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
+% PlotPlaceFields(pfObject, varargin)
+% varargin - [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
+
     if nargin<1, help PlotPlaceFields; return; end
   
     filebase = pfObject.filebase;

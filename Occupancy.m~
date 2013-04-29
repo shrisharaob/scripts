@@ -1,4 +1,4 @@
-function [occupancy, count] = Occupancy(trial,varargin)
+function occupancy = Occupancy(trial,varargin)
     % occupancy = Occupancy(trial,varargin)
     % Justin's code
 
@@ -47,7 +47,6 @@ Y(isnan(Y)) = [];
 
 %% Occupancy
 occupancy = Accumulate([X Y],1,msize); %./trial.xyzSampleRate;
-count = occupancy; keyboard;
 occupancy = occupancy ./ sum(occupancy(:));
 
 r1 = (-msize(1):msize(1))/msize(1);

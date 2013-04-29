@@ -1,6 +1,5 @@
-function neighbours = GetNeighbours(A, x, y, varargin)
+function neighbours = GetNeighbours(A, x, y)
 % neighbours = GetNeighbours(A, x, y)
-    [radius] = DefaultArgs(varargin, {1});
     [nRows, nClmns] = size(A);
     displacement = [ 1 0; -1 0; 1 1; 0 1; -1 1; 1 -1; 0 -1; -1 -1];
     neighboursIdx = displacement  + repmat([x, y], [8, 1]);

@@ -1,6 +1,6 @@
 function FindCommonKenjiClu(varargin)
 % this script returns clusters which are active acros trils in all filebases
-    [roi, arena] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}});
+    [roi, arena, sparsityThresh] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0.35});
     searchStruct.roi = roi;
     searchStruct.arena = arena;
     list = SearchKenji(searchStruct);
@@ -15,7 +15,7 @@ function FindCommonKenjiClu(varargin)
                 try
                     gt = GenericTrial(filebases{i}, trialNames{kTr});
                     gt = gt.LoadPF;
-                    kClu{kTr} = gt.pyrCluIdx(gt.pfObject.idealPFUnits);
+                    kClu{kTr} = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < sparsityThresh);
                     if cnt == 1, commonClus = kClu{1}; end
                     commonClus = intersect(commonClus, kClu{cnt});
                     cnt = cnt + 1;

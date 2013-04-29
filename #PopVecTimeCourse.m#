@@ -108,9 +108,9 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
             end
         end
         fprintf('  done !!! \n');       
-    % dotProd = popVec' * refVector;
-    dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
-    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
+        % dotProd = popVec' * refVector;
+        dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
     end 
     %% figures
     % figure;

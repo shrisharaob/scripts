@@ -1,0 +1,4 @@
+function y = Mat2ClmVec(x)
+
+    y = x(:);
+end

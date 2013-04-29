@@ -1,10 +1,16 @@
 function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
     % population vector time course for the entire filebase, considers only the common clus
 
-    [commonClus, binSize, roi, tolerence, IF_OVERWRITE, arena] = DefaultArgs(varargin, {[],  10,  {'CA3'}, 1e-1,1, {'bigSquare', 'linear'}});
-    %binSize in degrees
-    % .1 ~= 5 degrees
-    %    if FileExists(
+    [commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins] = ...
+        DefaultArgs(varargin, {[], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50]});
+  
+   if ~IF_COMPUTE
+       gt = GenericTrial(filebase, trialName);
+       fprintf('loading  ...');
+       load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
+       return;
+   end
+
     filetag = [];
     for mRoi = 1 : length(roi)
         if mRoi == 1
@@ -21,6 +27,7 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
         load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag '.commonClus.mat']);
     end
     if  isempty(commonClus), return; end
+    nClus = length(commonClus);
     sK.roi = roi;
     sK.arena = arena;
     %if ~SearchKenji(sK, gt.filebase, gt.trialName), return; end;
@@ -69,15 +76,17 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
         [~, minCIdx] = min(count);
         minPh = xx(minCIdx);
         thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); 
-        % in lfp sample rate thetaBoundaries = find(IsEqual(trialThPh,pi,
-        % tolerence, 0));% indices of thetapeak
+        % in lfp sample rate thetaBoundaries
+        % indices of thetapeak
         [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
         nDims = nRows * nClmns;
-        
-        refVector = zeros(nDims, 1);
-        refVector = nansum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(commonClus))), nRows, nClmns, length(commonClus)), 3);
+        refVector = zeros(nClus, nDims); % each clm of this matrix is a pop vector at one of the spatial bins
+        %        refVector = nansum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(commonClus))), nRows, nClmns, length(commonClus)), 3);
         % refVector = nansum(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)), 3);
-        refVector = refVector(:);
+        for mClu = 1 : length(commonClus)
+            refVector(mClu, :) = Mat2Vec(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus(mClu))), 0);
+        end
+        % refVector = refVector(:);
         % refVector = refVector ./ norm(refVector);
         fprintf('\n computing popvector...');
         thetaPeriods = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 : end)]; 
@@ -87,35 +96,43 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
             markerNo = 7;
         end
         nCycles = size(thetaPeriods, 1);
-        popVec = zeros(nDims, nCycles);
+        popVec = zeros(nClus, nDims, nCycles);
         oldStr = [];
         for kPopVec = 1 : nCycles
             str = sprintf(['#', num2str(kPopVec) ' of ' num2str(nCycles)]);
             fprintf([repmat('\b', 1, length(oldStr)), str]);
             oldStr = str;
             % population vector for each theta cycle, nDims -by- nClycles
-            for kClu = 1 : length(commonClus)
-                curRes = SelectPeriods(res(clu == commonClus(kClu)), thetaPeriods(kPopVec, :),'d',1,1);
-                if ~isempty(curRes)
-                    pos = SelectPeriods(gt.position(:, markerNo, :), round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
-                    if ~(all(isnan(pos(:))))
-                        
-                        popVec(:, kPopVec) = popVec(:, kPopVec) + SpkCntAtPos(gt, curRes, pos);
+            % curRes = SelectPeriods(res(clu == commonClus(kClu)), thetaPeriods(kPopVec, :),'d',1,1);
+            [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :),'d',1,1);
+            curClu = clu(curResId);
+            if ~isempty(curRes)
+                pos = SelectPeriods(gt.position(:, markerNo, :), round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+                pos = nanmean(pos, 1);
+                spkCnt = zeros(nClus, 1);
+                if ~(all(isnan(pos(:))))
+                    for mClu = 1 : nClus
+                        spkCnt(mClu) = sum(curRes == commonClus(mClu));
                     end
+                    % popVec(kClu, :, kPopVec) = popVec(:, kPopVec)
+                    % + SpkCntAtPos(gt, curRes, pos);
+                    xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
+                    popVec(:, xyBin, kPopVec) = spkCnt; %SpkCntAtPos(gt, curRes, curClu, pos);
                 end
             end
         end
-        fprintf('  done !!! \n');
-%         dotProd = popVec' * refVector;
-        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, filetag, mfilename, '.mat'], 'refVector', 'popVec');
+        fprintf('  done !!! \n');       
+    % dotProd = popVec' * refVector;
+    dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
+    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
     end 
     %% figures
     % figure;
-    %    bar(xx * 180 /pi, [count', fliplr(count(2:end))'],'FaceColor', 'k');
-    %    hold on;
+    % bar(xx * 180 /pi, [count', fliplr(count(2:end))'],'FaceColor', 'k');
+    % hold on;
     % line([minPh, minPh], ylim, 'Color', 'g');
     % line([minPh, minPh]+2*pi, ylim, 'Color', 'g');
-    %    figure;
+    % figure;
     % plot(linspace(0,sum(diff(gt.goodPosPeriods, 1, 2)) / gt.trackingSampleRate, length(dotProd)), dotProd);   
     
 

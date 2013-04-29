@@ -1,2 +1,30 @@
-function SmoothRM(gpf, varargin)
+function SmoothRM(gt, res, pos, varargin)
+% Saki's 1996, Hippocampus
 
+    [cluId, alpha, nBins] = DefaultArgs(varargin, {[], [], 50});
+    radius = 1;
+    occ = Occupancy(gt);
+    if isempty(gt.res)
+        fprintf('\n loading clures ...');
+        gt = gt.LoadCR;
+        fprintf(' done');
+    end
+    res = gt.res(
+    for mClu = 1 : length(cluId)
+        if ~(isempty(gt.pfObject.rateMap{mClu}))
+            sc = SpkCntAtPos(gt, gt.res(gt.clu 
+            
+        end
+    end
+        for x = 1 : length(gpf.xBins)
+                for y = 1 : length(gpf.yBins)
+                    
+                    nOccSamples = sum(~isnan(GetPxInRadius(occ, x, y, radius)));
+                    
+                    
+                    
+                    
+    
+    
+    
+% LocalWords:  Hippocampus
