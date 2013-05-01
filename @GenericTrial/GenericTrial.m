@@ -72,11 +72,9 @@ classdef GenericTrial
         % cell array of placefields objects
         pfObject ;
         
-        %
+        % cross corrlelogram
         ccg;
-        
-        
-        
+                
     end
     
     
@@ -192,7 +190,6 @@ classdef GenericTrial
                             fprintf(['\n' repmat('*', 1, 50) '\n '])
                             return;
                         end
-                        %        return;
                     end
                     try
                         xy = importdata([genericTrial.paths.data, genericTrial.trialName '.whl']);
@@ -268,7 +265,6 @@ classdef GenericTrial
                 [~, nElClu] = NClusters(genericTrial);
                 cluStartId = cumsum([1, nElClu]); % linear cluster id of the first non-noise cluster on each electrode cluStrtId -by- nElectrodes
                 rowId = find(~cellfun(@isempty, regexp(elPos, genericTrial.filebase)));
-                %                 cluStartId(nElClu == 0) = [];
                 for iRegion = 1 : length(roi)  % look for shanks in regions of interest
                     if ~isempty(rowId)
                         rowCell = regexp(elPos{rowId}, '\s', 'split');

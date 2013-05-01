@@ -181,7 +181,6 @@ classdef GenericPF
                     statePeriods = IntersectRanges(statePeriods, trial.trialPeriods);
                     posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
                     statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;       
-                    %posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
                     trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
                     posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
                     markerNo = 1;
@@ -240,9 +239,6 @@ classdef GenericPF
                     genericPF.xBin = xBin;
                     genericPF.yBin = yBin;
                 end
-             %    dotPos = regexp(fileName, '\.');
-%                 str1 = fileName(dotPos(2)+3 : end);
-%                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
              if isempty(genericPF.trialSubType)
                  fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
              else
@@ -316,8 +312,7 @@ classdef GenericPF
                             genericPF.state = 'walk'; 
                         end
                         genericPF.maze.name = anyPFObj.mazeName;
-%                         geneticPF.maze.boundaries = anyPFObj.Maze.boundaries;
-                        
+
                     case 'MTATrial'
                         fprintf('\n loading rate maps ...');
                         mtaPFObj = LoadMTAPFObject(anyPFObj.name, anyPFObj.trialName);
