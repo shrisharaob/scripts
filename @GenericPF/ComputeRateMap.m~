@@ -54,7 +54,6 @@
     X(X>Nbin) = Nbin;
     Y(Y>Nbin) = Nbin;
 
-
     %% Occupancy
     Occ = Accumulate([X Y],1,msize)./Session.trackingSampleRate;
 
@@ -85,6 +84,7 @@
     varargout{1} = conv2(Smoother1, Smoother2, Occ./sum(Occ(:)),'same');
     varargout{2} = Bin1;
     varargout{3} = Bin2;
+    varargout{4} = Count;
 end
 
 

@@ -152,40 +152,44 @@ classdef GenericPF
                     trial  = GenericTrial(genericPF.filebase,[], genericPF.trialName, mazePars);
                 end
                 trial = trial.Load({{'CluRes'}});
-                switch genericPF.datasetType
-                    case  'MTA'
-                        mtaTrial = MTATrial(genericPF.filebase, [], genericPF.trialName);
-                        if strcmp(state, 'RUN'),  state = 'walk'; else
-                            error('\n no %s state in filebase %s', state, genericPF.filebase); end
-                        statePeriods = mtaTrial.statePeriods(state); %% state periods starts with 0
-                        markerNo = 7;
-                    case 'default'
-                        statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]);
-                    case  'kenji'
-                        if strcmp(genericPF.datasetType, 'kenji')
-                            statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]); % @lfp fs
-                            statePeriods = IntersectRanges(statePeriods, genericPF.trialPeriods);
-                        end
+
+                switch trial.datasetType
+                  case  'MTA'
+                    mtaTrial = MTATrial(trial.filebase, [], trial.trialName);
+                    if strcmp(state, 'RUN')
+                        state = 'walk'; 
+                    else
+                        error('\n no %s state in filebase %s', state, trial.filebase); 
+                    end
+                    statePeriods = mtaTrial.statePeriods(state); %% state periods starts with 0
+                    markerNo = 7;
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos = 0;
+                  case 'default'
+                    statePeriods = load([trial.paths.data, trial.filebase '.sts.', state]);
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos = 0;
+                    markerNo = 1;
+                  case  'kenji'
+                    statePeriods = load([trial.paths.data, trial.filebase '.sts.', state]); % @lfp fs
+                    statePeriods = IntersectRanges(statePeriods, trial.trialPeriods);
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;       
+                    %posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                    posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
+                    markerNo = 1;
                 end
+
+
                 genericPF.state = state;
                 nClus= length(unique(trial.clu));
                 genericPF.rateMap = cell(1, nClus);
                 genericPF.occupancy = cell(1, nClus);
-                if strcmp(genericPF.datasetType, 'MTA')
-                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
-                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
-                else
-                    %%% sample rate of .sts file lfpSample rate
-                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
-                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
-                    switch genericPF.datasetType
-                        case 'kenji'
-                          % add trial start time to goodPosPeriods
-                          % to convert it to samples wrt filebse start point        
-                            trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
-                            posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
-                       end
-                end
+
+
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
@@ -319,7 +323,8 @@ classdef GenericPF
     end  
     
     methods(Static)
-        [rateMap, occupancy, Bin1, Bin2] = ComputeRateMap(genericTrial, cluIdx, varargin);
+        %        [rateMap, occupancy, Bin1, Bin2, count, occCount] = ComputeRateMap(genericTrial, cluIdx, varargin);
+        [rateMap, varargout] =  ComputeRateMap(genericTrial, cluIdx, varargin);
         pfPars = FindPFPars(arg, varargin);
     end
     

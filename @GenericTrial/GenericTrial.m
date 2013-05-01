@@ -1,7 +1,5 @@
 classdef GenericTrial
     % class to structure general recording data
-    % use GenericTrial(<filebase>) to add a new filebase / a list of
-    % filebases
     %-------
     % History:
     %  Shrisha - Created
@@ -127,7 +125,11 @@ classdef GenericTrial
                             genericTrial.paths.analysis = ['~/data/analysis/', fileBase, '/'];
                             genericTrial.datasetType = 'MTA';
                             if isempty(trialName)
-                                genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, [], 'all'));
+                                mtaTrial = MTATrial(fileBase, [], 'all');
+                                trialNames = mtaTrial.list_trialNames;
+                                disp(trialNames);
+                                trialName = input('trial name :' ,'s');
+                                genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, [],trialName));
                             else
                                 genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, [],trialName));
                             end
@@ -201,25 +203,6 @@ classdef GenericTrial
                         fprintf(['\n' repmat('*', 1, 50) '\n '])
                         return;
                     end
-                    
-                end
-                switch genericTrial.datasetType
-                  case 'kenji'
-                    [nRows, nclmns] = size(xy);
-                    nMarkers = nclmns / 2;
-                    xy = [xy(:, 1), xy(:,3), xy(:,2), xy(:,4)]; % the .whl format is inconsistent across dasetTypes
-                    genericTrial = genericTrial.ProcessKenji;
-                    pos = xy(:,1);
-                    pos(~inValidIdx) = 1;
-                    t = flipud(pos);
-                    t = [-1* t(1);t];
-                    pos = [ -1 * pos(1); pos];
-                    posBeginIndx = find(diff(pos) == 2);
-                    posEndIndx = find(flipud(diff(t) == 2));
-                    goodPeriods = [posBeginIndx+1, posEndIndx-1];
-                    genericTrial.goodPosPeriods = goodPeriods;
-                    xy(inValidIdx,:) = nan;
-                    genericTrial.position = reshape(xy, nRows, nMarkers, 2);
                 end
             end
             genericTrial.clu = [];
@@ -239,35 +222,44 @@ classdef GenericTrial
                     genericTrial.maze = mazePar;
                 end
               case 'kenji'
-                markerNo = 1;
-                genericTrial.maze.name = char(Beh(strcmp(Beh(:,4), genericTrial.trialName), 5));
-                switch genericTrial.maze.name 
-                  case 'bigSquare'
-                    genericTrial.maze.dimsInCm = [180, 180];
-                  case'midSquare'
-                    genericTrial.maze.dimsInCm = [120, 120];
-                  case 'linear'
-                    genericTrial.maze.dimsInCm = [250, 0];
-                  otherwise
-                    genericTrial.maze.dimsInCm = nan;
-                end
-              case 'MTA'
+                  [nRows, nclmns] = size(xy);
+                  nMarkers = nclmns / 2;
+                  xy = [xy(:, 1), xy(:,3), xy(:,2), xy(:,4)]; % the .whl format is inconsistent across dasetTypes
+                  genericTrial = genericTrial.ProcessKenji;
+                  pos = xy(:,1);
+                  pos(~inValidIdx) = 1;
+                  t = flipud(pos);
+                  t = [-1* t(1);t];
+                  pos = [ -1 * pos(1); pos];
+                  posBeginIndx = find(diff(pos) == 2);
+                  posEndIndx = find(flipud(diff(t) == 2));
+                  goodPeriods = [posBeginIndx+1, posEndIndx-1];
+                  genericTrial.goodPosPeriods = goodPeriods;
+                  xy(inValidIdx,:) = nan;
+                  genericTrial.position = reshape(xy, nRows, nMarkers, 2);
+                  markerNo = 1;
+                  genericTrial.maze.name = char(Beh(strcmp(Beh(:,4), genericTrial.trialName), 5));
+                  switch genericTrial.maze.name
+                      case 'bigSquare'
+                          genericTrial.maze.dimsInCm = [180, 180];
+                      case'midSquare'
+                          genericTrial.maze.dimsInCm = [120, 120];
+                      case 'linear'
+                          genericTrial.maze.dimsInCm = [250, 0];
+                      otherwise
+                          genericTrial.maze.dimsInCm = nan;
+                  end
+                  xPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 1)), max(genericTrial.position(~inValidIdx, markerNo, 1))];
+                  yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
+                  genericTrial.maze.boundaries = [xPxRange; yPxRange];
+                  miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
+                  genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor;
+                  for mState = 1 : length(state)
+                      genericTrial.states{mState} =  GenericState(genericTrial, state{mState});
+                  end
+                case 'MTA'
                 markerNo = 7;
             end
-            switch genericTrial.datasetType
-              case 'kenji'
-                xPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 1)), max(genericTrial.position(~inValidIdx, markerNo, 1))];
-                yPxRange = [min(genericTrial.position(~inValidIdx, markerNo, 2)), max(genericTrial.position(~inValidIdx, markerNo, 2))];
-                genericTrial.maze.boundaries = [xPxRange; yPxRange];
-                miscPar.maze.px2CmFactor = genericTrial.maze.dimsInCm ./ [range(xPxRange), range(yPxRange)]; % recenter xy values to zero
-                genericTrial.maze.px2CmFactor = miscPar.maze.px2CmFactor; 
-                for mState = 1 : length(state)
-                    genericTrial.states{mState} =  GenericState(genericTrial, state{mState}); 
-                end
-              case 'MTA'
-                
-            end
-            %             if genericTrial
             miscPar.maze = genericTrial.maze;
             save([genericTrial.paths.data, genericTrial.filebase, '.miscPar.mat'], 'miscPar');
             if FileExists(['~/data/', genericTrial.datasetType, '/ElePosition.txt'])
@@ -323,10 +315,12 @@ classdef GenericTrial
             genericTrial.ccg = anyTrialObj.ccg;
             genericTrial.maze.name = anyTrialObj.Maze.name;
             genericTrial.maze.boundaries = anyTrialObj.Maze.boundaries;
-            generictrial.goodPosPeriods = anyTrialObj.xyzPeriods;
-            for i = 1:length(anyTrialObj.Bhv.States),
-                genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;
-                genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;
+            genericTrial.goodPosPeriods = anyTrialObj.xyzPeriods;
+            if ~isempty(anyTrialObj.Bhv)
+                for i = 1:length(anyTrialObj.Bhv.States),
+                    genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;
+                    genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;
+                end
             end
             load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
             genericTrial.pyrCluIdx = linearPyrCluIdx;

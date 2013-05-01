@@ -1,8 +1,8 @@
-function [spkCnt, varargout] = SpkCntAtPos(arg, res, clu, pos,varargin)
+function [spkCnt, varargout] = SpkCntAtPos(arg, res, clu, x, y, varargin)
 % Justin's code
 
     [Nbin,Smooth,type] = DefaultArgs(varargin,{50,[],'xy'});
-    pos(isnan(pos(:, 1)), :) = [];
+    pos = [arg.pfObject.xBin(x), arg.pfObject.yBin(y)];
     nClu = length(unique(clu));
     spkCnt = zeros(nClu, 1);
     %% Constraint to maze is forced
@@ -40,7 +40,7 @@ function [spkCnt, varargout] = SpkCntAtPos(arg, res, clu, pos,varargin)
 
     %% Spike count
     for lClu = 1 : nClu 
-        spikep = res(clu == lClu);
+        spiket = res(clu == lClu);
         lSpkCnt = zeros(msize);
         indx = spiket(find(spiket>0 & spiket<=length(X)));
         if ~isempty(indx)
@@ -48,6 +48,6 @@ function [spkCnt, varargout] = SpkCntAtPos(arg, res, clu, pos,varargin)
             spikep(:,2) = Y(indx);
             lSpkCnt = Accumulate(spikep,1,msize);
         end
-        spkCnt(lClu) = lSpkCnt;
+        spkCnt(lClu) = lSpkCnt(x, y);
     end
 end
