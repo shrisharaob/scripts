@@ -9,44 +9,48 @@ classdef GenericPF
     properties (SetAccess = protected, GetAccess = public)
         % tag identifying the type of dataset
         datasetType;
+       
+        % dir name containing all the recording data
         filebase;
     end
     
     properties
         
+        % file paths
         paths;
         
         trialName;
         
         trialSubType;
         
-        %
+        % behavioural state
         state
         
-        % 
+        % trial begin & end times
         trialPeriods;
         
-        %
+        % vaild position tracking periods 
         goodPosPeriods;
         
         % place field parameters
         
+
         rateMap;
         
         %
         occupancy;
         
-        %
+        % spatial bins
         xBin;
         
         %
-        yBin
+        yBin;
         
         %
         nBins;
         
-        %
-        maze 
+        % arena specifications
+        maze;
 
         %
         smoothRateMap;

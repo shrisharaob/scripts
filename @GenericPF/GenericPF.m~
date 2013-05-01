@@ -152,40 +152,44 @@ classdef GenericPF
                     trial  = GenericTrial(genericPF.filebase,[], genericPF.trialName, mazePars);
                 end
                 trial = trial.Load({{'CluRes'}});
-                switch genericPF.datasetType
-                    case  'MTA'
-                        mtaTrial = MTATrial(genericPF.filebase, [], genericPF.trialName);
-                        if strcmp(state, 'RUN'),  state = 'walk'; else
-                            error('\n no %s state in filebase %s', state, genericPF.filebase); end
-                        statePeriods = mtaTrial.statePeriods(state); %% state periods starts with 0
-                        markerNo = 7;
-                    case 'default'
-                        statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]);
-                    case  'kenji'
-                        if strcmp(genericPF.datasetType, 'kenji')
-                            statePeriods = load([genericPF.paths.data, genericPF.filebase '.sts.', state]); % @lfp fs
-                            statePeriods = IntersectRanges(statePeriods, genericPF.trialPeriods);
-                        end
+
+                switch trial.datasetType
+                  case  'MTA'
+                    mtaTrial = MTATrial(trial.filebase, [], trial.trialName);
+                    if strcmp(state, 'RUN')
+                        state = 'walk'; 
+                    else
+                        error('\n no %s state in filebase %s', state, trial.filebase); 
+                    end
+                    statePeriods = mtaTrial.statePeriods(state); %% state periods starts with 0
+                    markerNo = 7;
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos = 0;
+                  case 'default'
+                    statePeriods = load([trial.paths.data, trial.filebase '.sts.', state]);
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos = 0;
+                    markerNo = 1;
+                  case  'kenji'
+                    statePeriods = load([trial.paths.data, trial.filebase '.sts.', state]); % @lfp fs
+                    statePeriods = IntersectRanges(statePeriods, trial.trialPeriods);
+                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;       
+                    %posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
+                    trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
+                    posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
+                    markerNo = 1;
                 end
+
+
                 genericPF.state = state;
                 nClus= length(unique(trial.clu));
                 genericPF.rateMap = cell(1, nClus);
                 genericPF.occupancy = cell(1, nClus);
-                if strcmp(genericPF.datasetType, 'MTA')
-                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
-                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
-                else
-                    %%% sample rate of .sts file lfpSample rate
-                    posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
-                    statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;
-                    switch genericPF.datasetType
-                        case 'kenji'
-                          % add trial start time to goodPosPeriods
-                          % to convert it to samples wrt filebse start point        
-                            trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
-                            posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
-                       end
-                end
+
+
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
@@ -195,7 +199,7 @@ classdef GenericPF
                     nSpikes = length(kRes(trial.clu(resIdx) == kClu));
                     if nSpikes > 10
                         cluKRes = trial.clu(resIdx);
-                        pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
+                        %        pos(isnan(pos(:, 1)), :) = []; % !!!!!!!!!!!!!!!!!!! 
                         [genericPF.rateMap{kClu}, genericPF.occupancy{kClu}, xBin, yBin] = ...
                             GenericPF.ComputeRateMap(trial, kRes(cluKRes == kClu), pos, [], smoothSigma);
                         if ~isempty(xBin), genericPF.xBin = xBin; end 
@@ -207,11 +211,13 @@ classdef GenericPF
                 yBin = genericPF.yBin;
                 save([genericPF.paths.analysis, fileName], 'rm', 'xBin', 'yBin');
                 clear rm;
-                dotPos = regexp(fileName, '\.');
-                str1 = fileName(dotPos(2)+3 : end);
-                fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
+                if isempty(genericPF.trialSubType)
+                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
+                else
+                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
+                end
                 fprintf('\n computing place field parameters\n');
-                pfPars = FindPFPars(genericPF, 1 : nClus);
+                pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);
                 save([genericPF.paths.analysis, fileName], 'pfPars')
             else
                 if strcmp(genericPF.datasetType, 'MTA') && isempty(genericPF.rateMap) && isempty(genericPF.xBin)
@@ -230,7 +236,6 @@ classdef GenericPF
                     genericPF.xBin = xBin;
                     genericPF.yBin = yBin;
                 end
-            
              %    dotPos = regexp(fileName, '\.');
 %                 str1 = fileName(dotPos(2)+3 : end);
 %                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
@@ -244,11 +249,10 @@ classdef GenericPF
              else                   
                     fprintf('\n computing place field parameters \n');
                     nClus = NClusters(genericPF);
-                    pfPars = FindPFPars(genericPF, 1 : nClus);
+                    pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);
                     save([genericPF.paths.analysis, fileName], 'pfPars')
              end
             end
-                              
                genericPF.com = pfPars.com;
                genericPF.smoothRateMap = pfPars.smoothRateMap;
                genericPF.selectedPairs = pfPars.selectedPairs;
@@ -270,8 +274,7 @@ classdef GenericPF
                end
 
         end % END of Class Constructor
-       
-        
+
         function genericPF = Convert2GenericPF(genericPF, anyPFObj)
                 
                 trClass = class(anyPFObj);
@@ -320,7 +323,8 @@ classdef GenericPF
     end  
     
     methods(Static)
-        [rateMap, occupancy, Bin1, Bin2] = ComputeRateMap(genericTrial, cluIdx, varargin);
+        %        [rateMap, occupancy, Bin1, Bin2, count, occCount] = ComputeRateMap(genericTrial, cluIdx, varargin);
+        [rateMap, varargout] =  ComputeRateMap(genericTrial, cluIdx, varargin);
         pfPars = FindPFPars(arg, varargin);
     end
     
