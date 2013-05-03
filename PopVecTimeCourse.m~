@@ -1,6 +1,5 @@
-function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
+function [popVec, refVector, dotProd] = PopVecTimeCourse(filebase, varargin)
     % population vector time course for the entire filebase, considers only the common clus
-
     [commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins] = ...
         DefaultArgs(varargin, {[], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50]});
   
@@ -10,27 +9,14 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
        return;
    end
-
-    filetag = [];
-    for mRoi = 1 : length(roi)
-        if mRoi == 1
-            filetag = ['.', char(roi{1})];
-        end
-        if mRoi > 1
-            filetag = [filetag, '.', char(roi{mRoi})];
-        end
-    end
-    for lArena = 1 : length(arena)
-        filetag = [filetag, '.', char(arena{lArena})];
-    end
-    if isempty(commonClus)
-        load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag '.commonClus.mat']);
+   filetag = GenFiletag(roi, arena);
+   if isempty(commonClus)
+        load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag 'commonClus.mat']);
     end
     if  isempty(commonClus), return; end
     nClus = length(commonClus);
     sK.roi = roi;
     sK.arena = arena;
-    %if ~SearchKenji(sK, gt.filebase, gt.trialName), return; end;
     filebases = SearchKenji(sK);
     workingFb = filebase;
     trialNames = filebases(strcmp(filebases(:,1), workingFb), 2);
@@ -47,15 +33,10 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
                 gt.res = allRes;
             end
         end
-        %roiClus = cell2mat(gt.GetRegionClu(roi)); % shd also add
-        %roiClus= roiClus(ismember(roiClus, gt.pyrCluIdx(gt.pfObject.acceptedUnits))); % clus in roi & with PFs
-        %if isempty(roiClus), return; end; % no clusters in the roi
+
         if isempty(gt.pfObject)
             gt = gt.LoadPF;
         end
-        % roiPFClu = unique(gt.clu(CompareVectors(gt.clu, roiClus)));
-        % validClu = roiPFClu(~cellfun(@isempty,gt.pfObject.rateMap(roiPFClu))); % remove clus for with no rate maps
-        % validClu = validClu(ismember(validClu, gt.pyrCluIdx(gt.pfObject.idealPFUnits)));
         res = gt.res(ismember(gt.clu, commonClus)); % load res only for the units in roi
         clu = gt.clu(ismember(gt.clu, commonClus));
         res = round(res .* gt.lfpSampleRate ./ gt.sampleRate) + 1; % convert res to lfp sample rate
@@ -81,8 +62,6 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
         [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
         nDims = nRows * nClmns;
         refVector = zeros(nClus, nDims); % each clm of this matrix is a pop vector at one of the spatial bins
-        %        refVector = nansum(reshape(Nan2Zero(cell2mat(gt.pfObject.rateMap(commonClus))), nRows, nClmns, length(commonClus)), 3);
-        % refVector = nansum(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)), 3);
         for mClu = 1 : length(commonClus)
             refVector(mClu, :) = Mat2Vec(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus(mClu))), 0);
         end
@@ -102,8 +81,6 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
             str = sprintf(['#', num2str(kPopVec) ' of ' num2str(nCycles)]);
             fprintf([repmat('\b', 1, length(oldStr)), str]);
             oldStr = str;
-            % population vector for each theta cycle, nDims -by- nClycles
-            % curRes = SelectPeriods(res(clu == commonClus(kClu)), thetaPeriods(kPopVec, :),'d',1,1);
             [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :),'d',1,1);
             curClu = clu(curResId);
             if ~isempty(curRes)
@@ -114,17 +91,23 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
                     for mClu = 1 : nClus
                         spkCnt(mClu) = sum(curRes == commonClus(mClu));
                     end
-                    % popVec(kClu, :, kPopVec) = popVec(:, kPopVec)
-                    % + SpkCntAtPos(gt, curRes, pos);
-                    xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
-                    popVec(:, xyBin, kPopVec) = spkCnt; %SpkCntAtPos(gt, curRes, curClu, pos);
+                    %xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
+                    xbin = find(histc(pos(1), gt.pfObject.xBin), 1);
+                    if isempty(xbin)
+                        xbin = gt.pfObject.xBin(1);
+                    end
+                    ybin = find(histc(pos(2), gt.pfObject.yBin), 1);
+                    if isempty(ybin)
+                        xbin = gt.pfObject.yBin(1);
+                    end
+                    xyBin = sub2ind(spatialBins, xbin, ybin);
+                    popVec(:, xyBin, kPopVec) = spkCnt; 
                 end
             end
         end
         fprintf('  done !!! \n');       
-    % dotProd = popVec' * refVector;
-    dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
-    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
+        dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
     end 
     %% figures
     % figure;

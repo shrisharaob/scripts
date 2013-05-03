@@ -1,4 +1,4 @@
-function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
+function [popVec, refVector, dotProd] = PopVecTimeCourse(filebase, varargin)
     % population vector time course for the entire filebase, considers only the common clus
     [commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins] = ...
         DefaultArgs(varargin, {[], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50]});
@@ -9,20 +9,9 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
        return;
    end
-    filetag = [];
-    for mRoi = 1 : length(roi)
-        if mRoi == 1
-            filetag = ['.', char(roi{1})];
-        end
-        if mRoi > 1
-            filetag = [filetag, '.', char(roi{mRoi})];
-        end
-    end
-    for lArena = 1 : length(arena)
-        filetag = [filetag, '.', char(arena{lArena})];
-    end
-    if isempty(commonClus)
-        load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag '.commonClus.mat']);
+   filetag = GenFiletag(roi, arena);
+   if isempty(commonClus)
+        load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag 'commonClus.mat']);
     end
     if  isempty(commonClus), return; end
     nClus = length(commonClus);
@@ -102,15 +91,23 @@ function [popVec, refVector] = PopVecTimeCourse(filebase, varargin)
                     for mClu = 1 : nClus
                         spkCnt(mClu) = sum(curRes == commonClus(mClu));
                     end
-                    xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
-                    popVec(:, xyBin, kPopVec) = spkCnt; %SpkCntAtPos(gt, curRes, curClu, pos);
+                    %xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
+                    xbin = find(histc(pos(1), gt.pfObject.xBin), 1);
+                    if isempty(xbin)
+                        xbin = 1;
+                    end
+                    ybin = find(histc(pos(2), gt.pfObject.yBin), 1);
+                    if isempty(ybin)
+                        ybin = 1;
+                    end
+                    xyBin = sub2ind(spatialBins, xbin, ybin);
+                    popVec(:, xyBin, kPopVec) = spkCnt; 
                 end
             end
         end
         fprintf('  done !!! \n');       
-    % dotProd = popVec' * refVector;
-    dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
-    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
+        dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
     end 
     %% figures
     % figure;

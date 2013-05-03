@@ -1,0 +1,28 @@
+function CovTimeSeries(trial)
+
+    if nargin<1, help CCGofSegments; return; end
+    if isempty(trial.pfObject)
+        trial = trial.LoadPF;
+    end
+    [IF_REPORT_FIG, timeWinSiz, pairs2analyse, IF_SAVE, fileTag] = DefaultArgs(varargin, {0, [1:size(trial.pfObject.selectedPairs, 1)],1, []});
+    pfObject = trial.pfObject;
+    
+    if FileExists(['~/data/analysis/' trial.filebase '/' trial.filebase '.SelectedPyrCells.mat'])
+        load(['~/data/analysis/' trial.filebase '/' trial.filebase '.SelectedPyrCells.mat']);
+        cellPairs = pfObject.selectedPairs(pairs2analyse, :);
+    else 
+        cellPairs =pfObject.selectedPairs;
+    end
+    
+    nPairs = size(cellPairs, 1);
+    if isempty(trial.res)
+        trial = trial.LoadCR;
+    end
+    for lPair = 1 : nPairs
+        
+        [res, clu] = 
+        [ccgOut, ccgTimeAx, Pairs] = ...
+            myCCG(pRes,pClu,binSize,halfBins,trial.sampleRate,overlappingPFCells,'count');
+        
+
+end

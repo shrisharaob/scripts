@@ -14,7 +14,7 @@ function PlotRateMaps(pfObject, varargin)
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 5, [], 84, pfObject.acceptedUnits});
+    [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
     if ~IS_COUNTOUR
@@ -89,6 +89,7 @@ function PlotRateMaps(pfObject, varargin)
                 if strcmp(pfObject.datasetType, 'MTA')
                     plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
                 else
+                    keyboard;
                     plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
                 end
                 grid on

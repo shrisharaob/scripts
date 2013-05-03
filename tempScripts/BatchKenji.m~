@@ -70,10 +70,10 @@ function BatchKenji(funcHandle, varargin)
                 end
             case 'passFb' % pass the filebase as an argument and all the subtrials are taken care 
                 fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
-                goodUnits(i).filebase = filebases{i};
+                %                goodUnits(i).filebase = filebases{i};
                 try
                     fout =feval(funcHandle, filebases{i}, funcArgs{:});
-                    goodUnits(i).clu = fout;
+                    %                    goodUnits(i).clu = fout;
                 catch err
                     fprintf('error .......  !!!!!!');
                 end
