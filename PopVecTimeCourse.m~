@@ -94,11 +94,11 @@ function [popVec, refVector, dotProd] = PopVecTimeCourse(filebase, varargin)
                     %xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
                     xbin = find(histc(pos(1), gt.pfObject.xBin), 1);
                     if isempty(xbin)
-                        xbin = gt.pfObject.xBin(1);
+                        xbin = 1;
                     end
                     ybin = find(histc(pos(2), gt.pfObject.yBin), 1);
                     if isempty(ybin)
-                        xbin = gt.pfObject.yBin(1);
+                        ybin = 1;
                     end
                     xyBin = sub2ind(spatialBins, xbin, ybin);
                     popVec(:, xyBin, kPopVec) = spkCnt; 

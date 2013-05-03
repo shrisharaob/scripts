@@ -9,6 +9,7 @@ function [popVec, refVector, dotProd] = PopVecTimeCourse(filebase, varargin)
        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
        return;
    end
+   
    filetag = GenFiletag(roi, arena);
    if isempty(commonClus)
         load(['~/data/analysis/kenji/', filebase, '/', filebase, filetag 'commonClus.mat']);
@@ -33,7 +34,6 @@ function [popVec, refVector, dotProd] = PopVecTimeCourse(filebase, varargin)
                 gt.res = allRes;
             end
         end
-
         if isempty(gt.pfObject)
             gt = gt.LoadPF;
         end

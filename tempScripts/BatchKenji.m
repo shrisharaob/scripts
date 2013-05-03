@@ -2,7 +2,7 @@ function BatchKenji(funcHandle, varargin)
 % evaluate func for all kenji
 % [roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE]
     [roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE] = ...
-        DefaultArgs(varargin, {{'CA1'}, {'bigSquare'}, 0, {}, 'passFb', 0});
+        DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0});
     %   list = importdata('~/data/kenji/list');
     %   load('~/data/kenji/Beh_time_ind.mat');
     sK.roi = roi;

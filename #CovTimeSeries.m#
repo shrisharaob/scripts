@@ -26,7 +26,6 @@ function CovTimeSeries(trial, varargin)
     endEdges = trial.trialPeriods(1) + timeWinSiz : timeWinSiz * (1 - overlap) : trial.trialPeriods(2);
     winEdges = [startEdges', endEdges'];
     nWindows = size(winEdges, 1); % total no of bins
-    
     for kTimeWin = 1 : nWindows
         [kWinRes, kWinResIdx] = SelectPeriods(res, winEdges(kTimeWin, :), 'd', 1, 1);
         kWinClu = clu(kWinResIdx);

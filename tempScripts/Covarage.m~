@@ -1,0 +1,10 @@
+function Covarage(gt)
+    
+    gt = gt.LoadPF;
+    srm = gt.pfObject.smoothRateMap(:, :, gt.pfObject.sparsity < 0.3);
+    srm = mean(srm, 3);
+    srm = srm ./ sum(srm(:));
+    sd3 = 3 * std(srm(:));
+    contour(srm, [sd3, sd3]);
+    
+end
