@@ -1,4 +1,8 @@
-function mask = Covarage(gt, varargin)
+function [selectedPos, mask] = Coverage(gt, varargin)
+% [selectedPos, mask] = Covarage(gt, varargin)
+% select postion samples that lie in the inside the 
+% locations covered by recorded place fields
+
     [roi, arena, IF_PLOT, IF_REPORTFIG] = DefaultArgs(varargin, {'CA3', 'bigSquare', 0, 0});
     gt = gt.LoadPF;
     load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);

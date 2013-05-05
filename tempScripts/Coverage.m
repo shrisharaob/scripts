@@ -1,5 +1,9 @@
-function mask = Covarage(gt, varargin)
-    [roi, arena, IF_PLOT, IF_REPORTFIG] = DefaultArgs(varargin, {'CA3', 'bigSquare', 0, 0});
+function [selectedPos, mask] = Coverage(gt, varargin)
+% [selectedPos, mask] = Covarage(gt, varargin)
+% select postion samples that lie in the inside the 
+% locations covered by recorded place fields
+
+    [roi, arena, markerNo,  IF_PLOT, IF_REPORTFIG, nStd] = DefaultArgs(varargin, {'CA3', 'bigSquare',1, 0, 0, 3});
     gt = gt.LoadPF;
     load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
     srm = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
@@ -8,24 +12,19 @@ function mask = Covarage(gt, varargin)
     mask = false(size(srm, 1), size(srm, 2));
     for n = 1 : nCells
         nsrm = srm(:, :,n);
-        sd3 = 3 * std(nsrm(:));
+        sd3 = nStd * std(nsrm(:));
         if IF_PLOT
             contour(nsrm, [sd3, sd3], 'Color', colors(n, :));
         end
         mask = mask | nsrm > sd3;
         hold on;
     end
-    pos = sq(gt.position(:, 1, :));
+    pos = sq(gt.position(:, markerNo, :));
     binnedPos = BinPos(gt);
-    % posLinIdx = sub2ind(size(mask), binnedPos(:, 1), binnedPos(:, 2));
-    %   maskLinIdx = find(~mask);
-    %    inValidPosLinIdx = posLinIdx(ismember(posLinIdx, maskLinIdx));
-    invalidPosIdx = ismember(binnedPos, Ind2Sub([50, 50], find(~mask)), 'rows');
+    invalidPosIdx = ismember(binnedPos, Ind2Sub([50, 50], find(~mask')), 'rows'); % transpose of mask
     pos(invalidPosIdx, :) = nan;
+    selectedPos = pos;
     keyboard;
-    mask = logical(pos(mask)); 
-%     srm =sum(srm, 3) ./ sum(sum(sum(srm, 3)));
-%     mask = srm > 3 * std(srm(:));
     if IF_REPORTFIG  & IF_PLOT
         reportfig(gcf, mfilename, 0, [gt.trialName, '# units :', num2str(sum(ismember(gt.pfObject.acceptedUnits, commonClus)))], [], 0);
         clf;
