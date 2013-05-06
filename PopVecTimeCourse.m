@@ -1,7 +1,7 @@
 function [popVec, refVector, dotProd] = PopVecTimeCourse(gt, ThPh, varargin)
 % population vector time course for the entire filebase, considers only the common clus
     [commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
-        DefaultArgs(varargin, {[], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 3});
+        DefaultArgs(varargin, {[], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 0, [50, 50], 2});
     
     if ~IF_COMPUTE
         fprintf('loading  ...');
@@ -34,37 +34,39 @@ function [popVec, refVector, dotProd] = PopVecTimeCourse(gt, ThPh, varargin)
     popVec = zeros(nClus, nDims, nCycles);
     oldStr = [];
     fprintf('\n computing popvector...');
-    [pos, ~] = Coverage(gt, roi, arena, markerNo, 0, 0);
-    keyboard;
+    [binnedPos, coverageMask] = Coverage(gt, roi, arena, markerNo, 0, 0);
     for kPopVec = 1 : nCycles
         str = sprintf(['#', num2str(kPopVec) ' of ' num2str(nCycles)]);
         fprintf([repmat('\b', 1, length(oldStr)), str]);
         oldStr = str;
         [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :),'d',1,1);
         curClu = clu(curResId);
-        if ~isempty(curRes)
-            pos = SelectPeriods(pos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
-            pos = nanmean(pos, 1);
+        if ~isempty(curRes) & length(curRes) > 10 
+            tPos = SelectPeriods(binnedPos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+            tPos = round(nanmean(tPos, 1));
             spkCnt = zeros(nClus, 1);
-            if ~(all(isnan(pos(:))))
+            if ~(all(isnan(tPos(:))))
                 for mClu = 1 : nClus
                     spkCnt(mClu) = sum(curRes == commonClus(mClu));
                 end
-                %xyBin = sub2ind(spatialBins, find(IsEqual(pos(1), gt.pfObject.xBin, 2), 1), find(IsEqual(pos(2), gt.pfObject.yBin, 2), 1));
-                xbin = find(histc(pos(1), gt.pfObject.xBin), 1);
-                if isempty(xbin)
-                    xbin = 1;
-                end
-                ybin = find(histc(pos(2), gt.pfObject.yBin), 1);
-                if isempty(ybin)
-                    ybin = 1;
-                end
-                xyBin = sub2ind(spatialBins, xbin, ybin);
+
+%                 xbin = find(histc(tPos(1), gt.pfObject.xBin), 1);
+%                 if isempty(xbin)
+%                     xbin = 1;
+%                 end
+%                 ybin = find(histc(tPos(2), gt.pfObject.yBin), 1);
+%                 if isempty(ybin)
+%                     ybin = 1;
+%                 end
+                
+                xyBin = Sub2Ind(size(coverageMask), tPos);
                 popVec(:, xyBin, kPopVec) = spkCnt; 
             end
         end
     end
     fprintf('  done !!! \n');       
     dotProd = refVector(:)' * reshape(popVec, [], size(popVec,3));
-    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
+    if IF_OVERWRITE
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'refVector', 'popVec', 'dotProd','-v7.3');
+    end
 end 

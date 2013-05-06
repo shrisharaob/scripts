@@ -1,4 +1,4 @@
-function [selectedPos, mask] = Coverage(gt, varargin)
+function [binnedPos, mask] = Coverage(gt, varargin)
 % [selectedPos, mask] = Covarage(gt, varargin)
 % select postion samples that lie in the inside the 
 % locations covered by recorded place fields
@@ -22,9 +22,10 @@ function [selectedPos, mask] = Coverage(gt, varargin)
     pos = sq(gt.position(:, markerNo, :));
     binnedPos = BinPos(gt);
     invalidPosIdx = ismember(binnedPos, Ind2Sub([50, 50], find(~mask')), 'rows'); % transpose of mask
-    pos(invalidPosIdx, :) = nan;
-    selectedPos = pos;
-    keyboard;
+    binnedPos(invalidPosIdx, :) = nan;
+%     pos(invalidPosIdx, :) = nan;
+%     selectedPos = pos;
+close(gcf);
     if IF_REPORTFIG  & IF_PLOT
         reportfig(gcf, mfilename, 0, [gt.trialName, '# units :', num2str(sum(ismember(gt.pfObject.acceptedUnits, commonClus)))], [], 0);
         clf;

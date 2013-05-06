@@ -15,7 +15,7 @@ function out = BinPos(trial,varargin)
     if strcmp(trial.datasetType, 'kenji')
             stsp = [1, diff(stsp)];
     end
-    stspos = SelectPeriods(sq(trial.position(:,markerNo,:)),stsp, 'c', 1);
+    stspos = SelectPeriods(sq(trial.position(:,markerNo,:)), stsp, 'c', 1);
     pos = stspos;
 %     shuffled_Pos = @(pos_shuffle,stspos) circshift(stspos,randi([-pos_shuffle,pos_shuffle]));
     %%

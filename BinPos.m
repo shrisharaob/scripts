@@ -1,6 +1,6 @@
 function out = BinPos(trial,varargin)
-    % occupancy = Occupancy(trial,varargin)
-    % Justin's code
+%     % occupancy = Occupancy(trial,varargin)
+%     % Justin's code
 
     [Nbin,Smooth,type, states, pos_shuffle] = DefaultArgs(varargin,{50, 0.03,'xy', {'head', 'theta'}, 0});
     
