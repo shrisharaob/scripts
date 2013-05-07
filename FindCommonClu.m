@@ -1,21 +1,30 @@
 function FindCommonClu(varargin)
-% this script returns clusters which are active acros trils in all filebases
-    [roi, arena, sparsityThresh] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0.35});
+% this script returns clusters which are active acros trials in all filebases
+% [filebases, datasetType,roi, arena, sparsityThresh]
+% filebases - cell array containing list of fbs    
+    
+    [filebases, datasetType,roi, arena, sparsityThresh] = ...
+        DefaultArgs(varargin, {{}, 'kenji', {'CA3'}, {'bigSquare'}, 0.35});
 
-    switch gt.datasetType
+    switch datasetType
       case 'kenji'
         searchStruct.roi = roi;
         searchStruct.arena = arena;
         list = SearchKenji(searchStruct);
         filebases = unique(list(:, 1));
       case 'MTA'
-        roi = 'CA1'
-        arena = 'cof'
-        list = 
+        roi = 'CA1';
+        arena = 'cof';
+        if ~iscell(filebases), filebases = cellstr(filebases); end
     end
-        
+    
     for i = 1 : length(filebases)
-        trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
+        switch datasetType 
+          case 'kenji'
+            trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
+          case 'MTA'
+            trialNames = GenericTrial.MTATrialNames(filebases{i});
+        end
         if ~isempty(trialNames)
             fprintf('\n ********* filebase: %s ************** \n', filebases{i});
             cnt = 1;

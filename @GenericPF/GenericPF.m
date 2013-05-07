@@ -253,25 +253,29 @@ classdef GenericPF
                     save([genericPF.paths.analysis, fileName], 'pfPars')
              end
             end
-               genericPF.com = pfPars.com;
-               genericPF.smoothRateMap = pfPars.smoothRateMap;
-               genericPF.selectedPairs = pfPars.selectedPairs;
-               genericPF.idealPFUnits = pfPars.idealPFUnits;
-               genericPF.idealPFPairs = pfPars.idealPFPairs;
-               genericPF.spatialCoherence = pfPars.spatialCoherence;
-               genericPF.sparsity = pfPars.sparsity;
-               genericPF.ratePk = pfPars.ratePk;
-               genericPF.acceptedUnits = pfPars.acceptedUnits;
-               genericPF.comDist = pfPars.comDist;
-               genericPF.pkLoc = pfPars.pkLoc;
-               genericPF.pkDist = pfPars.pkDist;
-               if isfield(pfPars, 'entropy');
-                   genericPF.jntEntropy = pfPars.entropy;
-               end
+            try
+                genericPF.com = pfPars.com;
+                genericPF.smoothRateMap = pfPars.smoothRateMap;
+                genericPF.selectedPairs = pfPars.selectedPairs;
+                genericPF.idealPFUnits = pfPars.idealPFUnits;
+                genericPF.idealPFPairs = pfPars.idealPFPairs;
+                genericPF.spatialCoherence = pfPars.spatialCoherence;
+                genericPF.sparsity = pfPars.sparsity;
+                genericPF.ratePk = pfPars.ratePk;
+                genericPF.acceptedUnits = pfPars.acceptedUnits;
+                genericPF.comDist = pfPars.comDist;
+                genericPF.pkLoc = pfPars.pkLoc;
+                genericPF.pkDist = pfPars.pkDist;
+                if isfield(pfPars, 'entropy');
+                    genericPF.jntEntropy = pfPars.entropy;
+                end
                if isempty(genericPF.maze)
                    load([genericPF.paths.data, genericPF.filebase, '.miscPar.mat']);
                    genericPF.maze = miscPar.maze;
                end
+            catch err
+                
+            end
 
         end % END of Class Constructor
 
