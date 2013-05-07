@@ -15,17 +15,14 @@ function [binnedPos, mask] = Coverage(gt, varargin)
         sd3 = nStd * std(nsrm(:));
         if IF_PLOT
             contour(nsrm, [sd3, sd3], 'Color', colors(n, :));
+            hold on;
         end
         mask = mask | nsrm > sd3;
-        hold on;
     end
-    pos = sq(gt.position(:, markerNo, :));
     binnedPos = BinPos(gt);
-    invalidPosIdx = ismember(binnedPos, Ind2Sub([50, 50], find(~mask')), 'rows'); % transpose of mask
+    invalidPosIdx = ismember(binnedPos, Ind2Sub([50, 50], find(~mask)), 'rows'); 
+    mask = mask'; % transpose of mask
     binnedPos(invalidPosIdx, :) = nan;
-%     pos(invalidPosIdx, :) = nan;
-%     selectedPos = pos;
-close(gcf);
     if IF_REPORTFIG  & IF_PLOT
         reportfig(gcf, mfilename, 0, [gt.trialName, '# units :', num2str(sum(ismember(gt.pfObject.acceptedUnits, commonClus)))], [], 0);
         clf;

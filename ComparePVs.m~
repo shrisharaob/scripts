@@ -37,13 +37,14 @@ function out = ComparePVs(filebase, varargin)
     end
     
     if nTrials > 1
-        eval(['nCycles = size(' pvNames{1} ', 3);']);
+
         for mTrPair = 1 : nTrPairs
             if IF_PLOT
+                eval(['nCycles = size(' pvNames{trialPairs(mTrPair, 1)} ', 3);']);
                 eval(['plot(transpose(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '))* reshape(' pvNames{trialPairs(mTrPair, 1)} ', [], nCycles));']);
                 if IF_REPORTFIG
-                    filename = ['PopVec.' filebase];
-                    commentString = [trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, ' # units: ' num2str(nCells)];
+                    filename = ['PopVec',  GenFiletag(roi, arena), filebase];
+                    commentString = [trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, '::' char(SearchKenji(trialNames{trialPairs(mTrPair, 1)})),' ', char(SearchKenji(trialNames{trialPairs(mTrPair, 2)}))  ' # units: ' num2str(nCells)];
                     reportfig(gcf, filename , 0, commentString, [],0);
                 end
             end
