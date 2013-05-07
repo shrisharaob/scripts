@@ -1,4 +1,6 @@
 function out = ComparePVs(filebase, varargin)
+% out = ComparePVs(filebase, varargin)
+% compare pop vecs 
 
     [roi, arena, IF_PLOT, IF_REPORTFIG] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 1, 1});
     out = [];
@@ -19,7 +21,7 @@ function out = ComparePVs(filebase, varargin)
     for mTr = 1 : length(trialNames)
         load(['~/data/analysis/kenji/' filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
         eval([pvNames{mTr} '= popVec;']);
-        eval([rvNames{mTr} '= refVector;']);
+        eval([rvNames{mTr} '= avgVector;']);
         eval([dpNames{mTr} '= dotProd;']);
         eval(['nCells = size(', pvNames{1}, ', 1)']);
         eval(['out.pv{mTr}=' pvNames{mTr} ';']);

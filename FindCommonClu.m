@@ -1,10 +1,19 @@
-function FindCommonKenjiClu(varargin)
+function FindCommonClu(varargin)
 % this script returns clusters which are active acros trils in all filebases
     [roi, arena, sparsityThresh] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0.35});
-    searchStruct.roi = roi;
-    searchStruct.arena = arena;
-    list = SearchKenji(searchStruct);
-    filebases = unique(list(:, 1));
+
+    switch gt.datasetType
+      case 'kenji'
+        searchStruct.roi = roi;
+        searchStruct.arena = arena;
+        list = SearchKenji(searchStruct);
+        filebases = unique(list(:, 1));
+      case 'MTA'
+        roi = 'CA1'
+        arena = 'cof'
+        list = 
+    end
+        
     for i = 1 : length(filebases)
         trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
         if ~isempty(trialNames)
@@ -23,19 +32,8 @@ function FindCommonKenjiClu(varargin)
                     fprintf('error  !!!!! \n');
                 end
             end
-            filetag = [];
-            for mRoi = 1 : length(roi)
-                if mRoi == 1
-                    filetag = ['.', char(roi{1})];
-                end
-                if mRoi > 1
-                    filetag = [filetag, '.', char(roi{mRoi})];
-                end
-            end
-            for lArena = 1 : length(arena)
-                filetag = [filetag, '.', char(arena{lArena})];
-            end
-            save(['~/data/analysis/kenji/', filebases{i},'/', filebases{i}, filetag, '.commonClus.mat'], 'commonClus');
+            filetag = GenFiletag(roi, arena);
+            save([gt.paths.analysis, gt.filebase, filetag, '.commonClus.mat'], 'commonClus');
         end
     end
 end
