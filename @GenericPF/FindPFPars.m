@@ -3,7 +3,7 @@ function pfPars = FindPFPars(arg, varargin)
 %varargin - [pyrCluIdx, smoothFactor, IF_OVERWRITE]
     if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
-        = DefaultArgs(varargin, {[], 'crt1', 0.01, 0, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
+        = DefaultArgs(varargin, {[], 'crt1', 0.01, 1, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
 
     pfPars.com = [];
     pfPars.smoothRateMap = [];
@@ -62,15 +62,14 @@ function pfPars = FindPFPars(arg, varargin)
             smoothedRateMap = SmoothSurface(kRateMap, smoothFactor);
             [maxSmoothedRate, linIdx] = max(smoothedRateMap(:));
             pfPars.ratePk(kUnit) = maxSmoothedRate;
-            [i,j]=ind2sub(size(smoothedRateMap), linIdx);
+            [j, i]=ind2sub(size(smoothedRateMap), linIdx);
             maxRateXLoc = pfObject.xBin(i);
             maxRateYLoc = pfObject.yBin(j);
-            %            rateThresh = .707 * maxSmoothedRate;
             rateThresh = nSTD * std(smoothedRateMap(:));
             threshMask(:,:,kUnit) = kRateMap > rateThresh;
             maskXY = threshMask(:,:,kUnit);
             z = find(maskXY);
-            [i, j] = ind2sub(size(maskXY), z);
+            [j, i] = ind2sub(size(maskXY), z);
             z = [i'; j']; % dims x sampels
             comX = 0;
             comY = 0;

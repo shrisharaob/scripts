@@ -3,12 +3,12 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
         DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 4});
     
-    switch gt.datasettype
+    switch gt.datasetType
       case 'kenji'
           
       case 'MTA'
-        roi = 'CA1'
-        arena = 'cof'
+        roi = 'CA1';
+        arena = 'cof';
     end
 
     if ~IF_COMPUTE

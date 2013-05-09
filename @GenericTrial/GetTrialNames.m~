@@ -1,0 +1,7 @@
+function trialNames = GetTrialNames(gt, varargin)
+
+    switch gt.datasetType
+        case 'zhenya'
+         fn = CatStruct(dir(gt.paths.data));
+         filenames = fn.names;
+         

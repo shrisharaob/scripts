@@ -89,7 +89,6 @@ function PlotRateMaps(pfObject, varargin)
                 if strcmp(pfObject.datasetType, 'MTA')
                     plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
                 else
-                    keyboard;
                     plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
                 end
                 grid on

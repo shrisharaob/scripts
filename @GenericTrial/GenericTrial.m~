@@ -330,6 +330,11 @@ classdef GenericTrial
     
     
 end %END of methods
+
+methods(Static)
+    [trialnames] = MTATrialNames(arg);
+end % END of static methods
+
 end % END of classdef
 
 
