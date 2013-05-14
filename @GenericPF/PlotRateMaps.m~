@@ -54,10 +54,12 @@ function PlotRateMaps(pfObject, varargin)
                         ylabel('pixels');
                     end
                     if strcmp(pfObject.maze.name, 'cof')
-                        DrawCircle(0,0, mazeDiameter / 2,'w');
+                        centerX = range(xlim) / 2;
+                        centerY = range(ylim) / 2;
+                        DrawCircle(centerX, centerY, mazeDiameter / 2,'w');
                     end
                     title(['clu #', num2str(cellCluIdx(mCell))]);
-                    %                                 title(elCluStr);
+                    % title(elCluStr);
                     if IF_WAITFORBTNPRESS, waitforbuttonpress; end
                 else
                     title(num2str(cellCluIdx(mCell)));

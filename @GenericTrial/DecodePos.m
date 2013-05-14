@@ -31,15 +31,16 @@ function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
     if isempty(gt.res)
         gt = gt.LoadCR;
     end
-
     [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, 0.6);
     fprintf('compution posterior... ');
     tic, posterior = decode_bayesian_poisson(ratemaps, sc);toc
     pos = decodedPosMAP(gt, posterior);
-    bcidx = round(bc * gt.trackingSampleRate)+1;
-    bcidx(end) = [];
-    xy = gt.position(:, markerNo , [1, 2]);
-    xy = xy(bcidx,:);
+    % bcidx = round(bc * gt.trackingSampleRate)+1;
+    % bcidx(end) = [];
+    bc = round(bc * gt.trackingSampleRate) + 1;
+    for kWin = 1 : size(bc, 1)
+        xy(kWin, :) = nanmean(SelectPeriods(gt.position(:, markerNo , [1, 2]), bc, 'c'));
+    end
     for kBin = 1 : size(pos,1) - 1
         predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));
     end

@@ -86,7 +86,7 @@ function PlotRateMaps(pfObject, varargin)
                 end
                 hold on;
                 if strcmp(pfObject.maze.name, 'cof')
-                    DrawCircle(0,0, maze.dims / 2,'k');
+                    DrawCircle(0,0, mazeDiameter / 2,'k');
                 end
                 if strcmp(pfObject.datasetType, 'MTA')
                     plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
