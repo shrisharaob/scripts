@@ -23,7 +23,7 @@ function [sc, winEdges] = GetSpikeCounts(trial, varargin)
 %             break;
 %         end
 %         end
-       
+       statePeriods = head(
       case 'kenji'
         for i = 1:length(trial.states)   
             if strcmp(trial.states{i}.name, state)

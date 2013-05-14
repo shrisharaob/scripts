@@ -1,0 +1,7 @@
+gt = GenreicTrial('jg05-20120315');
+trn = MTATrialNames(gt);
+for ktr = 1 : length(trn)
+gt1 = GenricTrial(gt.filebase, trn{ktr});
+gt1 = gt1.LoadPF;
+GenricPF.FindPFPars(gt1);
+end

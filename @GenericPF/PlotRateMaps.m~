@@ -31,14 +31,14 @@ function PlotRateMaps(pfObject, varargin)
                     rateMap = pfObject.rateMap{linIdx};
                 end
                 if ~isempty(rateMap)
-                    if ~isempty(pfObject.maze.px2CmFactor)
+                    if isfield(pfObject.maze, 'px2CmFactor')
                         xAxis = pfObject.xBin * pfObject.maze.px2CmFactor(1);
                         yAxis = pfObject.yBin * pfObject.maze.px2CmFactor(2);
                         IN_CM = true;
                     else 
                         xAxis = pfObject.xBin;
                         yAxis = pfObject.yBin;
-                        IN_CM = flase; 
+                        IN_CM = false; 
                     end
                     xAxis = xAxis - xAxis(1); % recenter to 0 
                     yAxis = yAxis - yAxis(1); 
@@ -89,7 +89,6 @@ function PlotRateMaps(pfObject, varargin)
                 if strcmp(pfObject.datasetType, 'MTA')
                     plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
                 else
-                    keyboard;
                     plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
                 end
                 grid on

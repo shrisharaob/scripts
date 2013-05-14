@@ -1,14 +1,23 @@
 function BatchKenji(funcHandle, varargin)
 % evaluate func for all kenji
 % [roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE]
-    [roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE] = ...
-        DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0});
-    %   list = importdata('~/data/kenji/list');
-    %   load('~/data/kenji/Beh_time_ind.mat');
-    sK.roi = roi;
-    sK.arena = arena;
-    matches = SearchKenji(sK);
-    filebases = unique(matches(:,1));
+    [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE] = ...
+        DefaultArgs(varargin, {'', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0});
+
+    switch datasetType
+      case 'kenji'
+        searchStruct.roi = roi;
+        searchStruct.arena = arena;
+        list = SearchKenji(searchStruct);
+        filebases = unique(list(:, 1));
+      case 'MTA'
+        roi = 'CA1';
+        arena = 'cof';
+        if ~iscell(filebases), filebases = cellstr(filebases); end
+      otherwise
+        return;
+    end
+
     for i = 1 : length(filebases);
         trialNames = matches(strcmp(matches(:,1), filebases(i)), 2);
         switch type

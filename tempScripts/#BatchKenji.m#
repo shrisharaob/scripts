@@ -7,8 +7,21 @@ function BatchKenji(funcHandle, varargin)
     %   load('~/data/kenji/Beh_time_ind.mat');
     sK.roi = roi;
     sK.arena = arena;
-    matches = SearchKenji(sK); 
+    matches = SearchKenji(sK);
     filebases = unique(matches(:,1));
+    
+    switch datasetType
+      case 'kenji'
+        searchStruct.roi = roi;
+        searchStruct.arena = arena;
+        list = SearchKenji(searchStruct);
+        filebases = unique(list(:, 1));
+      case 'MTA'
+        roi = 'CA1';
+        arena = 'cof';
+        if ~iscell(filebases), filebases = cellstr(filebases); end
+    end
+
     for i = 1 : length(filebases);
         trialNames = matches(strcmp(matches(:,1), filebases(i)), 2);
         switch type

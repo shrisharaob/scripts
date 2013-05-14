@@ -31,14 +31,14 @@ function PlotRateMaps(pfObject, varargin)
                     rateMap = pfObject.rateMap{linIdx};
                 end
                 if ~isempty(rateMap)
-                    if ~isempty(pfObject.maze.px2CmFactor)
+                    if isfield(pfObject.maze, 'px2CmFactor')
                         xAxis = pfObject.xBin * pfObject.maze.px2CmFactor(1);
                         yAxis = pfObject.yBin * pfObject.maze.px2CmFactor(2);
                         IN_CM = true;
                     else 
                         xAxis = pfObject.xBin;
                         yAxis = pfObject.yBin;
-                        IN_CM = flase; 
+                        IN_CM = false; 
                     end
                     xAxis = xAxis - xAxis(1); % recenter to 0 
                     yAxis = yAxis - yAxis(1); 
@@ -54,10 +54,12 @@ function PlotRateMaps(pfObject, varargin)
                         ylabel('pixels');
                     end
                     if strcmp(pfObject.maze.name, 'cof')
-                        DrawCircle(0,0, mazeDiameter / 2,'w');
+                        centerX = range(xlim) / 2;
+                        centerY = range(ylim) / 2;
+                        DrawCircle(centerX, centerY, mazeDiameter / 2,'w');
                     end
                     title(['clu #', num2str(cellCluIdx(mCell))]);
-                    %                                 title(elCluStr);
+                    % title(elCluStr);
                     if IF_WAITFORBTNPRESS, waitforbuttonpress; end
                 else
                     title(num2str(cellCluIdx(mCell)));
