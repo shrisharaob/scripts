@@ -14,15 +14,16 @@ function [sc, winEdges] = GetSpikeCounts(trial, varargin)
     nClus = length(cluIdx);
     switch trial.datasetType
       case 'MTA'
-        for i = 1:length(trial.states)
-            if strcmp(state, 'RUN')
-                state = 'walk';
-            end
-            if strcmp(trial.states{i}.label, state),
-                statePeriods = trial.states{i}.statePeriods;
-                break;
-            end
-        end
+       %  for i = 1:length(trial.states)
+%             if strcmp(state, 'RUN')
+%                 state = 'theta';
+%             end
+%             % if strcmp(trial.states{i}.label, state),
+%                 % statePeriods = trial.states{i}.statePeriods;
+%             break;
+%         end
+%         end
+       
       case 'kenji'
         for i = 1:length(trial.states)   
             if strcmp(trial.states{i}.name, state)

@@ -2,7 +2,7 @@ function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
 % decode position 
 % gt - GenericTrial Object
     [binSize, IF_REPORTFIG, type] = DefaultArgs(varargin, {200e-3, 0, 'display'});
-    [sc,bc] = GetSpikeCounts(gt, binSize, cluId );
+    [sc, bc] = GetSpikeCounts(gt, binSize, cluId, [], 0.6);
     switch gt.datasetType
       case 'kenji'
         markerNo = 1;
