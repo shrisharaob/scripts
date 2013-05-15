@@ -54,7 +54,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
         [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :),'d');
         curClu = clu(curResId);
         if ~isempty(curRes) & length(curRes) > 5
-            tPos = SelectPeriods(binnedPos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+            tPos = SelectPeriods(binnedPos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1, 'c');
             tPos = round(nanmean(tPos, 1));
             spkCnt = zeros(nClus, 1);
             if ~(all(isnan(tPos(:))))

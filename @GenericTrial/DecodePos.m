@@ -16,6 +16,7 @@ function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
             end
         end
         % convert 2 samplerate
+        stateXY = SelectPeriods(sq(gt.position(:, markerNo, :)), statePeriods, 'c');
         statePeriods = ConvertFs(statePeriods, gt.trackingSampleRate, gt.sampleRate);
       case 'kenji'
         for i = 1:length(gt.states)   

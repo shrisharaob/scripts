@@ -1,7 +1,7 @@
 function PlotRateMaps(pfObject, varargin)
 % PlotPlaceFields(pfObject, varargin)
-% varargin - [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
-
+% varargin - [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
+% IF_contour {0, 1, 2}
     if nargin<1, help PlotPlaceFields; return; end
   
     filebase = pfObject.filebase;
@@ -14,10 +14,10 @@ function PlotRateMaps(pfObject, varargin)
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
+    [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
-    if ~IS_COUNTOUR
+    if ~IF_CONTOUR
        
             for mCell = 1 : nCells
                 linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
@@ -65,8 +65,8 @@ function PlotRateMaps(pfObject, varargin)
                     title(num2str(cellCluIdx(mCell)));
                 end
             end
-    else
-        rateThreshPar = 0.707;
+    else % IF_CONTOUR
+
         colors = GenColormap(nCells);
         IS_AUTO_COLOR =0;
         if isempty(contourColor), IS_AUTO_COLOR = 1; end
@@ -79,17 +79,18 @@ function PlotRateMaps(pfObject, varargin)
             if sum(idx2) ~= 0
                 smoothedRateMap = pfObject.smoothRateMap(:,:,idx2);
                 maxRate = max(smoothedRateMap(:));
+                rateThreshPar = 3 * std(smoothedRateMap(:));
                 if nContours == 1
-                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[maxRate, maxRate].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[1, 1].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
                 else
-                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(rateThreshPar  * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end
-                hold on;
+                if IF_CONTOUR == 2, hold on; end
                 if strcmp(pfObject.maze.name, 'cof')
                     DrawCircle(0,0, mazeDiameter / 2,'k');
                 end
                 if strcmp(pfObject.datasetType, 'MTA')
-                    plot(pfObject.pkLoc(idx2, 2), pfObject.pkLoc(idx2, 1), '*k'); % x an y are reversed in Justins code
+                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k'); % x an y are reversed in Justins code
                 else
                     plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
                 end

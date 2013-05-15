@@ -5,7 +5,6 @@ function SequenceMem(filebase, varargin)
 % poission spikes stats and independence of cells
 
 [arena, roi, IF_REPORTFIG, type] = DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, 1, 'display'});
-%     gt = GenericTrial();
 
 kenjiSearch.roi = roi;
 kenjiSearch.arena = arena;
@@ -13,7 +12,6 @@ matches = SearchKenji(kenjiSearch);
 matches = matches(strcmp(matches(:, 1), filebase), :);
 nTrials = size(matches, 1);
 refTr = nTrials;
-%keyboard;
 switch type
   case 'compute'
     if nTrials == 1, return; end;
@@ -37,8 +35,6 @@ switch type
     end
     for mTr = 1 : nTrials
         if ~isempty(commonClus)
-            %            refRm = smRatemaps{refTr};
-            % if 
             [pos, predErr] = DecodePos(refGt, smRatemaps{mTr}, commonClus, 200e-3);
             save([gt.paths.analysis, filebase,  GenFiletag(roi, arena), mfilename, matches{mTr, 2}], 'pos', 'predErr');
             drawnow;
@@ -47,11 +43,8 @@ switch type
                                     char(SearchKenji(matches{refTr, 2})) '(' matches{mTr, 2} ')'] );
                 close gcf;
             end
-            
         end
-        
     end
-    %keyboard;
   case 'display'
    gt = GenericTrial(filebase, matches{refTr, 2});
   for mTr = 1 : nTrials
@@ -65,7 +58,6 @@ switch type
                                     char(SearchKenji(matches{refTr, 2})) '(' matches{mTr, 2} ')'] );
                 close(h);
             end
-
   end
 end
 close all;

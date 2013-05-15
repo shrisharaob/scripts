@@ -1,29 +1,47 @@
 function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
 % decode position 
 % gt - GenericTrial Object
-    [binSize, IF_REPORTFIG, type] = DefaultArgs(varargin, {200e-3, 0, 'display'});
-    [sc, bc] = GetSpikeCounts(gt, binSize, cluId, [], 0.6);
+    [binSize, IF_REPORTFIG, type, state] = DefaultArgs(varargin, {200e-3, 0, 'display', 'RUN'});
+
     switch gt.datasetType
-      case 'kenji'
-        markerNo = 1;
       case 'MTA'
-        marekerNo = 7;
+        markerNo = 7;
+        for i = 1:length(gt.states)
+            if strcmp(state, 'RUN')
+                state = 'walk';
+            end
+            if strcmp(gt.states{i}.label, state),
+                statePeriods = gt.states{i}.statePeriods;
+                break;
+            end
+        end
+        % convert 2 samplerate
+        stateXY = SelectPeriods(sq(gt.position(:, markerNo, :)), statePeriods, 'c');
+        statePeriods = ConvertFs(statePeriods, gt.trackingSampleRate, gt.sampleRate);
+      case 'kenji'
+        for i = 1:length(gt.states)   
+            if strcmp(gt.states{i}.name, state)
+                statePeriods = gt.states{i}.statePeriods; % @ lfp fs
+                break;
+            end
+        end
+        markerNo = 1;
+        statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
     end
+
+    if isempty(gt.res)
+        gt = gt.LoadCR;
+    end
+    [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, 0.6);
     fprintf('compution posterior... ');
     tic, posterior = decode_bayesian_poisson(ratemaps, sc);toc
     pos = decodedPosMAP(gt, posterior);
-    % figure;
-    % plot(pos(:,1), pos(:,2),'.');
-    % figure;
-    % for kBin = 1 : size(posterior,3)
-    %   imagesc(sq(posterior(:,:,kBin)));
-    %   pause(.05);
-    %   drawnow;
-    % end
-    bcidx = round(bc * gt.trackingSampleRate)+1;
-    bcidx(end) = [];
-    xy = gt.position(:, markerNo , [1, 2]);
-    xy = xy(bcidx,:);
+    % bcidx = round(bc * gt.trackingSampleRate)+1;
+    % bcidx(end) = [];
+    bc = round(bc * gt.trackingSampleRate) + 1;
+    for kWin = 1 : size(bc, 1)
+        xy(kWin, :) = nanmean(SelectPeriods( , bc, 'c'));
+    end
     for kBin = 1 : size(pos,1) - 1
         predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));
     end

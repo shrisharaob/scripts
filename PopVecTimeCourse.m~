@@ -61,7 +61,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
                 for mClu = 1 : nClus
                     spkCnt(mClu) = sum(curClu == commonClus(mClu));
                 end
-              %                xyBin = Sub2Ind(size(coverageMask), tPos);
+                %                xyBin = Sub2Ind(size(coverageMask), tPos);
                 popVec(:, tPos(1), tPos(2), kPopVec) = spkCnt; 
             end
         end
