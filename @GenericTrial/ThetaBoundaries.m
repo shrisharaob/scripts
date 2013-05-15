@@ -1,6 +1,6 @@
 function thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
 
-    [commonClus, thBinSiz, tolerence, nCatCycles] = DefaultArgs(varargin, {[], 10, 1e-1, 0});
+    [commonClus, thBinSiz, tolerence, nCatCycles, inPeriods] = DefaultArgs(varargin, {[], 10, 1e-1, 0, []});
     
     res = trial.res(ismember(trial.clu, commonClus)); % load res only for the units in roi
     clu = trial.clu(ismember(trial.clu, commonClus));
@@ -21,4 +21,9 @@ function thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
         thetaBoundaries = thetaBoundaries(1 : nCatCycles : end);
     end
     thetaBoundaries = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 : end)]; 
+    if ~isempty(inPeriods)
+        thBndInPeriods = IntersectRanges(thetaBoundaries, inPeriods);
+        % select only complete theta cycles within inPeriods
+        thetaBoundaries = thetaBoundaries(ismember(thetaBoundaries, thBndInPeriods, 'rows'), :);
+    end
 end

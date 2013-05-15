@@ -17,7 +17,6 @@ function thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
     [~, minCIdx] = min(count(2:end-1)); 
     minPh = 0.5 * (binEdges(minCIdx) + binEdges(minCIdx + 1));
     thetaBoundaries = find(IsEqual(trialThPh, minPh, tolerence, 0)); 
-keyboard;
     if nCatCycles
         thetaBoundaries = thetaBoundaries(1 : nCatCycles : end);
     end
