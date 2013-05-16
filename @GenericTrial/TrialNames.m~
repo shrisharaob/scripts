@@ -1,0 +1,5 @@
+function trialNames = TrialNames(gt)
+  %  trialNames = TrialNames(gt)
+  % returns all the trial names in a filebase
+
+  

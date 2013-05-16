@@ -5,7 +5,6 @@ function SequenceMem(filebase, varargin)
 % poission spikes stats and independence of cells
 
     [arena, roi, IF_REPORTFIG, type] = DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, 1, 'display'});
-
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
