@@ -1,12 +1,12 @@
-function out=ButterBandPass(x,fs,f1,f2,varargin)
-%x,fs,f1,f2,order(default=6)
+function out = ButterBandPass(x, fs, fRange, varargin)
+% ButterBandPass(x, fs, fRange, varargin)
 
-if nargin>4 && ~isempty(varargin(1)) 
-    order=varargin(1);else order=6;
+[order] = DefaultArgs(varargin, {6});
 
-[b a ]=butter(order,f1/(fs/2),'high');
+[b a ]=butter(order,fRange(1) / (fs/2), 'high');
 tempx=filtfilt(b,a,x);
-[b a ]=butter(order,f2/(fs/2),'low');
+[b a ]=butter(order,fRange(2) / (fs/2), 'low');
+
 out=filtfilt(b,a,tempx);
 
 end

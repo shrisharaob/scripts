@@ -24,7 +24,7 @@ classdef GenericTrial
         trialName;
         
         % for kenji data set where several trials are concatinated into a
-        % single filebase @lfp  fs
+        % single filebase @lfp  fs, for MTA as well 
         trialPeriods;
         
         % tag to identify trial subtypes, if any
@@ -113,6 +113,9 @@ classdef GenericTrial
                   case 'kenji'
                     genericTrial.paths.data = ['~/data/kenji/', fileBase, '/'];
                     genericTrial.paths.analysis = ['~/data/analysis/kenji/', fileBase, '/'];
+                  case 'zhenya'
+                    genericTrial.paths.data = ['~/data/zhenya/', fileBase, '/'];
+                    genericTrial.paths.analysis = ['~/data/analysis/zhenya/', fileBase, '/'];
                   otherwise
                     genericTrial.paths.data = ['~/data/', fileBase, '/'];
                     genericTrial.paths.analysis = ['~/data/analysis/', fileBase, '/'];
@@ -140,7 +143,17 @@ classdef GenericTrial
                             %  <filebase>, in case it does not exist
                             if ~DirExists('~/data/analysis/kenji/', fileBase);
                                 mkdir([genericTrial.paths.analysis]);
-                            end
+                            end  
+                        elseif DirExists('~/data/zhenya/', fileBase)
+                            genericTrial.datasetType = 'zhenya';
+                            genericTrial.paths.data = ['~/data/zhenya/', fileBase, '/'];
+                            genericTrial.paths.analysis = ['~/data/analysis/zhenya/', fileBase, '/'];
+                            genericTrial.trackingSampleRate = 50;
+                            % create a subfolder under analysis folder with  name
+                            %  <filebase>, in case it does not exist
+                            if ~DirExists('~/data/analysis/zhenya/', fileBase);
+                                mkdir([genericTrial.paths.analysis]);
+                            end  
                         elseif DirExists('~/data/', fileBase)
                             if ~DirExists('~/data/analysis/', fileBase);
                                 mkdir(genericTrial.paths.analysis);
@@ -200,6 +213,9 @@ classdef GenericTrial
                         fprintf(['\n' repmat('*', 1, 50) '\n '])
                         return;
                     end
+                  case 'zhenya'
+                    
+                    %xy = importdata([gt.
                 end
             end
             genericTrial.clu = [];
@@ -300,6 +316,7 @@ classdef GenericTrial
             end
             genericTrial.trialName = anyTrialObj.trialName;
             genericTrial.trialSubType = [];
+            %            genericTrial.trialPeriods = anyTrialObj.syncPeriods;
             genericTrial.sampleRate = anyTrialObj.sampleRate;
             genericTrial.lfpSampleRate = anyTrialObj.lfpSampleRate;
             genericTrial.lfp = anyTrialObj.lfp;

@@ -2,25 +2,29 @@ function out = ComparePVs(filebase, varargin)
 % out = ComparePVs(filebase, varargin)
 % compare pop vecs 
 
-    [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, 1, 1});
+    [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = ...
+        DefaultArgs(varargin, {[], {'CA3'}, {'bigSquare'}, 1, 1});
     out = [];
     switch datasetType
       case 'kenji'
         searchStruct.roi = roi;
         searchStruct.arena = arena;
-        list = SearchKenji(searchStruct);
-        filebases = unique(list(:, 1));
+        matches = SearchKenji(searchStruct);
+        matches = matches(strcmp(matches(:, 1), filebase), :);
+        trialNames = matches(:, 2);
       case 'MTA'
         roi = 'CA1';
         arena = 'cof';
-        if ~iscell(filebase), filebase = cellstr(filebase); end
+        % if ~iscell(filebase), filebase = cellstr(filebase); end
+        trialNames = MTATrialNames(filebase);
+      otherwise
+        error;
+        return;
     end
     filetag = GenFiletag(roi, arena);
-    sK.roi = roi;
-    sK.arena = arena;
-    matches = SearchKenji(sK);
-    matches = matches(strcmp(matches(:, 1), filebase), :);
-    trialNames = matches(:, 2);
+%     sK.roi = roi;
+%     sK.arena = arena;
+%     matches = SearchKenji(sK);
     nTrials = length(trialNames);
     if nTrials > 1
         trialPairs = nchoosek(1:nTrials, 2);

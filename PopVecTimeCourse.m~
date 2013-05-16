@@ -1,7 +1,7 @@
 function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % population vector time course for the entire filebase, considers only the common clus
     [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
-        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 4});
+        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 2});
     
     switch gt.datasetType
       case 'kenji'
@@ -32,29 +32,30 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     nDims = nRows * nClmns;
     refVector = zeros(nClus, nRows, nClmns); % each clm of this matrix is a pop vector at one of the spatial bins
     % indices of thetapeak in lfp sample rate thetaBoundaries
-    thetaPeriods = gt.ThetaBoundaries(ThPh, commonClus, [], [], nThCycles); 
+  
     if strcmp(gt.datasetType, 'kenji')
         markerNo = 1;
     elseif strcmp(gt.datasetType, 'MTA')
         markerNo = 7;
     end
-    nCycles = size(thetaPeriods, 1);
-    popVec = zeros(nClus, nRows, nClmns, nCycles);
     oldStr = [];
-    fprintf('\n computing popvector...');
     [binnedPos, coverageMask] = Coverage(gt, roi, arena, markerNo, 0, 0);
     inout = InOut(~isnan(binnedPos(:,1)), [0, 1]); % select res from only when rat is in a good pf
     inout = inout{1};
+    thetaPeriods = gt.ThetaBoundaries(ThPh, commonClus, [], [], nThCycles, ConvertFs(inout, gt.trackingSampleRate, gt.lfpSampleRate));
+    nCycles = size(thetaPeriods, 1);
+    popVec = zeros(nClus, nRows, nClmns, nCycles);
     [res, resIdx] = SelectPeriods(res, round(inout * gt.lfpSampleRate ./ gt.trackingSampleRate) + 1, 'd');
     clu = clu(resIdx);
+    fprintf('\n computing popvector...');
     for kPopVec = 1 : nCycles
         str = sprintf(['#', num2str(kPopVec) ' of ' num2str(nCycles)]);
         fprintf([repmat('\b', 1, length(oldStr)), str]);
         oldStr = str;
-        [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :),'d');
+        [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :), 'd');
         curClu = clu(curResId);
         if ~isempty(curRes) & length(curRes) > 5
-            tPos = SelectPeriods(binnedPos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1);
+            tPos = SelectPeriods(binnedPos, round(thetaPeriods(kPopVec, :) .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1, 'c');
             tPos = round(nanmean(tPos, 1));
             spkCnt = zeros(nClus, 1);
             if ~(all(isnan(tPos(:))))
@@ -69,7 +70,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     avgVector = mean(popVec, 4);
     fprintf('  done !!! \n');
     dotProd = avgVector(:)' * reshape(popVec, [], size(popVec,4));
-    if IF_OVERWRITE
+    if IF_COMPUTE
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
     end
 end 

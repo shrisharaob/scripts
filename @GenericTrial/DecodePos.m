@@ -40,7 +40,7 @@ function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
     % bcidx(end) = [];
     bc = round(bc * gt.trackingSampleRate) + 1;
     for kWin = 1 : size(bc, 1)
-        xy(kWin, :) = nanmean(SelectPeriods(gt.position(:, markerNo , [1, 2]), bc, 'c'));
+        xy(kWin, :) = nanmean(SelectPeriods( , bc, 'c'));
     end
     for kBin = 1 : size(pos,1) - 1
         predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));

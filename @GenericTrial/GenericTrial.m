@@ -24,7 +24,7 @@ classdef GenericTrial
         trialName;
         
         % for kenji data set where several trials are concatinated into a
-        % single filebase @lfp  fs
+        % single filebase @lfp  fs, for MTA as well 
         trialPeriods;
         
         % tag to identify trial subtypes, if any
@@ -316,6 +316,7 @@ classdef GenericTrial
             end
             genericTrial.trialName = anyTrialObj.trialName;
             genericTrial.trialSubType = [];
+            genericTrial.trialPeriods = [1, diff(anyTrialObj.syncPeriods)];
             genericTrial.sampleRate = anyTrialObj.sampleRate;
             genericTrial.lfpSampleRate = anyTrialObj.lfpSampleRate;
             genericTrial.lfp = anyTrialObj.lfp;
