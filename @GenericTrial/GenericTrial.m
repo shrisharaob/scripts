@@ -316,7 +316,7 @@ classdef GenericTrial
             end
             genericTrial.trialName = anyTrialObj.trialName;
             genericTrial.trialSubType = [];
-            genericTrial.trialPeriods = [1, diff(anyTrialObj.syncPeriods)];
+            genericTrial.trialPeriods = anyTrialObj.syncPeriods;
             genericTrial.sampleRate = anyTrialObj.sampleRate;
             genericTrial.lfpSampleRate = anyTrialObj.lfpSampleRate;
             genericTrial.lfp = anyTrialObj.lfp;
