@@ -1,6 +1,9 @@
 function BatchKenji(funcHandle, varargin)
-% evaluate func for all kenji
+% function BatchKenji(funcHandle, varargin)
 % [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE]
+% '', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0
+% evaluate func for all filebases
+
     [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE] = ...
         DefaultArgs(varargin, {'', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0});
 
@@ -19,6 +22,7 @@ function BatchKenji(funcHandle, varargin)
         %if ~iscell(filebases), filebases = cellstr(filebases); end
         load('~/data/analysis/MTA_fb_list.mat');
       otherwise
+        fprintf('\n data set type not specified \n');
         return;
     end
     

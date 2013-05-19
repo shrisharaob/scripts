@@ -1,5 +1,7 @@
 function out = ComparePVs(filebase, varargin)
 % out = ComparePVs(filebase, varargin)
+% [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG]
+% [], {'CA3'}, {'bigSquare'}, 1, 1
 % compute dot product 
 
     [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = ...
@@ -38,7 +40,10 @@ function out = ComparePVs(filebase, varargin)
         eval(['out.pv{mTr}=' pvNames{mTr} ';']);
         eval(['out.rv{mTr}=' rvNames{mTr} ';']);
         if IF_PLOT
+            % figHdl = figure;
+            % subplot(nTrials, mTr, 1);
             eval(['plot(' dpNames{mTr} ');']);
+            %            title(trialNames{mTr});
             xlabel('# Theta cycles');
             ylabel('dot product');
             if IF_REPORTFIG
@@ -48,13 +53,17 @@ function out = ComparePVs(filebase, varargin)
             end
         end
     end
-    
+    close(figHdl);
+    dpFunc = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
     if nTrials > 1
-
         for mTrPair = 1 : nTrPairs
             if IF_PLOT
+                %   figHdl = figure;
+                % subplot(nTrPairs, mTrPair, 
                 eval(['nCycles = size(' pvNames{trialPairs(mTrPair, 1)} ', 4);']);
-                eval(['plot(transpose(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '))* reshape(' pvNames{trialPairs(mTrPair, 1)} ', [], nCycles));']);
+                eval(['cdp = dpFunc(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '), reshape(' pvNames{trialPairs(mTrPair, 1)} ', [], nCycles));']);
+                cdp(isnan(cdp)) = 0;
+                plot(cdp);
                 if IF_REPORTFIG
                     commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells), '<br>', trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, ' (' char(SearchKenji(trialNames{trialPairs(mTrPair, 1)})), ' , ', char(SearchKenji(trialNames{trialPairs(mTrPair, 2)})) ')' ]);
                     reportfig(gcf, filename , 0, commentString, [],0);
