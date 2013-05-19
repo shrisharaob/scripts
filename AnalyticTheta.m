@@ -2,11 +2,12 @@ function [ThPh, ThAmp] = AnalyticTheta(gt, varargin)
 
     [channel, fRange, IF_COMPUTE] = DefaultArgs(varargin, {1, [4 12], 0});
     
-    if ~IF_COMPUTE
-        load([gt.paths.data, gt.filebase, '.thpar.mat']);
+    if ~IF_COMPUTE & FileExists([gt.paths.data, gt.filebase, gt.trialName, '.thpar.mat'])
+        load([gt.paths.data, gt.filebase, gt.trialName, '.thpar.mat']);
         return;
-    end
-
+    end    
+    
+    fprintf('\n computing theta phase \n');
     switch gt.datasetType
         case 'MTA'
           mtr = MTATrial(gt.filebase, {{'lfp', channel}}, gt.trialName);
@@ -17,7 +18,7 @@ function [ThPh, ThAmp] = AnalyticTheta(gt, varargin)
     xa = hilbert(x);
     ThAmp = abs(xa);
     ThPh = angle(xa);
-    save([gt.paths.data, gt.filebase, '.thpar.mat'], 'ThAmp', 'ThPh');
+    save([gt.paths.data, gt.filebase, gt.trialName, '.thpar.mat'], 'ThAmp', 'ThPh');
 end
     
     

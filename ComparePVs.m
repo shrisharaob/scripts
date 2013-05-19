@@ -1,6 +1,6 @@
 function out = ComparePVs(filebase, varargin)
 % out = ComparePVs(filebase, varargin)
-% compare pop vecs 
+% compute dot product 
 
     [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = ...
         DefaultArgs(varargin, {[], {'CA3'}, {'bigSquare'}, 1, 1});
@@ -15,16 +15,12 @@ function out = ComparePVs(filebase, varargin)
       case 'MTA'
         roi = 'CA1';
         arena = 'cof';
-        % if ~iscell(filebase), filebase = cellstr(filebase); end
         trialNames = MTATrialNames(filebase);
       otherwise
         error;
         return;
     end
     filetag = GenFiletag(roi, arena);
-%     sK.roi = roi;
-%     sK.arena = arena;
-%     matches = SearchKenji(sK);
     nTrials = length(trialNames);
     if nTrials > 1
         trialPairs = nchoosek(1:nTrials, 2);
@@ -46,8 +42,8 @@ function out = ComparePVs(filebase, varargin)
             xlabel('# Theta cycles');
             ylabel('dot product');
             if IF_REPORTFIG
-                filename = ['PopVec',  GenFiletag(roi, arena)];
-                commentString = [filebase, '- trial id :'  trialNames{mTr}, ' # units: ' num2str(nCells)];
+                filename = ['PopVec',  GenFiletag(roi, arena), datasetType];
+                commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells), '<br>','trial - ' trialNames{mTr}]);
                 reportfig(gcf, filename , 0, commentString, [],0);
             end
         end
@@ -60,8 +56,7 @@ function out = ComparePVs(filebase, varargin)
                 eval(['nCycles = size(' pvNames{trialPairs(mTrPair, 1)} ', 4);']);
                 eval(['plot(transpose(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '))* reshape(' pvNames{trialPairs(mTrPair, 1)} ', [], nCycles));']);
                 if IF_REPORTFIG
-                    filename = ['PopVec',  GenFiletag(roi, arena)];
-                    commentString = [trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, '::' char(SearchKenji(trialNames{trialPairs(mTrPair, 1)})),' ', char(SearchKenji(trialNames{trialPairs(mTrPair, 2)}))  ' # units: ' num2str(nCells)];
+                    commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells), '<br>', trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, ' (' char(SearchKenji(trialNames{trialPairs(mTrPair, 1)})), ' , ', char(SearchKenji(trialNames{trialPairs(mTrPair, 2)})) ')' ]);
                     reportfig(gcf, filename , 0, commentString, [],0);
                 end
             end

@@ -5,6 +5,12 @@ function [binnedPos, mask] = Coverage(gt, varargin)
 
     [roi, arena, markerNo,  IF_PLOT, IF_REPORTFIG, nStd] = DefaultArgs(varargin, {'CA3', 'bigSquare',1, 0, 0, 3});
     gt = gt.LoadPF;
+    switch gt.datasetType
+      case 'MTA'
+        roi = 'CA1';
+        arena = 'cof';
+
+    end
     load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
     srm = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
     nCells = size(srm, 3);

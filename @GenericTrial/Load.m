@@ -40,10 +40,10 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                 else
                    
                     [res, clu, map] = LoadCluRes([genericTrial.paths.data, genericTrial.filebase]);
-                    if strcmp(genericTrial.datasetType, 'kenji')
-                        [res, resIdx] = SelectPeriods(res, ConvertFs(genericTrial.trialPeriods, genericTrial.sampleRate), 'd');
-                        clu = clu(resIdx);
-                    end
+               %      if strcmp(genericTrial.datasetType, 'kenji')
+%                         [res, resIdx] = SelectPeriods(res, ConvertFs(genericTrial.trialPeriods, genericTrial.lfpSampleRate, genericTrial.sampleRate), 'd');
+%                         clu = clu(resIdx);
+%                     end
                     genericTrial.elClu = map(:,[2, 3]);
                     genericTrial.res = res;
                     genericTrial.clu = clu;

@@ -1,5 +1,10 @@
 function thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
-
+% thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
+% varargin - [commonClus, thBinSiz, tolerence, nCatCycles, inPeriods]    
+% returns the boundaries of complete theta cycles, boundries identified as the phase with least spiking
+% nCatCycles - number of theta cycles to concatinate
+% inPeriods - theta boundaries returned lie with in the inPeriods
+    
     [commonClus, thBinSiz, tolerence, nCatCycles, inPeriods] = DefaultArgs(varargin, {[], 10, 1e-1, 0, []});
     
     res = trial.res(ismember(trial.clu, commonClus)); % load res only for the units in roi
@@ -20,7 +25,7 @@ function thetaBoundaries = ThetaBoundaries(trial, ThPh,  varargin)
     if nCatCycles
         thetaBoundaries = thetaBoundaries(1 : nCatCycles : end);
     end
-    thetaBoundaries = [thetaBoundaries(1 : end - 1)- 1, thetaBoundaries(2 : end)]; 
+    thetaBoundaries = [thetaBoundaries(1 : end - 1), thetaBoundaries(2 : end)]; 
     if ~isempty(inPeriods)
         thBndInPeriods = IntersectRanges(thetaBoundaries, inPeriods);
         % select only complete theta cycles within inPeriods
