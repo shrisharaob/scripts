@@ -23,7 +23,7 @@ function FindCommonClu(varargin)
           case 'kenji'
             trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
           case 'MTA'
-            trNames = GenericTrial.MTATrialNames(filebases{i});
+            trNames = MTATrialNames(filebases{i});
             trialNames = trNames(find(~cellfun(@strcmp, trNames, repmat({'all'}, length(trNames), 1))));
             
       end

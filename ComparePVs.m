@@ -7,21 +7,17 @@ function out = ComparePVs(filebase, varargin)
     [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = ...
         DefaultArgs(varargin, {[], {'CA3'}, {'bigSquare'}, 1, 1});
     out = [];
-    switch datasetType
-      case 'kenji'
-        searchStruct.roi = roi;
-        searchStruct.arena = arena;
-        matches = SearchKenji(searchStruct);
-        matches = matches(strcmp(matches(:, 1), filebase), :);
-        trialNames = matches(:, 2);
-      case 'MTA'
-        roi = 'CA1';
-        arena = 'cof';
-        trialNames = MTATrialNames(filebase);
-      otherwise
-        error;
-        return;
-    end
+     switch datasetType
+       case 'kenji'
+         analysisFldrPath = '~/data/analysis/kenji/';
+       
+       case 'MTA'
+         roi = 'CA1';
+         arena = 'cof';
+         analysisFldrPath = ['~/data/analysis/'];
+
+     end
+    trialNames = TrialNames(filebase, datasetType, roi, arena);
     filetag = GenFiletag(roi, arena);
     nTrials = length(trialNames);
     if nTrials > 1
@@ -35,7 +31,7 @@ function out = ComparePVs(filebase, varargin)
     dpNames = genvarname(cellstr(repmat('dp', length(trialNames), 1)));
     if IF_PLOT, figHdl = figure; end
     for mTr = 1 : nTrials
-        load(['~/data/analysis/kenji/' filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
+        load([analysisFldrPath, filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
         eval([pvNames{mTr} '= popVec;']);
         eval([rvNames{mTr} '=mean('  pvNames{mTr} ', 4);']);
         eval([dpNames{mTr} '= dotProd;']);
@@ -53,7 +49,6 @@ function out = ComparePVs(filebase, varargin)
                 set(axHdl, 'XTickLabel', '');
                 set(axHdl, 'XColor', get(axHdl,'Color'));
             end
-
             ylabel('dot product');
         end
     end 

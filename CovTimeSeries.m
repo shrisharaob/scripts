@@ -1,5 +1,8 @@
 function CovTimeSeries(trial, varargin)
-% 
+% CovTimeSeries(trial, varargin)
+% [ThPh, commonClus, IF_REPORT_FIG, nThCycles, overlap, pairs2analyse, IF_SAVE, binSize, fileTag] 
+% [], [], 0, 3, 0.8,[1:size(trial.pfObject.selectedPairs, 1)], 1, 10e-3, []
+% computes cov in theta cycles  
      
     if nargin<1, help CCGofSegments; return; end
     if isempty(trial.pfObject), trial = trial.LoadPF; end

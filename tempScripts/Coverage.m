@@ -1,9 +1,11 @@
 function [binnedPos, mask] = Coverage(gt, varargin)
 % [selectedPos, mask] = Covarage(gt, varargin)
+% [roi, arena, markerNo,  IF_PLOT, IF_REPORTFIG, nStd]
 % select postion samples that lie in the inside the 
 % locations covered by recorded place fields
 
-    [roi, arena, markerNo,  IF_PLOT, IF_REPORTFIG, nStd] = DefaultArgs(varargin, {'CA3', 'bigSquare',1, 0, 0, 3});
+    [roi, arena, markerNo,  IF_PLOT, IF_REPORTFIG, nStd] = ...
+        DefaultArgs(varargin, {'CA3', 'bigSquare',1, 0, 0, 3});
     gt = gt.LoadPF;
     switch gt.datasetType
       case 'MTA'
@@ -30,7 +32,7 @@ function [binnedPos, mask] = Coverage(gt, varargin)
     mask = mask'; % transpose of mask
     binnedPos(invalidPosIdx, :) = nan;
     if IF_REPORTFIG  & IF_PLOT
-        reportfig(gcf, mfilename, 0, [gt.trialName, '# units :', num2str(sum(ismember(gt.pfObject.acceptedUnits, commonClus)))], [], 0);
+        reportfig(gcf, [mfilename, GenFiletag(roi, arena), gt.datasetType], 0, [gt.trialName, '# units :', num2str(sum(ismember(gt.pfObject.acceptedUnits, commonClus)))], [], 0);
         clf;
     end
 end

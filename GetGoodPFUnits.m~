@@ -1,6 +1,6 @@
 function out = GetGoodPFUnits(filebase, varargin)
 
-    [roi, arena, IF_SmthRM, IF_REPORTFIG] = DefaultArgs(varargin, { {'CA3'}, {'bigSquare'}, 1, 0 });
+    [roi, arena, IF_SmthRM, IF_REPORTFIG] = DefaultArgs(varargin, { {'CA1'}, {'bigSquare'}, 1, 0 });
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
@@ -51,18 +51,23 @@ function out = GetGoodPFUnits(filebase, varargin)
     out.goodUnits = commonClus(gu);
     if nTrials == 1 | length(out.goodUnits) == 1 | isempty(out.goodUnits)
         nPairs = 0; 
+        nCommonPairs = 0;
     else 
         commonPFPairs = roiPFPairs{refTr};
         commonPFPairs = commonPFPairs(ismember(commonPFPairs, nchoosek(out.goodUnits, 2), 'rows'), :);
         nPairs = size(commonPFPairs, 1);
+        nCommonPairs = nchoosek(length(commonClus), 2);
         out.commonPairs = commonPFPairs;
     end
     nPairs
     nTrials
     fp = fopen(['~/data/analysis/kenji/', mfilename, GenFiletag(arena, roi)], 'a');
     fprintf(fp, ['\n', repmat('::', 1, 10), filebase, repmat('::', 1, 10)]);
-    fprintf(fp, ['\n # good PF units :' num2str(length(out.goodUnits))]);
+    fprintf(fp, ['\n #Trials :' num2str(nTrials)]);
+    fprintf(fp, ['\n # good PF units :' num2str(length(commonClus))]);
+    fprintf(fp, ['\n # common pairs :' num2str(nCommonPairs)]);
     fprintf(fp, ['\n # overalpping pairs  :' num2str(nPairs)]);
     fclose(fp);
-    %keyboard; 
 end
+
+

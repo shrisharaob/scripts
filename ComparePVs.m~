@@ -63,7 +63,6 @@ function out = ComparePVs(filebase, varargin)
         commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells)]);
         reportfig(figHdl, filename , 0, commentString, [],0);
     end
-    keyboard;
     close(figHdl);
     
     % compare pv across trials with common units
@@ -77,8 +76,8 @@ function out = ComparePVs(filebase, varargin)
         for mTrPair = 1 : nTrPairs
             if IF_PLOT
                 figure(figHdl);
-                axHdl = subplot(nTrPairs, 1,  mTrPair)
-                eval(['cdp = dpFunc(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '), reshape(' pvNames{trialPairs(mTrPair, 2)} ', [], nCycles));']);
+                axHdl = subplot(nTrPairs, 1,  mTrPair);
+                eval(['cdp = dpFunc(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '), reshape(' pvNames{trialPairs(mTrPair, 2)} '(:, :, :, 1 : nCycles), [], nCycles));']);
                 cdp(isnan(cdp)) = 0;
                 plot(cdp); 
                 if mTrPair == nTrPairs, xlabel('# Theta cycles'); 

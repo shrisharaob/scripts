@@ -30,7 +30,7 @@ function out = GetGoodPFUnits(filebase, varargin)
         end
         fprintf(['\n trial :' gt.trialName ]);
         gta{kTr} = gt.LoadPF;
-        commonClus = commonClus(ismember(commonClus, gt.pyrCluIdx(gta{kTr}.pfObject.idealPFUnits))); 
+        %        commonClus = commonClus(ismember(commonClus, gt.pyrCluIdx(gta{kTr}.pfObject.idealPFUnits))); 
         sparsity(:, kTr) = gta{kTr}.pfObject.sparsity(ismember(gta{kTr}.pfObject.acceptedUnits, commonClus));
         roiPFPairs{kTr} = nchoosek(commonClus, 2);
     end

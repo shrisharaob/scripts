@@ -33,7 +33,8 @@ function CovTimeSeries(trial, varargin)
         str = sprintf(['#', num2str(kTimeWin) ' of ' num2str(nWindows)]);
         fprintf([repmat('\b', 1, length(oldStr)), str]);
         oldStr = str;
-        for lPair = 1 : nPairs
+        [binnedPos, coverageMask] = Coverage(gt, roi, arena, markerNo, 0, 0);     
+        for lPair = 1 : nPairs         
             pRes = [];
             pClu = [];
             for kClu = 1 : 2

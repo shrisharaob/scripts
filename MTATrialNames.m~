@@ -12,8 +12,9 @@ function trialnames = MTATrialNames(varargin)
         filebase = arg;
     end
     try
-        mtaTrial = MTATrial(gt.filebase, [], 'all');
-        trialnames = permute(mtaTrial.list_trialNames, [2, 1]);
+        mtaTrial = MTATrial(filebase, [], 'all');
+        trNames = permute(mtaTrial.list_trialNames, [2, 1]);
+        trialnames = trNames(find(~cellfun(@strcmp, trNames, repmat({'all'}, length(trNames), 1))));
     catch err
         return;
     end

@@ -1,6 +1,8 @@
 function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
+% [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
+% [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycle]s
+% [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1
 % population vector time course for the entire filebase, considers only the common clus
-% [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles]
   
   [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
         DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1});
@@ -15,6 +17,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     if ~IF_COMPUTE
         fprintf('loading  ...');
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
+        avgVector = mean(popVec, 4);
         return;
     end
     if isempty(gt.clu), gt = gt.LoadCR; end
@@ -77,7 +80,9 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     sRateMaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
     %    sRateMaps = reshape(permute(sRateMaps, [3 1 2]), [], nClus)
     fprintf('  done !!! \n');
-    dotProd = sRateMaps(:)' * reshape(popVec, [], size(popVec,4));
+    dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
+    dotProd = dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)));
+    dotProd(isnan(dotProd)) = 0;
     if IF_COMPUTE
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
     end
