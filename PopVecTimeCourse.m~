@@ -64,7 +64,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
         oldStr = str;
         [curRes, curResId] = SelectPeriods(res(ismember(clu, commonClus)), thetaPeriods(kPopVec, :), 'd');
         curClu = clu(curResId);
-        if ~isempty(curRes) & length(curRes) > 5
+        if ~isempty(curRes)% & length(curRes) > 5 
             tPos = SelectPeriods(binnedPos, ConvertFs(thetaPeriods(kPopVec, :), gt.lfpSampleRate, gt.trackingSampleRate), 'c');
             tPos = round(nanmean(tPos, 1));
             spkCnt = zeros(nClus, 1);
@@ -81,7 +81,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     %    sRateMaps = reshape(permute(sRateMaps, [3 1 2]), [], nClus)
     fprintf('  done !!! \n');
     dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
-    dotProd = dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)));
+    dotProd = arctan(dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)))); % Fisher z - var equalizing for the corr estimator
     dotProd(isnan(dotProd)) = 0;
     if IF_COMPUTE
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');

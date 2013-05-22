@@ -1,9 +1,11 @@
+
 function ccgAllcells(trial, pfPars, varargin)
     % ccgAllcells(trial, pfPars, varargin)
     % varargin [IF_REPORT_FIG, pairs2analyse, IF_SAVE]
     [IF_REPORT_FIG, pairs2analyse, IF_SAVE, trialName] = DefaultArgs(varargin, {0, [1:size(pfPars.selectedPairs, 1)],1, 'crt1'});
     cellPairs = pfPars.selectedPairs(pairs2analyse, :);
     load(['~/data/analysis/' trial.name '/' trial.name '.SelectedPyrCells.mat']);
+    
     nPairs = size(cellPairs, 1);
     if nPairs ~= 0 & ~isempty(nPairs)
 
@@ -32,6 +34,7 @@ function ccgAllcells(trial, pfPars, varargin)
             ccgSmooth(:, kPair) = spline(ccgTimeAx',yy,tt);
 
             %% beh timescale ccg
+
             binSize = 200e-3; % 100ms
             halfBins = round(2000e-3 / binSize);
             binSize = round(binSize * trial.sampleRate);
