@@ -1,10 +1,11 @@
 function trialNames = TrialNames(arg, varargin)
-%  trialNames = TrialNames(gt)
+% trialNames = TrialNames(gt)
+% [datasetType, roi, arena]
 % returns all the trial names in a filebase
 
     [datasetType, roi, arena] = DefaultArgs(varargin, {[], 'CA3', 'bigSquare'});
 
-    trialName = [];
+    trialNames = [];
     if isa(arg, 'GenericTrial')
         filebase = arg.filebase;
         datasetType = gt.datasetType;

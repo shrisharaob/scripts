@@ -14,17 +14,16 @@ function trialNames = TrialNames(arg, varargin)
 
     switch datasetType
       case 'kenji'
-
         kenjiSearch.roi = roi;
         kenjiSearch.arena = arena;
         matches = SearchKenji(kenjiSearch);
         trialNames = matches(strcmp(matches(:,1), filebase), 2);
       case 'MTA'
-        try
-            mtaTrial = MTATrial(filebase, [], 'all');
-        catch err
-            return;
-        end
-        trialnames = permute(mtaTrial.list_trialNames, [2, 1]);
-        
+ %        try
+%             mtaTrial = MTATrial(filebase, [], 'all');
+%         catch err
+%             return;
+%         end
+%         trialNames = permute(mtaTrial.list_trialNames, [2, 1]);
+        trialNames = MTATrialNames(filebase);
     end

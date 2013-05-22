@@ -1,17 +1,19 @@
-function out = Remapping(filebase, varargin)
+function out = Remapping(filebase, datasetType, varargin)
 % Remapping(filebase, arena, roi, cluIdx, IF_PLOT)
 
-    [arena, roi, cluIdx, IF_PLOT] = DefaultArgs(varargin, {{'bigSquare'},{'CA3'}, [], 0});
+    [roi, arena, cluIdx, IF_PLOT, IF_RPORTFIG] = DefaultArgs(varargin, {{'bigSquare'},{'CA3'}, [], 0, 0});
     out = {};
-    kenjiSearch.roi = roi;
-    kenjiSearch.arena = arena;
-    matches = SearchKenji(kenjiSearch);
-    matches = matches(strcmp(matches(:, 1), filebase), :);
-    nTrials = size(matches, 1);
+%   kenjiSearch.roi = roi;
+%   kenjiSearch.arena = arena;
+%   matches = SearchKenji(kenjiSearch);
+%   matches = matches(strcmp(matches(:, 1), filebase), :);
+    trialNames = TrialNames(filebase, datasetType, roi, arena);
+    nTrials = length(trialNames);
+    nTrPairs = nchoosek(nTrials, 2);
     refTr = 1;
     commonClus = cluIdx;
     for kTr = 1 : nTrials
-        gt = GenericTrial(filebase, matches{kTr, 2});
+        gt = GenericTrial(filebase, trialNames{kTr});
         if kTr == 1 & isempty(cluIdx)
             load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
         end
@@ -40,27 +42,31 @@ function out = Remapping(filebase, varargin)
             refPkDist = refPkDist(ismember(roiPFPairs{refTr}, roiPFPairs{kTr}, 'rows'));
             kPkDist = pkDist{kTr};
             kPkDist = kPkDist(ismember(roiPFPairs{kTr}, roiPFPairs{refTr}, 'rows'));
-            keyboard;
             out.pkDist{kTr} = [refPkDist, kPkDist];
             if IF_PLOT
                 figure(kTr)
-                %             clf;
-                subplot(1, 2, 1);
+                subplot(nTrPairs, 2, 1);
                 if length(kPk) >= 2
                     hist2([MakeUniformDistr(refPk), MakeUniformDistr(kPk)]);
+                    title('rate peaks');
+                    xlabel(trialNames{refTr});
+                    ylabel(trialNames{kTr});
+                    axis square;
                 end
-                subplot(1, 2, 2)
+                subplot(nTrPairs, 2, 2)
                 if length(kPkDist) >= 2
                     hist2([MakeUniformDistr(refPkDist), MakeUniformDistr(kPkDist)]);
+                    title('peak distances');d
+                    xlabel(trialNames{refTr});
+                    ylabel(trialNames{kTr});
+                    axis square;
+                end
+                if IF_REPORTFIG
+                    reportfig(kTr, [mfilename, GenFiletag(roi, arena), datasetType], 0, []);
                 end
             end
-            %             xlabel(['trial :', ]);
-            %             ylabel(['trial# 
-            %             waitforbuttonpress;
-            %             clf;
         end
     end
-    
 end
 
     
