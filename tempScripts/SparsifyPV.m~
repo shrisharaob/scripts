@@ -1,0 +1,9 @@
+function SparsifyPV(gt, varargin)
+
+[roi, arena, nDims] = DefaultArgs(varargin, {'CA3', 'bigSqure', 2500});
+
+%    load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
+
+[popVec, ~, dotProd] = PopVecTimeCourse(gt);
+[nClus,~,~,nCycles] = size(popVEc);
+  popVec = sparse(reshape(popVec, nClus * nDims, nCycles));

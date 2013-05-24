@@ -1,4 +1,4 @@
-function BatchKenji(funcHandle, varargin)
+function BatchProcess(funcHandle, varargin)
 % function BatchKenji(funcHandle, varargin)
 % [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE]
 % '', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0
@@ -49,7 +49,7 @@ function BatchKenji(funcHandle, varargin)
                     try
                         if IF_LOAD_GT
                             gt = GenericTrial(filebases{i}, trialNames{lTr});
-                            feval(funcHandle, gt, funcArgs{:});
+                            fout = feval(funcHandle, gt, funcArgs{:});
                         else
                             feval(funcHandle, filebases{i}, funcArgs{:});
                         end
@@ -62,6 +62,9 @@ function BatchKenji(funcHandle, varargin)
                     catch err
                         
                     end
+                end
+                if IF_SAVE
+                    save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), func2str(funcHandle),  '.mat'], 'fout');
                 end
             end
             
@@ -104,11 +107,12 @@ function BatchKenji(funcHandle, varargin)
                 fprintf('error .......  !!!!!!');
             end
             
+
         end
     end
-    if IF_SAVE
-        save(['~/data/analysis/kenji/', func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'goodUnits');
-    end
+%     if IF_SAVE
+%         save(['~/data/analysis/kenji/', func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'goodUnits');
+%     end
     fclose('all');
 end
 

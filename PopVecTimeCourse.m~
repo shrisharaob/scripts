@@ -81,7 +81,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     %    sRateMaps = reshape(permute(sRateMaps, [3 1 2]), [], nClus)
     fprintf('  done !!! \n');
     dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
-    dotProd = arctan(dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)))); % Fisher z - var equalizing for the corr estimator
+    dotProd = atan(dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)))); % Fisher z - var equalizing for the corr estimator
     dotProd(isnan(dotProd)) = 0;
     if IF_COMPUTE
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
