@@ -1,4 +1,4 @@
-function [out, t, Pairs] = myCCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs, varargin)
+function [out, t, Pairs] = CCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs, varargin)
 % constructs multiple cross and Auto correlogram
 % usage: [ccg, t, pairs] = CCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs)
 %

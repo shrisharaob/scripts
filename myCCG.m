@@ -1,4 +1,4 @@
-function [out, t, Pairs] = CCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs, varargin)
+function [out, t, Pairs] = myCCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs, varargin)
 % constructs multiple cross and Auto correlogram
 % usage: [ccg, t, pairs] = CCG(T, G, BinSize, HalfBins, SampleRate, GSubset, Normalization, Epochs)
 %
@@ -209,7 +209,7 @@ for g1=1:nGroups, for g2=g1:nGroups
 	
 		% plot graph
 %		bar(1000*(-HalfBins:HalfBins)*BinSize/SampleRate, ccg(:,g1,g2));
-		bar(t, ccg(:,g1,g2), 'b');
+		bar(t, ccg(:,g1,g2), 'k');
 
 		% label y axis
 		if g1==g2

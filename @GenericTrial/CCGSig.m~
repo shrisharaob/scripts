@@ -1,0 +1,7 @@
+function y = CCGSig(gt, varargin);
+defRandomiz = struct('Type','jitter','nRand',100,'Tau',4,'Alpha',[5 95]);
+[pairs2test, binSiz, halfBins, normalization, randomiz] = DefaultArgs(varargin, {nChoosek(NClusters(gt), 2), 10e-3, 200, 'count', defRandomiz});
+
+
+
+y = CCGSignif(gt.res, gt.clu, 

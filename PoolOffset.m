@@ -17,7 +17,7 @@ function PoolOffset(varargin)
             try
                 % load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(arena, roi), 'CCG.mat' ]);
                 load(['~/data/analysis/kenji/', filebases{kBase}, '/', filebases{kBase}, '.', trialNames{mTr}, GenFiletag(arena, roi), 'CCG.mat' ]);
-                offset{kBase, mTr} = fout.offset;
+                offset{kBase, mTr} = abs(fout.offset);
             catch err
             
             end     
