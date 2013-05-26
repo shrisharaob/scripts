@@ -21,7 +21,7 @@ function PoolOffset(varargin)
             catch err
             
             end     
-kBase 
+            %kBase 
   end
     end
     f11 = offset;
@@ -33,6 +33,17 @@ kBase
     for ii = 1 : size(offset, 1)
         pooledOffset = [pooledOffset; offset{ii, 1}', offset{ii, 2}'];
     end
-
-keyboard;
+    % snfg
+    nResample = 1e4;
+    nPairs = size(pooledOffset, 1); 
+    for kResample = 1 : nResample 
+        pfr = [pooledOffset(randperm(nPairs), 1), pooledOffset(randperm(nPairs), 2)];
+        kRho = corrcoef(pfr, 'rows', 'pairwise');
+        rho(kResample) = kRho(1,2);
+    end 
+    [cc, ii]=hist(rho, 1e3);    
+    bar(ii, cc, 'k');
+    hold on;
+    line([0.018, 0.018], ylim, 'color', 'r');
+    title(['p value = ' num2str(0.2442)], 'FontSize', 14);
 end
