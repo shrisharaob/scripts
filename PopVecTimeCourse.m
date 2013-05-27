@@ -2,10 +2,11 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycle]s
 % [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1
+% popVec nDims-by-nThetaCycles
 % population vector time course for the entire filebase, considers only the common clus
   
-  [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
-        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1});
+  [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
+        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, 0, 3,[], 10, 1e-1, 1, [50, 50], 1});
     
     switch gt.datasetType
       case 'kenji'
@@ -14,10 +15,24 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
         roi = 'CA1';
         arena = 'cof';
     end
+    dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
+    if isempty(commonClus), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']); end
     if ~IF_COMPUTE
         fprintf('loading  ...');
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
         avgVector = mean(popVec, 4);
+        if IF_CHUNKS
+            if isempty(gt.pfObject), gt = gt.LoadPF; end
+            sRateMaps = sq(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)));
+            nCycles = size(popVec, 2);
+            chunkBoundaries = 1 : floor(nCycles / nChunks) : nCycles;
+             for kChunk = 1 : nChunks
+                 pv(:,  kChunk) = sum(popVec(:, chunkBoundaries(1 + (kChunk - 1)) : chunkBoundaries(kChunk + 1)), 2);
+             end
+             dotProd = atan(dp(sRateMaps(:), pv));
+             popVec = pv;
+        end
+        keyboard;
         return;
     end
     if isempty(gt.clu), gt = gt.LoadCR; end
@@ -30,7 +45,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
             [ThPh, ~] = AnalyticTheta(gt, [], [], 0);
         end
     end
-    if isempty(commonClus), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']); end
+
     nClus = length(commonClus);
     res = gt.res(ismember(gt.clu, commonClus)); % load res only for the units in roi
     clu = gt.clu(ismember(gt.clu, commonClus));
@@ -79,10 +94,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     avgVector = mean(popVec, 4);
     popVec = sparse(reshape(popVec, nClus * nDims, nCycles));
     sRateMaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
-    %    sRateMaps = reshape(permute(sRateMaps, [3 1 2]), [], nClus)
     fprintf('  done !!! \n');
-    dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
-    %    dotProd = atan(dp(sRateMaps(:), reshape(popVec, [], size(popVec,4)))); % Fisher z - var equalizing for the corr estimator
     dotProd = atan(dp(sRateMaps(:), popVec)); % Fisher z - var equalizing for the corr estimator
     dotProd(isnan(dotProd)) = 0;
     if IF_COMPUTE

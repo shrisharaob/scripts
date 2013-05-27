@@ -1,7 +1,7 @@
 function PlotRateMaps(pfObject, varargin)
 % PlotPlaceFields(pfObject, varargin)
-% varargin - [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
-
+% varargin - [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
+% IF_contour {0, 1, 2}
     if nargin<1, help PlotPlaceFields; return; end
   
     filebase = pfObject.filebase;
@@ -14,10 +14,10 @@ function PlotRateMaps(pfObject, varargin)
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [ IS_COUNTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
+    [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
-    if ~IS_COUNTOUR
+    if ~IF_CONTOUR
        
             for mCell = 1 : nCells
                 linIdx = ismember(linearCluIdx,cellCluIdx(mCell));
@@ -82,6 +82,7 @@ function PlotRateMaps(pfObject, varargin)
                 rateThreshPar = 3 * std(smoothedRateMap(:));
                 if nContours == 1
                     contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[1, 1].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    hold on;
                 else
                     contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(rateThreshPar  * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end

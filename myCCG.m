@@ -52,7 +52,7 @@ if nargin<8
 end
 
 if nargin<9
-    IF_PLOT = 1;
+    IF_PLOT = 0;
 else 
     IF_PLOT = varargin{1};
 end

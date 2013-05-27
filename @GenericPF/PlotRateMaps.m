@@ -82,6 +82,7 @@ function PlotRateMaps(pfObject, varargin)
                 rateThreshPar = 3 * std(smoothedRateMap(:));
                 if nContours == 1
                     contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[1, 1].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    hold on;
                 else
                     contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(rateThreshPar  * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end
@@ -101,4 +102,4 @@ function PlotRateMaps(pfObject, varargin)
             end
         end
     end
-    end
+end
