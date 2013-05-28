@@ -4,40 +4,60 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1
 % popVec nDims-by-nThetaCycles
 % population vector time course for the entire filebase, considers only the common clus
-  
-  [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles] = ...
-        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, 0, 3,[], 10, 1e-1, 1, [50, 50], 1});
+    
+    [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor] = ...
+        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, 0, 3,[], 10, 1e-1, 1, [50, 50], 1, 0.03});
     
     switch gt.datasetType
       case 'kenji'
-          
+        
       case 'MTA'
         roi = 'CA1';
         arena = 'cof';
     end
     dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
     if isempty(commonClus), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']); end
-    if ~IF_COMPUTE
+    if ~IF_COMPUTE & ~IF_CHUNKS
         fprintf('loading  ...');
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
         avgVector = mean(popVec, 4);
-        if IF_CHUNKS
-            if isempty(gt.pfObject), gt = gt.LoadPF; end
-            sRateMaps = sq(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)));
-            nCycles = size(popVec, 2);
-            chunkBoundaries = 1 : floor(nCycles / nChunks) : nCycles;
-             for kChunk = 1 : nChunks
-                 pv(:,  kChunk) = sum(popVec(:, chunkBoundaries(1 + (kChunk - 1)) : chunkBoundaries(kChunk + 1)), 2);
-             end
-             dotProd = atan(dp(sRateMaps(:), pv));
-             popVec = pv;
-        end
-        keyboard;
+        dotProd = atan(dp(sRateMaps(:), pv));
+        popVec = pv;
         return;
     end
+    %% COMPUTE AVG RATE MAPS FOR CHUNKS
+    if IF_CHUNKS
+        if isempty(gt.pfObject), gt = gt.LoadPF; end
+        if isempty(gt.res), gt = gt.LoadCR; end
+        switch gt.datasetType
+          case 'kenji'
+            chunkBoundaries = gt.trialPeriods(1) : floor(diff(gt.trialPeriods) / nChunks) : gt.trialPeriods(2); 
+        end
+        chunkPeriods = ConvertFs([chunkBoundaries(1: end - 1)', chunkBoundaries(2 : end)'], gt.lfpSampleRate, gt.trackingSampleRate);
+        [res, clu, pos] = gt.LoadStateRes('RUN', 1, gt.trackingSampleRate, chunkPeriods);
+        nClus = length(commonClus);
+        sRateMaps = sq(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)));
+        for kChunk = 1 : nChunks
+            str = sprintf('chunck %d of %d \n', kChunk, nChunks);
+            fprintf(str);
+            kChunkRes = res{kChunk};
+            for kClu = 1 : nClus
+                rm{kChunk, kClu} = GenericPF.ComputeRateMap(gt, kChunkRes(clu{kChunk} == commonClus(kClu)), pos{kChunk}, [], rmSmoothFactor);
+                srm(:, kClu) = Mat2Vec(SmoothSurface(rm{kChunk, kClu}, rmSmoothFactor));
+            end
+            popVec(:, kChunk) = srm(:);
+        end
+        out.popVec = sparse(popVec);
+        out.clu = commonClus;
+        out.rateMap = rm;
+        out.dotProd = atan(dp(sRateMaps(:), out.PopVec));
+        save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GeneFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat']);
+        return;
+    end
+    %% COMPUTE PV FOR THETA CYCLES
     if isempty(gt.clu), gt = gt.LoadCR; end
     if isempty(gt.pfObject), gt = gt.LoadPF; end
-    if isempty(ThPh), 
+    if isempty(ThPh)
         switch gt.datasetType
           case 'kenji'
             load([gt.paths.data, gt.filebase, '.thpar.mat']);
@@ -57,7 +77,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     [nRows, nClmns] = size(gt.pfObject.rateMap{find(~cellfun(@isempty, gt.pfObject.rateMap), 1)});
     nDims = nRows * nClmns;
     refVector = zeros(nClus, nRows, nClmns); % each clm of this matrix is a pop vector at one of the spatial bins
-    % indices of thetapeak in lfp sample rate thetaBoundaries
+                                             % indices of thetapeak in lfp sample rate thetaBoundaries
     if strcmp(gt.datasetType, 'kenji')
         markerNo = 1;
     elseif strcmp(gt.datasetType, 'MTA')

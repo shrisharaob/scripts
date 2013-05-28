@@ -9,44 +9,48 @@ classdef GenericPF
     properties (SetAccess = protected, GetAccess = public)
         % tag identifying the type of dataset
         datasetType;
+       
+        % dir name containing all the recording data
         filebase;
     end
     
     properties
         
+        % file paths
         paths;
         
         trialName;
         
         trialSubType;
         
-        %
+        % behavioural state
         state
         
-        % 
+        % trial begin & end times
         trialPeriods;
         
-        %
+        % vaild position tracking periods 
         goodPosPeriods;
         
         % place field parameters
         
+
         rateMap;
         
         %
         occupancy;
         
-        %
+        % spatial bins
         xBin;
         
         %
-        yBin
+        yBin;
         
         %
         nBins;
         
-        %
-        maze 
+        % arena specifications
+        maze;
 
         %
         smoothRateMap;
@@ -177,7 +181,6 @@ classdef GenericPF
                     statePeriods = IntersectRanges(statePeriods, trial.trialPeriods);
                     posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
                     statePeriods = round(statePeriods .* trial.sampleRate ./ trial.lfpSampleRate) + 1;       
-                    %posStatePeriods = round(statePeriods .* trial.trackingSampleRate  ./ trial.lfpSampleRate) + 1;
                     trialStartTime_pos =  round(trial.trialPeriods(1, 1) .*  trial.trackingSampleRate ./ trial.lfpSampleRate) + 1;
                     posStatePeriods = IntersectRanges(posStatePeriods, trial.goodPosPeriods + trialStartTime_pos); 
                     markerNo = 1;
@@ -236,9 +239,6 @@ classdef GenericPF
                     genericPF.xBin = xBin;
                     genericPF.yBin = yBin;
                 end
-             %    dotPos = regexp(fileName, '\.');
-%                 str1 = fileName(dotPos(2)+3 : end);
-%                 fileName = [fileName(1 : dotPos) 'FindPFPars', str1];
              if isempty(genericPF.trialSubType)
                  fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
              else
@@ -253,25 +253,29 @@ classdef GenericPF
                     save([genericPF.paths.analysis, fileName], 'pfPars')
              end
             end
-               genericPF.com = pfPars.com;
-               genericPF.smoothRateMap = pfPars.smoothRateMap;
-               genericPF.selectedPairs = pfPars.selectedPairs;
-               genericPF.idealPFUnits = pfPars.idealPFUnits;
-               genericPF.idealPFPairs = pfPars.idealPFPairs;
-               genericPF.spatialCoherence = pfPars.spatialCoherence;
-               genericPF.sparsity = pfPars.sparsity;
-               genericPF.ratePk = pfPars.ratePk;
-               genericPF.acceptedUnits = pfPars.acceptedUnits;
-               genericPF.comDist = pfPars.comDist;
-               genericPF.pkLoc = pfPars.pkLoc;
-               genericPF.pkDist = pfPars.pkDist;
-               if isfield(pfPars, 'entropy');
-                   genericPF.jntEntropy = pfPars.entropy;
-               end
+            try
+                genericPF.com = pfPars.com;
+                genericPF.smoothRateMap = pfPars.smoothRateMap;
+                genericPF.selectedPairs = pfPars.selectedPairs;
+                genericPF.idealPFUnits = pfPars.idealPFUnits;
+                genericPF.idealPFPairs = pfPars.idealPFPairs;
+                genericPF.spatialCoherence = pfPars.spatialCoherence;
+                genericPF.sparsity = pfPars.sparsity;
+                genericPF.ratePk = pfPars.ratePk;
+                genericPF.acceptedUnits = pfPars.acceptedUnits;
+                genericPF.comDist = pfPars.comDist;
+                genericPF.pkLoc = pfPars.pkLoc;
+                genericPF.pkDist = pfPars.pkDist;
+                if isfield(pfPars, 'entropy');
+                    genericPF.jntEntropy = pfPars.entropy;
+                end
                if isempty(genericPF.maze)
                    load([genericPF.paths.data, genericPF.filebase, '.miscPar.mat']);
                    genericPF.maze = miscPar.maze;
                end
+            catch err
+                
+            end
 
         end % END of Class Constructor
 
@@ -312,8 +316,7 @@ classdef GenericPF
                             genericPF.state = 'walk'; 
                         end
                         genericPF.maze.name = anyPFObj.mazeName;
-%                         geneticPF.maze.boundaries = anyPFObj.Maze.boundaries;
-                        
+
                     case 'MTATrial'
                         fprintf('\n loading rate maps ...');
                         mtaPFObj = LoadMTAPFObject(anyPFObj.name, anyPFObj.trialName);

@@ -186,13 +186,10 @@ classdef GenericPF
                     markerNo = 1;
                 end
 
-
                 genericPF.state = state;
                 nClus= length(unique(trial.clu));
                 genericPF.rateMap = cell(1, nClus);
                 genericPF.occupancy = cell(1, nClus);
-
-
                 pos = SelectPeriods(sq(trial.position(:,markerNo,:)), posStatePeriods - trialStartTime_pos, 'c');
                 %convert spike times to to tracking sample rate
                 res = round(trial.res .* trial.trackingSampleRate ./ trial.sampleRate) + 1;
@@ -215,9 +212,9 @@ classdef GenericPF
                 save([genericPF.paths.analysis, fileName], 'rm', 'xBin', 'yBin');
                 clear rm;
                 if isempty(genericPF.trialSubType)
-                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
+                    fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.mat'];
                 else
-                fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
+                    fileName = [genericPF.filebase, '.FindPFPars.', genericPF.trialName '.' genericPF.trialSubType '.mat'];
                 end
                 fprintf('\n computing place field parameters\n');
                 pfPars = GenericPF.FindPFPars(genericPF, 1 : nClus);

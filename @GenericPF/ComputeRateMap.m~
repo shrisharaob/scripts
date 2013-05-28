@@ -1,7 +1,7 @@
     function [RateMap, varargout] = ComputeRateMap(Session,spiket,pos,varargin)
     % Justin's code
 
-    [Nbin,Smooth,type] = DefaultArgs(varargin,{50,[],'xy'});
+   [Nbin,Smooth,type, IF_COMPUTE_RM] = DefaultArgs(varargin,{50,[],'xy', 1});
 
 
     %% Constraint to maze is forced
@@ -68,23 +68,32 @@
     if isempty(Smooth)
         Smooth = Nbin/3000;
     end
+    if IF_COMPUTE_RM
+        r1 = (-msize(1):msize(1))/msize(1);
+        r2 = (-msize(2):msize(2))/msize(2);
+        Smoother1 = exp(-r1.^2/Smooth^2/2);
+        Smoother1 = Smoother1/sum(Smoother1);
+        Smoother2 = exp(-r2.^2/Smooth^2/2);
+        Smoother2 = Smoother2/sum(Smoother2);
+        SCount = conv2(Smoother1,Smoother2,Count,'same');
+        SOcc = conv2(Smoother1,Smoother2,Occ,'same');
+        RateMap = NaN(Nbin,Nbin);
+        OccThresh = 0.06;
+        RateMap(SOcc>OccThresh) = SCount(SOcc>OccThresh)./SOcc(SOcc>OccThresh);
+        RateMap(SOcc<OccThresh) = NaN;        rateMap = RateMap;
+        varargout{1} = conv2(Smoother1, Smoother2, Occ./sum(Occ(:)),'same');
+        varargout{2} = Bin1;
+        varargout{3} = Bin2;
+    else
+        RateMap  = [];
+        varargout{1} = [];
+        varargout{2} = [];
+        varargout{3} = [];
+    end
 
-    r1 = (-msize(1):msize(1))/msize(1);
-    r2 = (-msize(2):msize(2))/msize(2);
-    Smoother1 = exp(-r1.^2/Smooth^2/2);
-    Smoother1 = Smoother1/sum(Smoother1);
-    Smoother2 = exp(-r2.^2/Smooth^2/2);
-    Smoother2 = Smoother2/sum(Smoother2);
-    SCount = conv2(Smoother1,Smoother2,Count,'same');
-    SOcc = conv2(Smoother1,Smoother2,Occ,'same');
-    RateMap = NaN(Nbin,Nbin);
-    OccThresh = 0.06;
-    RateMap(SOcc>OccThresh) = SCount(SOcc>OccThresh)./SOcc(SOcc>OccThresh);
-    RateMap(SOcc<OccThresh) = NaN;        rateMap = RateMap;
-    varargout{1} = conv2(Smoother1, Smoother2, Occ./sum(Occ(:)),'same');
-    varargout{2} = Bin1;
-    varargout{3} = Bin2;
     varargout{4} = Count;
+    Occ(Occ == 0) = NaN;
+    varargout{5} = Occ;
 end
 
 
