@@ -50,8 +50,8 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
         out.popVec = sparse(popVec);
         out.clu = commonClus;
         out.rateMap = rm;
-        out.dotProd = atan(dp(sRateMaps(:), out.PopVec));
-        save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GeneFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat']);
+        out.dotProd = atan(dp(sRateMaps(:), out.popVec));
+        save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat'], 'out', '-v7.3');
         return;
     end
     %% COMPUTE PV FOR THETA CYCLES
