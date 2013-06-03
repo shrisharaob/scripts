@@ -1,13 +1,15 @@
-function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
+ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
-% [ThPh, commonClus, roi, arena, IF_COMPUTE, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycle]s
+ % [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,  IF_REPORTFIG, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor] = ...
 % [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1
 % popVec nDims-by-nThetaCycles
 % population vector time course for the entire filebase, considers only the common clus
     
-    [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor] = ...
-        DefaultArgs(varargin, {[], [], {'CA3'},  {'bigSquare'}, 0, 0, 3,[], 10, 1e-1, 1, [50, 50], 1, 0.03});
-    
+    [IF_COMPUTE, IF_CHUNKS, nChunks, ThPh, commonClus, roi, arena, IF_REPORTFIG, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor] = ...
+        DefaultArgs(varargin, { 0, 0, 3, [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1, 0.02});
+
+avgVector = [];    
+
     switch gt.datasetType
       case 'kenji'
         
@@ -27,6 +29,29 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
     end
     %% COMPUTE AVG RATE MAPS FOR CHUNKS
     if IF_CHUNKS
+        if ~IF_COMPUTE
+            load([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat']);
+            if isempty(gt.pfObject), gt = gt.LoadPF;end
+            for kk = 1 : length(out.clu)
+                p1 = reshape(full(out.popVec), [50, 50, length(out.clu), nChunks]);
+                subplot(1, nChunks + 1, nChunks + 1);
+                imagesc(gt.pfObject.smoothRateMap(:,:,ismember(gt.pfObject.acceptedUnits, out.clu(kk))));
+                axis square;
+                clims = caxis;
+                for i = 1: nChunks
+                    subplot(1, nChunks + 1, i);
+                    imagesc(sq(p1(:, :, (kk), i)))
+                    axis square;
+                    caxis(clims);
+                end
+                reportfig(gcf, ['smthmap.CHUNKS.', num2str(nChunks)], 0, [gt.filebase, '.' gt.trialName '      clu id :: ' num2str(out.clu(kk))]);
+                clf
+                popVec = out.popVec;
+                dotProd = out.dotProd;
+            end
+            return;
+        end
+
         if isempty(gt.pfObject), gt = gt.LoadPF; end
         if isempty(gt.res), gt = gt.LoadCR; end
         switch gt.datasetType
@@ -42,7 +67,7 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
             fprintf(str);
             kChunkRes = res{kChunk};
             for kClu = 1 : nClus
-                rm{kChunk, kClu} = GenericPF.ComputeRateMap(gt, kChunkRes(clu{kChunk} == commonClus(kClu)), pos{kChunk}, [], rmSmoothFactor);
+                rm{kChunk, kClu} = GenericPF.ComputeRateMap(gt, kChunkRes(clu{kChunk} == commonClus(kClu)), pos{kChunk}, [], 0.03);
                 srm(:, kClu) = Mat2Vec(SmoothSurface(rm{kChunk, kClu}, rmSmoothFactor));
             end
             popVec(:, kChunk) = srm(:);
@@ -52,6 +77,9 @@ function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
         out.rateMap = rm;
         out.dotProd = atan(dp(sRateMaps(:), out.popVec));
         save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat'], 'out', '-v7.3');
+        popVec = out.popVec;
+        avgVector = [];
+        dotProd = out.dotProd;
         return;
     end
     %% COMPUTE PV FOR THETA CYCLES

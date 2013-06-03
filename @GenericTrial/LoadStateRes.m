@@ -1,11 +1,11 @@
 function [res, clu, varargout] = LoadStateRes(gt, varargin)
-%[clu, res] = LoadStateRes(gt, varargin)
-% [IF_INGOODPOS, fs] = {0, 0}
+%[clu, res, pos, posStatePeriods] = LoadStateRes(gt, varargin)
+% [state, IF_INGOODPOS, fs, posInPeriods] = {0, 0}
 % IF_INGOODPOS : logical, res only in good pos periods loaded
 % fs : convert res to fs
 % loads clu res for the specified state
 
-    [state, IF_INGOODPOS, fs, posInPeriods] = DefaultArgs(varargin, {'RUN', 0, 0, []});
+    [state, IF_INGOODPOS, fs, posInPeriods] = DefaultArgs(varargin, {'RUN', 1, 0, []});
 
     if isempty(gt.res), gt = gt.LoadCR; end
 
@@ -32,14 +32,16 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         markerNo = 1;
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
         statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
-       if IF_INGOODPOS
+        trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
+        if IF_INGOODPOS
            posStatePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.trackingSampleRate); %round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
            % statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
-           trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
+          
            posStatePeriods = IntersectRanges(posStatePeriods, gt.goodPosPeriods + trialStartTime_pos); 
            statePeriods = ConvertFs(posStatePeriods, gt.trackingSampleRate, gt.sampleRate);
        else
            statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
+           posStatePeriods = ConvertFs(statePeriods, gt.sampleRate, gt.trackingSampleRate);
        end
     end
 
@@ -55,7 +57,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
             posIntervals = RecenterPeriods(posInPeriods);
             pos{kInterval} = SelectPeriods(sq(gt.position(:, markerNo, :)), IntersectRanges(posStatePeriods - trialStartTime_pos, posIntervals(kInterval, :)), 'c');
             kRes = ConvertFs(gt.res, gt.sampleRate, gt.trackingSampleRate);
-            [res{kInterval}, kResIndx] = SelectPeriods(kRes, IntersectRanges(posStatePeriods, posInPeriods(kInterval, :)),'d', 1, 1);
+            [res{kInterval}, kResIndx] = SelectPeriods(kRes, IntersectRanges(posStatePeriods, posInPeriods(kInterval, :)), 'd', 1, 1);
             clu{kInterval} = gt.clu(kResIndx);
             if fs > 0 && fs ~= gt.trackingSampleRate
                 res{kInterval} = ConvertFs(res{kInterval}, gt.trackingSampleRate, fs);
@@ -63,4 +65,5 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         end
         varargout{1} = pos;
     end
+    varargout{2} = posStatePeriods;
 end

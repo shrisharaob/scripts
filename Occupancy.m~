@@ -36,27 +36,27 @@ function [occupancy, count] = Occupancy(trial,varargin)
     Bin2 = ([1:msize(2)]-1)/k(2) + Ymin+round(k(2)^-1/2);
     
     %% rounded position
-X = round((pos(:,1)-Xmin)*k(1))+1;
-Y = round((pos(:,2)-Ymin)*k(2))+1;
+    X = round((pos(:,1)-Xmin)*k(1))+1;
+    Y = round((pos(:,2)-Ymin)*k(2))+1;
 
-%% Push back in any stray bins
-X(X>Nbin) = Nbin;
-Y(Y>Nbin) = Nbin;
-X(isnan(X)) =[];
-Y(isnan(Y)) = [];
+    %% Push back in any stray bins
+    X(X>Nbin) = Nbin;
+    Y(Y>Nbin) = Nbin;
+    X(isnan(X)) =[];
+    Y(isnan(Y)) = [];
 
-%% Occupancy
-occupancy = Accumulate([X Y],1,msize); %./trial.xyzSampleRate;
-count = occupancy; keyboard;
-occupancy = occupancy ./ sum(occupancy(:));
+    %% Occupancy
+    occupancy = Accumulate([X Y],1,msize); %./trial.xyzSampleRate;
+    count = occupancy;
+    occupancy = occupancy ./ sum(occupancy(:));
 
-r1 = (-msize(1):msize(1))/msize(1);
-r2 = (-msize(2):msize(2))/msize(2);
-Smoother1 = exp(-r1.^2/Smooth^2/2);
-Smoother1 = Smoother1/sum(Smoother1);
-Smoother2 = exp(-r2.^2/Smooth^2/2);
-Smoother2 = Smoother2/sum(Smoother2);
-occupancy = conv2(Smoother1,Smoother2,occupancy,'same');
+    r1 = (-msize(1):msize(1))/msize(1);
+    r2 = (-msize(2):msize(2))/msize(2);
+    Smoother1 = exp(-r1.^2/Smooth^2/2);
+    Smoother1 = Smoother1/sum(Smoother1);
+    Smoother2 = exp(-r2.^2/Smooth^2/2);
+    Smoother2 = Smoother2/sum(Smoother2);
+    occupancy = conv2(Smoother1,Smoother2,occupancy,'same');
 
 
 end

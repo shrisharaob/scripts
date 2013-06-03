@@ -3,11 +3,21 @@ function out = SearchKenji(args, varargin)
     % args.arena - search struct 
     %   args.arena.arena
     %   args.arena.args.roi
-    [searchInFilebase, trialName] = DefaultArgs(varargin, {[], []});
+    [searchInFilebase, trialName, IF_GET_MAZE] = DefaultArgs(varargin, {[], [], false});
     IN_FILEBASE = ~isempty(searchInFilebase);
     load('~/data/kenji/Beh_time_ind.mat'); % loads var Beh
     out = Beh(:, [2, 4]); %[filebase, trialName];
     idx = true(size(Beh,1), 1);
+   if ~isstruct(args), IF_GET_MAZE = true; end
+    if IF_GET_MAZE
+        out = Beh(strcmp(Beh(:, 2), args) & ~strcmp(Beh(:, 5), 'sleep'), [2, 4, 5]);
+        if isempty(out) % check if arg is a trial name
+             out = Beh(strcmp(Beh(:, 4), args) & ~strcmp(Beh(:, 5), 'sleep'), [5]);
+        end
+        if isempty(out)
+            out{1} = '';
+        end
+    else
     %% search for matching arenas 
     if isfield(args, 'arena')
         if ~isempty(args.arena)
@@ -81,6 +91,7 @@ function out = SearchKenji(args, varargin)
             end
         end
     end
+end
 
 end
 

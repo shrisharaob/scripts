@@ -2,24 +2,15 @@ function timesInPF = GetPFTrajectories(trial, pfPars, pfObject, varargin)
     % find time points when the rat entered the palce fied and when it exited 
     % pfBoundries : cell array - 1 x nPFBoundries
 
-    [stateName, IF_COMPUTE, nSTD] = DefaultArgs(varargin, {'RUN', 1, 3});
-    switch trial.datasetType
-        case 'MTA'
-          stateTimes = trial.Bhv.getState(stateName).state;
-          stateTimes = stateTimes + 1;
-          trajectories = [];
-          markerNo = 7;
-          nAcceptedUnits = sum( ~ pfPars.IS_DISCARD);
-      case 'kenji'
-          stateTimes = 
-    end
-    if ~IF_COMPUTE
-        load(['~/data/analysis/' filebase '/' filebase '.' trial.trialName '.' mfilename '.mat']);
-        return;
-    end
+    [stateName, IS_SAVE] = DefaultArgs(varargin, {'walk', 1});
+    stateTimes = trial.Bhv.getState(stateName).state;
+    stateTimes = stateTimes + 1;
+    trajectories = [];
+    markerNo = 7;
+    nAcceptedUnits = sum( ~ pfPars.IS_DISCARD);
     if nAcceptedUnits ~= 0
         pfBoundries = cell(1, nAcceptedUnits);
-        rateThreshFactor = 0.707
+        rateThreshFactor = 0.707;
         for mUnit = 1 : nAcceptedUnits
             smoothedRateMap = pfPars.smoothRateMap(:,:,mUnit);
             maxRate = max(smoothedRateMap(:));
@@ -51,7 +42,10 @@ function timesInPF = GetPFTrajectories(trial, pfPars, pfObject, varargin)
             timesInPF{kPlaceCell} = [entryIdx(:), exitIdx(:)];
         end
         filebase = trial.name;
-        save(['~/data/analysis/' filebase '/' filebase '.' trial.trialName '.' mfilename '.mat'], 'timesInPF');
+        if IS_SAVE
+            save(['~/data/analysis/' filebase '/' filebase '.' trial.trialName '.' mfilename '.mat'], 'timesInPF');
+        end
+%     end
 end
 
 

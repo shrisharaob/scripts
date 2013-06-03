@@ -1,8 +1,9 @@
 function out = BinPos(trial,varargin)
 %     % occupancy = Occupancy(trial,varargin)
 %     % Justin's code
+% accepts position data as input, default set to trial.position
 
-    [Nbin,Smooth,type, states, pos_shuffle] = DefaultArgs(varargin,{50, 0.03,'xy', {'head', 'theta'}, 0});
+    [Nbin,Smooth,type, states, pos, pos_shuffle] = DefaultArgs(varargin,{50, 0.03,'xy', {'head', 'theta'}, [], 0});
     
 %     [stsp stateLabel] = trial.trialPeriods(states);
     stsp = trial.trialPeriods;
@@ -15,8 +16,11 @@ function out = BinPos(trial,varargin)
     if strcmp(trial.datasetType, 'kenji')
             stsp = [1, diff(stsp)];
     end
-    stspos = SelectPeriods(sq(trial.position(:,markerNo,:)), stsp, 'c', 1);
-    pos = stspos;
+
+    if isempty(pos)
+        stspos = SelectPeriods(sq(trial.position(:,markerNo,:)), stsp, 'c', 1);
+        pos = stspos;
+    end
 %     shuffled_Pos = @(pos_shuffle,stspos) circshift(stspos,randi([-pos_shuffle,pos_shuffle]));
     %%
     Xmin = trial.maze.boundaries(1,1);

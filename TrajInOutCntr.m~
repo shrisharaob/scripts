@@ -1,0 +1,4 @@
+function inoutTime = TrajInOutCntr(gt, cntr)
+% inoutTime = TrajInOutCntr(gt, cntr)
+% returns the times when the trajectories lie inside the specified contour
+    

@@ -11,7 +11,7 @@ function timesInPF = GetPFTrajectories(trial, pfPars, pfObject, varargin)
           markerNo = 7;
           nAcceptedUnits = sum( ~ pfPars.IS_DISCARD);
       case 'kenji'
-          stateTimes = 
+
     end
     if ~IF_COMPUTE
         load(['~/data/analysis/' filebase '/' filebase '.' trial.trialName '.' mfilename '.mat']);

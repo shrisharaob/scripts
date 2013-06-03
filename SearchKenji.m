@@ -1,9 +1,10 @@
-function out = SearchKenji(args, varargin)
+function out = SearchKenji(varargin)
     % returns the filebase and trial names stisfying the search keys
     % args.arena - search struct 
     %   args.arena.arena
     %   args.arena.args.roi
-    [searchInFilebase, trialName, IF_GET_MAZE] = DefaultArgs(varargin, {[], [], false});
+    defArgs = struct('roi', 'CA3', 'arena', 'bigSquare');     
+    [args, searchInFilebase, trialName, IF_GET_MAZE] = DefaultArgs(varargin, {defArgs, [], [], false});
     IN_FILEBASE = ~isempty(searchInFilebase);
     load('~/data/kenji/Beh_time_ind.mat'); % loads var Beh
     out = Beh(:, [2, 4]); %[filebase, trialName];
