@@ -1,27 +1,23 @@
 function out = ComparePVs(filebase, varargin)
 % out = ComparePVs(filebase, varargin)
-% [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG]
+% [datasetType, IF_CHUNKS, nChunks, IF_PLOT, IF_REPORTFIG, roi, arena]
 % [], {'CA3'}, {'bigSquare'}, 1, 1
 % compute dot product 
 
-    [datasetType, roi, arena, IF_PLOT, IF_REPORTFIG] = ...
-        DefaultArgs(varargin, {[], {'CA3'}, {'bigSquare'}, 1, 1});
+    [datasetType, IF_CHUNKS, nChunks, IF_PLOT, IF_REPORTFIG, roi, arena] = ...
+        DefaultArgs(varargin, {[], 0, 3, 1, 1,  {'CA3'}, {'bigSquare'}});
     out = [];
-    switch datasetType
-      case 'kenji'
-        searchStruct.roi = roi;
-        searchStruct.arena = arena;
-        matches = SearchKenji(searchStruct);
-        matches = matches(strcmp(matches(:, 1), filebase), :);
-        trialNames = matches(:, 2);
-      case 'MTA'
-        roi = 'CA1';
-        arena = 'cof';
-        trialNames = MTATrialNames(filebase);
-      otherwise
-        error;
-        return;
-    end
+     switch datasetType
+       case 'kenji'
+         analysisFldrPath = '~/data/analysis/kenji/';
+       
+       case 'MTA'
+         roi = 'CA1';
+         arena = 'cof';
+         analysisFldrPath = ['~/data/analysis/'];
+
+     end
+    trialNames = TrialNames(filebase, datasetType, roi, arena);
     filetag = GenFiletag(roi, arena);
     nTrials = length(trialNames);
     if nTrials > 1
@@ -35,7 +31,14 @@ function out = ComparePVs(filebase, varargin)
     dpNames = genvarname(cellstr(repmat('dp', length(trialNames), 1)));
     if IF_PLOT, figHdl = figure; end
     for mTr = 1 : nTrials
-        load(['~/data/analysis/kenji/' filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
+        if IF_CHUNKS
+            load([analysisFldrPath, filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'CHUNKS.', num2str(nChunks), '.PopVecTimeCourse.mat']);    
+            popVec = out.popVec;
+            dotProd = out.dotProd;
+        else
+            load([analysisFldrPath, filebase, '/', filebase, '.', trialNames{mTr}, filetag, 'PopVecTimeCourse.mat']);
+        end
+        popVec = full(popVec);
         eval([pvNames{mTr} '= popVec;']);
         eval([rvNames{mTr} '=mean('  pvNames{mTr} ', 4);']);
         eval([dpNames{mTr} '= dotProd;']);
@@ -53,13 +56,12 @@ function out = ComparePVs(filebase, varargin)
                 set(axHdl, 'XTickLabel', '');
                 set(axHdl, 'XColor', get(axHdl,'Color'));
             end
-
             ylabel('dot product');
+            ylim([-1, 1]);
         end
     end 
     if IF_REPORTFIG
         filename = ['PopVec',  GenFiletag(roi, arena), datasetType];
-        %        commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells), '<br>','trial - ' trialNames{mTr}]);
         commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells)]);
         reportfig(figHdl, filename , 0, commentString, [],0);
     end
@@ -71,7 +73,7 @@ function out = ComparePVs(filebase, varargin)
     if nTrials > 1
         nCycles = inf;
         for kTrPair = 1 : nTrPairs
-            eval(['nCycles = min(nCycles, size(' pvNames{trialPairs(kTrPair, 1)} ', 4));']);
+            eval(['nCycles = min(nCycles, size(' pvNames{trialPairs(kTrPair, 1)} ', 2));']);
         end
         for mTrPair = 1 : nTrPairs
             if IF_PLOT
@@ -91,10 +93,9 @@ function out = ComparePVs(filebase, varargin)
         end
         if IF_REPORTFIG
             commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells)]);
-            %       commentString = sprintf(['filebase :::: ' filebase, '<br>'  '# units: ' num2str(nCells), '<br>', trialNames{trialPairs(mTrPair, 1)}, ' -  ' trialNames{trialPairs(mTrPair, 2)}, ' (' char(SearchKenji(trialNames{trialPairs(mTrPair, 1)})), ' , ', char(SearchKenji(trialNames{trialPairs(mTrPair, 2)})) ')' ]);
             reportfig(figHdl, filename , 0, commentString, [],0);
         end
-        close(figHdl);
-    end
 
+    end
+    close(figHdl);
 end

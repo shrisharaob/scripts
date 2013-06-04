@@ -289,7 +289,7 @@ classdef GenericTrial
                         if length(genericTrial.elPos(iRegion).shank) > 1 && nElClu(iRegion) > 0 % roi on several shanks, cluster Ids in the shank
                             genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank(1)) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
                         elseif ~isempty(genericTrial.elPos(iRegion).shank)  && nElClu(iRegion) > 0
-                            genericTrial.elPos(iRegion).clu = cluStartId(genericTrial.elPos(iRegion).shank) : cluStartId(genericTrial.elPos(iRegion).shank) + sum(nElClu(genericTrial.elPos(iRegion).shank)) - 1;
+                            genericTrial.elPos(iRegion).clu = []; %%% FIX THIS %%%%
                         end
                     end
                 end

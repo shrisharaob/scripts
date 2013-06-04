@@ -31,24 +31,26 @@ avgVector = [];
     if IF_CHUNKS
         if ~IF_COMPUTE
             load([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat']);
-            if isempty(gt.pfObject), gt = gt.LoadPF;end
-            for kk = 1 : length(out.clu)
-                p1 = reshape(full(out.popVec), [50, 50, length(out.clu), nChunks]);
-                subplot(1, nChunks + 1, nChunks + 1);
-                imagesc(gt.pfObject.smoothRateMap(:,:,ismember(gt.pfObject.acceptedUnits, out.clu(kk))));
-                axis square;
-                clims = caxis;
-                for i = 1: nChunks
-                    subplot(1, nChunks + 1, i);
-                    imagesc(sq(p1(:, :, (kk), i)))
+            if IF_REPORTFIG
+                if isempty(gt.pfObject), gt = gt.LoadPF;end
+                for kk = 1 : length(out.clu)
+                    p1 = reshape(full(out.popVec), [50, 50, length(out.clu), nChunks]);
+                    subplot(1, nChunks + 1, nChunks + 1);
+                    imagesc(gt.pfObject.smoothRateMap(:,:,ismember(gt.pfObject.acceptedUnits, out.clu(kk))));
                     axis square;
-                    caxis(clims);
+                    clims = caxis;
+                    for i = 1: nChunks
+                        subplot(1, nChunks + 1, i);
+                        imagesc(sq(p1(:, :, (kk), i)))
+                        axis square;
+                        caxis(clims);
+                    end
+                    reportfig(gcf, ['smthmap.CHUNKS.', num2str(nChunks)], 0, [gt.filebase, '.' gt.trialName '      clu id :: ' num2str(out.clu(kk))]);
+                    clf
                 end
-                reportfig(gcf, ['smthmap.CHUNKS.', num2str(nChunks)], 0, [gt.filebase, '.' gt.trialName '      clu id :: ' num2str(out.clu(kk))]);
-                clf
-                popVec = out.popVec;
-                dotProd = out.dotProd;
             end
+            popVec = out.popVec;
+            dotProd = out.dotProd;
             return;
         end
 
@@ -75,8 +77,9 @@ avgVector = [];
         out.popVec = sparse(popVec);
         out.clu = commonClus;
         out.rateMap = rm;
-        out.dotProd = atan(dp(sRateMaps(:), out.popVec));
-        save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.',mfilename, '.mat'], 'out', '-v7.3');
+        out.dotProd = atan(dp(sRateMaps(:), out.popVec)  ./ nClus);  % normalize dp by the number of cells 
+        % save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'out', '-v7.3');
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
         popVec = out.popVec;
         avgVector = [];
         dotProd = out.dotProd;
@@ -143,7 +146,7 @@ avgVector = [];
     popVec = sparse(reshape(popVec, nClus * nDims, nCycles));
     sRateMaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus));
     fprintf('  done !!! \n');
-    dotProd = atan(dp(sRateMaps(:), popVec)); % Fisher z - var equalizing for the corr estimator
+    dotProd = atan(dp(sRateMaps(:), popVec) / nClus); % Fisher z - var equalizing for the corr estimator
     dotProd(isnan(dotProd)) = 0;
     if IF_COMPUTE
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');

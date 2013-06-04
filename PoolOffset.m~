@@ -22,7 +22,7 @@ function PoolOffset(varargin)
             
             end     
             %kBase 
-  end
+        end
     end
     f11 = offset;
     offset = offset(logical(sum(~cellfun(@isempty, offset), 2)), :);
@@ -37,20 +37,20 @@ function PoolOffset(varargin)
     xx(isnan(xx(:, 1)) | isnan(xx(:,2)), :) = [];
     fy = polyval([1, 0], xx(:, 1));
     resudials = vnorm([xx(:, 1), fy]' - xx');
-    
     nPairs = size(pooledOffset, 1); 
+    
     for kResample = 1 : nResample 
         % scramble cell ids
         pfr = [pooledOffset(randperm(nPairs), 1), pooledOffset(randperm(nPairs), 2)];
-        kRho = corrcoef(pfr, 'rows', 'pairwise');
-        rho(kResample) = kRho(1,2);
+%         kRho = corrcoef(pfr, 'rows', 'pairwise');
+%         rho(kResample) = kRho(1,2);
     end 
-    [cc, ii]=hist(rho, 1e3);    
-    bar(ii, cc, 'k');
-    hold on;
-    line([0.018, 0.018], ylim, 'color', 'r');
-    title(['p value = ' num2str(0.2442)], 'FontSize', 14);
-    
+%     [cc, ii]=hist(rho, 1e3);    
+%     bar(ii, cc, 'k');
+%     hold on;
+%     line([0.018, 0.018], ylim, 'color', 'r');
+%     title(['p value = ' num2str(0.2442)], 'FontSize', 14);
     
     keyboard;
+
 end

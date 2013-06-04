@@ -1,10 +1,10 @@
 function IF_DIR_EXISTS =  DirExists(loc,  name)
 % check if dirctory <name> exists at location <loc>
-
+ 
     IF_DIR_EXISTS = 0;
     
     files = dir(loc);
-    if ~isempty(files)
+    if ~isempty(files)        
         isdir = CatStruct(files, 'isdir', 1);
         IS_DIR = isdir.isdir;
         

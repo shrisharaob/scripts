@@ -1,7 +1,7 @@
 function CompareTrials(filebase, varargin)
 
     [arena, roi, cluIdx, IF_SmthRM, IF_REPORTFIG] = ...
-        DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, [], 1, 1});
+        DefaultArgs(varargin, {{'bigSquare'}, {'CA1'}, [], 1, 1});
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);

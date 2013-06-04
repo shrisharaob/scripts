@@ -316,7 +316,7 @@ classdef GenericTrial
             end
             genericTrial.trialName = anyTrialObj.trialName;
             genericTrial.trialSubType = [];
-            genericTrial.trialPeriods = [1, diff(anyTrialObj.syncPeriods) + 1]; % since clures is loaded with IFSquash : true
+            genericTrial.trialPeriods = RecenterPeriods(anyTrialObj.syncPeriods); % since clures is loaded with IFSquash : true
             genericTrial.sampleRate = anyTrialObj.sampleRate;
             genericTrial.lfpSampleRate = anyTrialObj.lfpSampleRate;
             genericTrial.lfp = anyTrialObj.lfp;
@@ -328,7 +328,7 @@ classdef GenericTrial
             genericTrial.ccg = anyTrialObj.ccg;
             genericTrial.maze.name = anyTrialObj.Maze.name;
             genericTrial.maze.boundaries = anyTrialObj.Maze.boundaries;
-            genericTrial.goodPosPeriods = [1, diff(anyTrialObj.xyzPeriods) + 1];
+            genericTrial.goodPosPeriods = RecenterPeriods(anyTrialObj.xyzPeriods);
             if ~isempty(anyTrialObj.Bhv)
                 for i = 1:length(anyTrialObj.Bhv.States),
                     genericTrial.states{i}.label = anyTrialObj.Bhv.States{i}.label;

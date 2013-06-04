@@ -1,6 +1,8 @@
-function out = MultiPeakPFDistance(gpf, gt, varargin)
+function out = MultiPeakPFDistance(gt, varargin)
 % out = MultiPeakPFDistance(gpf, occupancy, varargin)
 % 
+    if isempty(gt.pfObject), gt = gt.LoadPF; end
+    gpf = gt.pfObject;
     defClu = gpf.acceptedUnits;
     defCellPairs = nchoosek(defClu, 2);
     [cellPairs, IF_SMRM, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag] = ...
