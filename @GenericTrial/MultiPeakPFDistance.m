@@ -74,7 +74,7 @@ function out = MultiPeakPFDistance(gt, varargin)
     end
     cellIds = cellIds(SELECTED_CELL);
     out.cntrVertices = cntrVertices;
-    out.cntrPeals = cntrPeaks;
+    out.cntrPeaks = cntrPeaks;
     %%%%%%  CCG 
     if IF_COMPUTE_CCG
         if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 

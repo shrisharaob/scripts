@@ -56,11 +56,11 @@ function PoolOffset(varargin)
             % commonCntrs.CntrPeaks{mBase, mTr} = out{mBase, mTr}.cntrPeaks(logical(STABLE_CNTRS{mBase}));
             nStableCells = sum(STABLE_CNTRS{mBase});
             nStableCntrs = cellfun(@sum, tf{mBase});
-%             for kCell = 1 : nStableCells
-%                 kIdx = idx{kCell};
-%                 tempCntr = cntrVertices{kCell};
-%                 cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
-%             end
+            for kCell = 1 : nStableCells
+                kIdx = idx{kCell};
+                tempCntr = cntrVertices{kCell};
+                cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
+            end
         end
     end
     keyboard;

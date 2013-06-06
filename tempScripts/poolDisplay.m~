@@ -1,0 +1,32 @@
+for ii = 1 : length(out)  
+    for jj = 1 : sum(~cellfun(@isempty, out(ii,:))) 
+        subplot(1, sum(~cellfun(@isempty, out(ii,:))) , jj)
+        cntrVertices = out{ii, jj}.cntrVertices;
+        cntrPeaks = out{ii, jj}.cntrPeals;
+        for cel = 1 : length(cntrVertices)
+            icntr = cntrVertices{cel};
+            ipk = cntrPeaks{cel};
+            for kk = 1 : length(icntr)
+                plot(icntr{kk}(:,1), icntr{kk}(:,2),'r.-');
+                hold on
+                plot(ipk(kk, 1), ipk(kk, 2), 'k*')
+                xlim([1 50]);
+                ylim([1 50]);
+            end
+            for kk = 1 : length(icntr)
+                plot(icntr{kk}(:,1), icntr{kk}(:,2),'r.-');
+                hold on
+                plot(ipk(kk, 1), ipk(kk, 2), 'k*')
+                xlim([1 50]);
+                ylim([1 50]);
+            end
+            for kk = 1 : length(icntr)
+                plot(icntr{kk}(:,1), icntr{kk}(:,2),'r.-');
+                hold on
+                plot(ipk(kk, 1), ipk(kk, 2), 'k*')
+                xlim([1 50]);
+                ylim([1 50]);
+            end
+        end
+    end
+end

@@ -1,10 +1,11 @@
 function IS_EQUAL = IsEqual(a, b, varargin)
 % IS_EQUAL = IsEqual(a, b, varargin)
+% [tolerence, IF_ALL, type] = [.01, 1, 'absolute'] 
 % returns logical for  doe b lie between close interval [a-tol, a+tol] 
 % extend for any general matrix
 
-    [tolerence, IF_ALL] = DefaultArgs(varargin, {.01,1});
-    type = 'absolute';
+    [tolerence, IF_ALL, type] = DefaultArgs(varargin, {.01, 1, 'absolute'});
+
     switch type
         case 'relative'
             sd = a * tolerence;

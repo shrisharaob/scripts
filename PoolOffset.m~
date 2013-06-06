@@ -6,24 +6,48 @@ function PoolOffset(varargin)
           sK.roi = roi;
           sK.arena = arena;
           filebases = SearchKenji(sK);
-          filebases = filebases(:, 1);
+          filebases = unique(filebases(:, 1));
           
     end
-    
+    trNo = 0;
     for kBase = 1 : length(filebases)
         trialNames = TrialNames(filebases{kBase}, datasetType, roi, arena);
+        fprintf([filebases{kBase} '\n']);
         for mTr = 1 : length(trialNames)
-            %            gt =  GenericTrial(filebases{kBase}, trialNames{mTr});
+            fprintf(['\t' trialNames{mTr} '\n']);
+            gt =  GenericTrial(filebases{kBase}, trialNames{mTr});
             try
                 % load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(arena, roi), 'CCG.mat' ]);
-                load(['~/data/analysis/kenji/', filebases{kBase}, '/', filebases{kBase}, '.', trialNames{mTr}, GenFiletag(arena, roi), 'CCG.mat' ]);
-                offset{kBase, mTr} = abs(fout.offset);
+%                 load(['~/data/analysis/kenji/', filebases{kBase}, '/', filebases{kBase}, '.', trialNames{mTr}, GenFiletag(arena, roi), 'CCG.mat' ]);
+%                 offset{kBase, mTr} = abs(fout.offset);
+                commonClus = gt.LoadCommonClus;
+                out{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
+                trNo = trNo + 1;
+                trNames{trNo} = trialNames{mTr}; 
             catch err
-            
+                fprintf(['\n error ' trialNames{mTr}, '\n']);
             end     
             %kBase 
         end
     end
+    keyboard;
+    out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows
+    nTrs = sum(~cellfun(@isempty, out), 2);
+    out = out(nTrs > 1, :);
+    nTrs = nTrs(nTrs > 1);
+    % find pks of cntrs which are stable acorss sessions
+    for mBase = 1 : size(out, 1)
+        DetectCmnPks = GenDetectCmnPks(nTrs(mBase), 'ismemberf', 3);
+        cntrPeakNames = genvarname(cellstr(repmat('cntrPeak', nTrs(mBase), 1)));
+        evalStr = [];
+        for lTr = 1 : nTrs(mBase)
+            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
+            evalStr = [evalStr, ',' cntrPeakNames{lTr}];
+        end
+        [tf, locf] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
+        STABLE_CNTRS{mBase}  = cellfun(@sum, tf);
+    end
+    keyboard;
     f11 = offset;
     offset = offset(logical(sum(~cellfun(@isempty, offset), 2)), :);
     idx = nchoosek(1:size(offset, 2), 2);
@@ -33,7 +57,7 @@ function PoolOffset(varargin)
     for ii = 1 : size(offset, 1)
         pooledOffset = [pooledOffset; offset{ii, 1}', offset{ii, 2}'];
     end
-    xx =  pooledOffset;
+    xx = pooledOffset;
     xx(isnan(xx(:, 1)) | isnan(xx(:,2)), :) = [];
     fy = polyval([1, 0], xx(:, 1));
     resudials = vnorm([xx(:, 1), fy]' - xx');
@@ -53,4 +77,18 @@ function PoolOffset(varargin)
     
     keyboard;
 
+end
+
+function funcHdl = GenDetectCmnPks(n, varargin)
+% generates func hdl with variable no of input args for detecting common peaks across sessions
+ 
+    [funcName, tolerence] = DefaultArgs(varargin, {'ismemberf', 2});
+    str = [];
+    for i = 1 : n    
+        if i == 1, str = 'A1'; 
+        else
+            str = [str, ',A' num2str(i)];
+        end
+    end
+    funcHdl = str2func(['@(' str ')' funcName '(' str ',' , '''row''', ',', '''tol''',  ',', num2str(tolerence), ')']);
 end

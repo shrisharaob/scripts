@@ -1,6 +1,7 @@
  function [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
 % [popVec, avgVector, dotProd] = PopVecTimeCourse(gt, varargin)
- % [ThPh, commonClus, roi, arena, IF_COMPUTE, IF_CHUNKS, nChunks,  IF_REPORTFIG, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor] = ...
+% [IF_COMPUTE, IF_CHUNKS, nChunks, ThPh, commonClus, roi, arena, IF_REPORTFIG, trialName, binSize, tolerence, IF_OVERWRITE,  spatialBins, nThCycles, rmSmoothFactor]
+
 % [], [], {'CA3'},  {'bigSquare'}, 0, [], 10, 1e-1, 1, [50, 50], 1
 % popVec nDims-by-nThetaCycles
 % population vector time course for the entire filebase, considers only the common clus
@@ -78,8 +79,8 @@ avgVector = [];
         out.clu = commonClus;
         out.rateMap = rm;
         out.dotProd = atan(dp(sRateMaps(:), out.popVec)  ./ nClus);  % normalize dp by the number of cells 
-        % save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'out', '-v7.3');
-        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
+        save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'out', '-v7.3');
+        %save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
         popVec = out.popVec;
         avgVector = [];
         dotProd = out.dotProd;
