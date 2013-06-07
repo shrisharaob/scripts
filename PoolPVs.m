@@ -34,15 +34,18 @@ for kBase = 1 : length(filebase)
     pvNames = genvarname(cellstr(repmat('pv', length(trialNames), 1)));
     rvNames = genvarname(cellstr(repmat('rv', length(trialNames), 1)));
     dpNames = genvarname(cellstr(repmat('dp', length(trialNames), 1)));
-    
     for mTr = 1 : nTrials
+%         gt = GenericTrial(filebase{kBase}, trialNames{mTr});
+%         gt = gt.LoadPF;
         if IF_CHUNKS
             if FileExists([analysisFldrPath, filebase{kBase}, '/', filebase{kBase}, '.', trialNames{mTr}, filetag, 'CHUNKS.', num2str(nChunks), '.PopVecTimeCourse.mat'])
                 try
-                    fprintf(['\n' trialNames{mTr}])
-                    load([analysisFldrPath, filebase{kBase}, '/', filebase{kBase}, '.', trialNames{mTr}, filetag, 'CHUNKS.', num2str(nChunks), '.PopVecTimeCourse.mat']);    
-                    popVec = out.popVec;
-                    dotProd = out.dotProd;
+                   load([analysisFldrPath, filebase{kBase}, '/' , filebase{kBase}, filetag, 'commonClus.mat']);
+                   nCells = length(commonClus);
+                   fprintf(['\n' trialNames{mTr}])
+                   load([analysisFldrPath, filebase{kBase}, '/', filebase{kBase}, '.', trialNames{mTr}, filetag, 'CHUNKS.', num2str(nChunks), '.PopVecTimeCourse.mat']);    
+                   popVec = out.popVec;
+                   dotProd = out.dotProd ./ nCells;
                 catch err
                     continue;
                 end
@@ -62,7 +65,7 @@ for kBase = 1 : length(filebase)
         eval(['out.rv{mTr}=' rvNames{mTr} ';']);
         eval(['cdp = dpFunc(Mat2Vec(' rvNames{mTr} '),' pvNames{mTr} ');']);
         poolCount = poolCount + 1;
-        pooledDp(poolCount, :) = cdp;
+        pooledDp(poolCount, :) = cdp ./ nCells;
     end
     
     % compare pv across trials with common units
@@ -75,15 +78,17 @@ for kBase = 1 : length(filebase)
             for mTrPair = 1 : nTrPairs
                 eval(['cdp = dpFunc(Mat2Vec(' rvNames{trialPairs(mTrPair, 1)} '),' pvNames{trialPairs(mTrPair, 2)} ');']);
                 cdp(isnan(cdp)) = 0;
+                cdp = cdp ./ nCells;
                 poolCount = poolCount + 1;
                 pooledDp(poolCount, :) = cdp;
             end
         end
     end
 end
-keyboard;
+
 scatter(pooledDp(:, 1), pooledDp(:, 2), 'b', marker);
 hold on;
+axis tight;
 scatter(pooledDp(:, 1), pooledDp(:, 3), 'r', marker);
 scatter(pooledDp(:, 2), pooledDp(:, 3), 'g', marker);
 line([0, 1], [0, 1], 'color', 'k');

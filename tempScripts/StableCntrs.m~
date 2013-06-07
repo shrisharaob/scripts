@@ -26,34 +26,70 @@
 
 
     out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows
-    selectedFBs = filebases(logical(sum(~cellfun(@isempty, out), 2)));
+                                                            %    selectedFBs = filebases(logical(sum(~cellfun(@isempty, out), 2)));
     nTrs = sum(~cellfun(@isempty, out), 2);
     out = out(nTrs > 1, :);
     nTrs = nTrs(nTrs > 1);
     % find pks of cntrs which are stable acorss sessions
     for mBase = 1 : size(out, 1)
-        DetectCmnPks = GenDetectCmnPks(nTrs(mBase), 'ismemberf', 3);
+        DetectCmnPks = GenDetectCmnPks(2, 'ismemberf', 3);
         cntrPeakNames = genvarname(cellstr(repmat('cntrPeak', nTrs(mBase), 1)));
-        evalStr = [];
+
+        trPairs = nchoosek(1 : nTrs(mBase), 2);
+        trPairs(trPairs(:, 1) ~= 1 ,:) = [] ;
         for lTr = 1 : nTrs(mBase)
             eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
             %            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeaks;']);
-            evalStr = [evalStr, ',' cntrPeakNames{lTr}];
+            %    evalStr = [evalStr, ',' cntrPeakNames{lTr}];
         end
-        [tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
-        %        nStableCntrs{mBase} = 
-        STABLE_CNTRS{mBase}  = logical(cellfun(@sum, tf{mBase}));
-        for mTr = 1 : nTrs(mBase)
-            idx = tf{mBase}(STABLE_CNTRS{mBase});
-            cntrVertices = out{mBase, mTr}.cntrVertices(STABLE_CNTRS{mBase});
-            cntrPeaks = out{mBase, mTr}.cntrPeals(STABLE_CNTRS{mBase});
-            % commonCntrs.CntrPeaks{mBase, mTr} = out{mBase, mTr}.cntrPeaks(logical(STABLE_CNTRS{mBase}));
-            nStableCells = sum(STABLE_CNTRS{mBase});
-            nStableCntrs = cellfun(@sum, tf{mBase});
+        for kTrPr = 1 : size(trPairs, 1)
+            evalStr = [];
+            for kPr = 1 : 2
+                evalStr = [evalStr, ',' cntrPeakNames{trPairs(kTrPr, kPr)}];
+            end
+            [kTF{kTrPr}, kLoc{kTrPr}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
+        end
+        nTrPairs = size(trPairs, 1);
+        if nTrPairs > 1
+            for mTrPr = 1 : nTrPairs - 1
+                if mTrPr == 1
+                    mTF{mBase} = cellfun(@and, kTF{mTrPr}, kTF{mTrPr + 1}, 'UNIFORMOUTPUT', 0); 
+                else
+                    mTF{mBase} = cellfun(@and, mTF{mBase}, kTF{mTrPr + 1},'UNIFORMOUTPUT', 0);
+                end
+            end
+        else
+            mTF{mBase} = kTF{1};
+        end
+        %[tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
+        STABLE_CELLS{mBase}  = logical(cellfun(@sum, mTF{mBase}));
+        nStableCells = sum(STABLE_CELLS{mBase});
+        nStableCntrs = sum(cellfun(@sum, mTF{mBase}));
+        for mTrPr = 1 : nTrPairs
+            idx = [];
+            if mTrPr== 1
+                idx = mTF{mBase}(STABLE_CELLS{mBase});
+            else
+                tempKloc = kLoc{mTrPr}(STABLE_CELLS{mBase});
+
+                for lCell = 1 : nStableCells
+                    keyboard;
+                    lKloc = tempKloc{lCell};
+                    lkIdx = mTF{mBase}{lCell};
+                    idx{lCell} = lKloc(mTF{mBase}{lCell});
+                end
+            end
+    
+            cntrVertices = out{mBase, trPairs(mTrPr)}.cntrVertices(STABLE_CELLS{mBase});
+            cntrPeaks = out{mBase, trPairs(mTrPr)}.cntrPeals(STABLE_CELLS{mBase});
             for kCell = 1 : nStableCells
                 kIdx = idx{kCell};
+                if mTrPr ~= 1, kIdx(kIdx == 0) = []; end
                 tempCntr = cntrVertices{kCell};
-                cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
+                cntrs.cntrVertices{kCell} = tempCntr(kIdx);
             end
+            cmnCntrs{mBase, trPairs(mTrPr)} = cntrs;
         end
     end
+
+    

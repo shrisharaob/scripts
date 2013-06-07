@@ -39,8 +39,6 @@
         trPairs(trPairs(:, 1) ~= 1 ,:) = [] ;
         for lTr = 1 : nTrs(mBase)
             eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
-            %            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeaks;']);
-            %    evalStr = [evalStr, ',' cntrPeakNames{lTr}];
         end
         for kTrPr = 1 : size(trPairs, 1)
             evalStr = [];
@@ -51,37 +49,47 @@
         end
         nTrPairs = size(trPairs, 1);
         if nTrPairs > 1
-            for mTrPr = 1 : nTrPairs
+            for mTrPr = 1 : nTrPairs - 1
                 if mTrPr == 1
                     mTF{mBase} = cellfun(@and, kTF{mTrPr}, kTF{mTrPr + 1}, 'UNIFORMOUTPUT', 0); 
                 else
-                    mTF{mBase} = cellfun(@and, tf{mBase}, kTF{mTrPr + 1},'UNIFORMOUTPUT', 0);
+                    mTF{mBase} = cellfun(@and, mTF{mBase}, kTF{mTrPr + 1},'UNIFORMOUTPUT', 0);
                 end
             end
         else
             mTF{mBase} = kTF{1};
         end
-        %[tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
-        %        nStableCntrs{mBase} = 
         STABLE_CELLS{mBase}  = logical(cellfun(@sum, mTF{mBase}));
+        nStableCells = sum(STABLE_CELLS{mBase});
+        nStableCntrs = sum(cellfun(@sum, mTF{mBase}));
         for mTrPr = 1 : nTrPairs
-            if mTrPr== 1
-                idx = mTF{mBase}(STABLE_CELLS{mBase});
-            else
-                idx = kLoc{mTrPr}(STABLE_CELLS{mBase});
-            end
-            for kPr = 1 : 2
-                cntrVertices = out{mBase, trPairs(kPr)}.cntrVertices(STABLE_CELLS{mBase});
-                cntrPeaks = out{mBase, trPairs(kPr)}.cntrPeals(STABLE_CELLS{mBase});
-                % commonCntrs.CntrPeaks{mBase, mTrPr} = out{mBase, mTrPr}.cntrPeaks(logical(STABLE_CELLS{mBase}));
-                nStableCells = sum(STABLE_CELLS{mBase});
-                nStableCntrs = cellfun(@sum, mTF{mBase});
+            for lPr = 1 : 2
+                idx = [];
+                if lPr== 1
+                    idx = mTF{mBase}(STABLE_CELLS{mBase});
+                else
+                    tempKloc = kLoc{mTrPr}(STABLE_CELLS{mBase});
+                    tempLkIdx = mTF{mBase}(STABLE_CELLS{mBase});
+                    for lCell = 1 : nStableCells
+                        keyboard;
+                        idx{lCell} = tempKloc{lCell}(tempLkIdx{lCell});
+                    end
+                end
+                cntrVertices = out{mBase, trPairs(mTrPr, lPr)}.cntrVertices(STABLE_CELLS{mBase});
+                cntrPeaks = out{mBase, trPairs(mTrPr, lPr)}.cntrPeals(STABLE_CELLS{mBase});
                 for kCell = 1 : nStableCells
                     kIdx = idx{kCell};
-                    if kPr ~= 1, kIdx(kIdx == 0) = []; end
-                    tempCntr = cntrVertices{kCell};
-                    cmnCntrs.cntrVertices{mBase, trPairs(kPr)} = tempCntr(kIdx);
+                    if ~isempty(kIdx)
+                        if lPr ~= 1, kIdx(kIdx == 0) = []; end
+                        tempCntr = cntrVertices{kCell};
+                        tempPeaks = cntrPeaks{kCell};
+                        cntrs.cntrVertices{kCell} = tempCntr(kIdx);
+                        cntrs.cntrPeaks{kCell} = tempPeaks(kIdx, :);
+                    else
+                        cntrs = {};
+                    end
                 end
+                cmnCntrs{mBase, trPairs(mTrPr, lPr)} = cntrs;
             end
         end
     end
