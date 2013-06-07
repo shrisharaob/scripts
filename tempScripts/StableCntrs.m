@@ -71,7 +71,6 @@
                     tempKloc = kLoc{mTrPr}(STABLE_CELLS{mBase});
                     tempLkIdx = mTF{mBase}(STABLE_CELLS{mBase});
                     for lCell = 1 : nStableCells
-                        keyboard;
                         idx{lCell} = tempKloc{lCell}(tempLkIdx{lCell});
                     end
                 end
