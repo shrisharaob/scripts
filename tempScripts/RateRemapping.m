@@ -24,47 +24,47 @@ function rr = RateRemapping(varargin)
                 if FileExists(['~/data/kenji/' list{i} '/' subTrialNames{kSubTr} '.whl'])
                     try
                         gt = GenericTrial(list{i}, subTrialNames{kSubTr});
-                        %                         fprintf(fp, '\n trialname : %s', subTrialNames{kSubTr});fclose(fp);
                         gt = gt.LoadPF;
                         [rmpk{cnt}, kCluIdx{cnt}] = RmPeak(gt, roi);
                         if cnt == 1, commonIdx = kCluIdx{1}; end
                         commonIdx = intersect(commonIdx, kCluIdx{cnt});
-
-    %                     clus{cnt} = kIdx{1};
                         cnt = cnt + 1;
                     catch err
                         fp = fopen('~/data/analysis/kenji/logFilePFr','a');
                         str = sprintf(['\n' subTrialNames{kSubTr}: 'not done']);
-                        %                         str = [str '\n' err.message];
                         fwrite(fp, str);
                         fclose(fp);
                     end
                 end
             end
-
+            
             for ktr = 1 : cnt - 1
                    sIdx{ktr} = ismember(kCluIdx{ktr}, commonIdx);
             end
             if ~isempty(rmpk)
-                refTrial = rmpk{1};
-                refTrial = refTrial(sIdx{1});
+                refTrRMPk = rmpk{1};
+                refTrRMPk = refTrRMPk(sIdx{1});
                 cluid = gt.GetRegionClu(roi);
                 r = [];
                 if ~isempty(cluid{1})
                     baseno = 1;
                     for mSubTr = 2 : cnt - 1
-                        mTr = rmpk{mSubTr};
-                        mTr = mTr(sIdx{mSubTr});
-                        rho = corrcoef(refTrial(:), mTr(:), 'rows', 'pairwise');
+                        mTrRMPk = rmpk{mSubTr};
+                        mTrRMPk = mTrRMPk(sIdx{mSubTr});
+                        rho = corrcoef(refTrRMPk(:), mTrRMPk(:), 'rows', 'pairwise');
+                        plot(refTrRMPk(:), mTrRMPk(:), '*');
+                        hold all
                         r{mSubTr} = atan(rho(1, 2)); % Fisher z transform
-                        plot(baseno, r{mSubTr}, '*');
-                        hold on;
+                                                     %                        plot(baseno, r{mSubTr}, '*');
+                                                     %                        hold on;
                         baseno = baseno + 1;
                     end
                     %             r(1) = []; % corr with the same trial
                 end
+                xlabel('rate pk arena A', 'FontSize', 14);
+                ylabel('rate pk arena B', 'FontSize', 14);
+                line([0, 60], [0, 60], 'color','k');
                 rr{i} = r;
-    %             clear rmpk;
                 rmpk =  {};
             end
         end
@@ -74,7 +74,7 @@ function rr = RateRemapping(varargin)
         fclose('all');
     end
     save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' char(roi), '.' mfilename '.mat'], 'rr');
-
+    keyboard;
     if IF_PLOT
         figure;
         bn = 1;

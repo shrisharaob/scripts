@@ -22,6 +22,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                 kSmoothRM = gpf.smoothRateMap(:, :, idx);
                 rateThresh = nSTD * std(kSmoothRM(:));
                 kPk = LocalMinima2(-1 * kSmoothRM', -1 * rateThresh, 2);
+                kPeakRate = kSmoothRM(Sub2Ind(size(kSmoothRM, kPk)));
                 kContr = contour(kSmoothRM, [1, 1] .* rateThresh);
                 [nRows, nClmns] = size(kContr);
                 nContrs = 0;
@@ -30,7 +31,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                 while ~IS_DONE
                     nContrs = nContrs + 1;
                     mClm(nContrs) = 1 + sum(nVals) + (nContrs - 1);
-                    if mClm(nContrs) > nClmns, 
+                    if mClm(nContrs) > nClmns,
                          mClm(nContrs) = nClmns;
                         nContrs = nContrs - 1;
                         IS_DONE = 1; continue; 
@@ -122,7 +123,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                   pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
                   pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
                   plot(cntrA{cntrPairs(kCntrPr, 1)}(:,1), cntrA{cntrPairs(kCntrPr, 1)}(:,2),'r.-');
-                  hold on
+                  hold on;
                   plot(pkA(cntrPairs(kCntrPr, 1), 1), pkA(cntrPairs(kCntrPr, 1), 2), 'g*')
                   xlim([1 50]);
                   ylim([1 50]);
@@ -133,7 +134,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                   line([0 0], ylim, 'Color', 'r');
                   %%%%%%
                   keyboard;
-                  clf;                   
+                  clf;              
                   end
               end
           end

@@ -6,6 +6,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
     [cellPairs, IF_SMRM, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag] = ...
         DefaultArgs(varargin, {defCellPairs, 1, 3, 0.5, 2, 'RUN', 10e-3, 200e-3});
     
+
     cellIds = unique(cellPairs(:));
     nCells = length(cellIds);
     smthRateMaps = gpf.smoothRateMap(:, :, nCells);
@@ -84,7 +85,6 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
     nCellPairs = size(cellPairs, 1);
     stsp = gt.LoadStatePeriods([],gt.trackingSampleRate, 1);
     stsp = stsp - ConvertFs(gt.trialPeriods(1), gt.lfpSampleRate, gt.trackingSampleRate);
-    counterPk = 0;
     for mCellPair = 1 : nCellPairs
       cntrA = cntrVertices{cellIds == cellPairs(mCellPair, 1)}; 
       cntrB = cntrVertices{cellIds == cellPairs(mCellPair, 2)};
@@ -96,14 +96,10 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
           cntrPairs(cntrPairs(:, 1) > nCntrA, :) = [];
           cntrPairs(cntrPairs(:, 2) > nCntrB, :) = [];
           cntrPairs = sortrows(unique(cntrPairs, 'rows')); 
-          pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
-          pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
-      
           for kCntrPr = 1 : size(cntrPairs, 1)
-              kCntrPr 
+              kCntrPr
               % OVERLAP = any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)}));
               % if the sub cntrs overlap
-              pkDistAB(counterPk + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 1), :));
               if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
                   POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                   POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
@@ -111,8 +107,8 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                   inout = InOut(POS_IN_AB);
                   timesInAB = inout{1};
                   timesInAB = IntersectRanges(timesInAB, stsp);
-                  res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd');
-                  res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd');
+                  res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd', 1, 1);
+                  res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd', 1, 1);
                   if length(res1) > 5 & length(res2) > 5
                   mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
                   [mCCg, ccgTAx, ~] = myCCG([res1; res2], mClu, binSize, halfBins, gt.sampleRate, cellPairs(mCellPair, :), 'count', [], 1);
@@ -123,6 +119,8 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                   imagesc(occupancy); colormap('gray');
                   set(gca, 'ydir', 'normal');
                   hold on;
+                  pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
+                  pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
                   plot(cntrA{cntrPairs(kCntrPr, 1)}(:,1), cntrA{cntrPairs(kCntrPr, 1)}(:,2),'r.-');
                   hold on
                   plot(pkA(cntrPairs(kCntrPr, 1), 1), pkA(cntrPairs(kCntrPr, 1), 2), 'g*')

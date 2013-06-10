@@ -1,0 +1,19 @@
+function ProcessFigure(hFigure, fileName, paperSize)
+% History:
+% Dmytro Velychko - Created
+    
+    allAxesInFigure = findall(hFigure, 'type', 'axes');
+    for hAxis = allAxesInFigure'
+        set(hAxis, 'box', 'off');
+        set(hAxis, 'TickDir', 'out');
+        set(hAxis,'FontSize', 8);
+        set(get(hAxis,'XLabel'), 'FontSize', 8);
+        set(get(hAxis,'YLabel'), 'FontSize', 8);
+    end
+    set(hFigure, 'PaperPosition', [0, 0, paperSize]);
+    set(hFigure, 'PaperSize', paperSize);
+    set(hFigure, 'Renderer', 'Painters');
+    if (delta.Test.IsSaveFigures())
+        saveas(hFigure, fileName, 'pdf');
+    end
+end
