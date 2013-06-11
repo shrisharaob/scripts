@@ -1,0 +1,6 @@
+function out = TrajectoryEvents(gt, varargin)
+% out = TrajectoryEvents(gt, varargin)
+
+
+
+

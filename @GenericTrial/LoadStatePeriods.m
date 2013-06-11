@@ -25,9 +25,15 @@ function statePeriods = LoadStatePeriods(gt, varargin)
         trialStartTime_pos = 0;
         markerNo = 1;
       case  'kenji'
-        markerNo = 1;
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
-        statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
+        switch state
+          case 'RUN'
+            markerNo = 1;
+            statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
+
+          case 'SWS'
+            return;
+        end
     end
     
     if IF_INGOODPOS

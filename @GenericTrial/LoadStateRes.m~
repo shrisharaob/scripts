@@ -32,14 +32,15 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         markerNo = 1;
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
         statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
-       if IF_INGOODPOS
+        trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
+        if IF_INGOODPOS
            posStatePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.trackingSampleRate); %round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
            % statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
-           trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
            posStatePeriods = IntersectRanges(posStatePeriods, gt.goodPosPeriods + trialStartTime_pos); 
            statePeriods = ConvertFs(posStatePeriods, gt.trackingSampleRate, gt.sampleRate);
        else
            statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
+           posStatePeriods = ConvertFs(statePeriods, gt.sampleRate, gt.trackingSampleRate);
        end
     end
 

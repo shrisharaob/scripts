@@ -1,8 +1,15 @@
-function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
+function [pos, predErr] = DecodePos(gt, varargin)
 % decode position 
 % gt - GenericTrial Object
-    [binSize, IF_REPORTFIG, type, state] = DefaultArgs(varargin, {200e-3, 0, 'display', 'RUN'});
 
+    if isempty(gt.pfObject), gt = gt.LoadPF; end
+    defCluId = gt.pfObject.acceptedUnits;
+    defRateMaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, defCluId));
+    [binSize, IF_REPORTFIG, type, state, ratemaps, cluId, binOverlap] = ...
+        DefaultArgs(varargin, {200e-3, 0, 'display', 'RUN', defRateMaps, defCluId, 0});
+
+    cluId = cluId(ismember(cluId, gt.pfObject.acceptedUnits));
+    ratemaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, cluId));
     switch gt.datasetType
       case 'MTA'
         markerNo = 7;
@@ -19,20 +26,25 @@ function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
         stateXY = SelectPeriods(sq(gt.position(:, markerNo, :)), statePeriods, 'c');
         statePeriods = ConvertFs(statePeriods, gt.trackingSampleRate, gt.sampleRate);
       case 'kenji'
-        for i = 1:length(gt.states)   
-            if strcmp(gt.states{i}.name, state)
-                statePeriods = gt.states{i}.statePeriods; % @ lfp fs
-                break;
+        switch state
+          case 'RUN'
+            for i = 1:length(gt.states)   
+                if strcmp(gt.states{i}.name, state)
+                    statePeriods = gt.states{i}.statePeriods; % @ lfp fs
+                    break;
+                end
             end
-        end
-        markerNo = 1;
-        statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
+            markerNo = 1;
+            statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
+            
+          case 'SWS'
+            statePeriods = gt.TrajectoryEvents('SWS', cluId);
     end
 
     if isempty(gt.res)
         gt = gt.LoadCR;
     end
-    [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, 0.6);
+    [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, binOverlap);
     fprintf('compution posterior... ');
     tic, posterior = decode_bayesian_poisson(ratemaps, sc);toc
     pos = decodedPosMAP(gt, posterior);

@@ -1,8 +1,8 @@
 function statePeriods = LoadStatePeriods(gt, varargin)
 % statePeriods = LoadStatePeriods(gt, varargin)
-% loads the specified state periods 
+% loads the specified state periods @lfp fs
 
-[state, fs, IF_INGOODPOS] = DefaultArgs(varargin, {'RUN', 0, 1})
+    [state, fs, IF_INGOODPOS] = DefaultArgs(varargin, {'RUN', 0, 1});
 
 
     switch gt.datasetType
