@@ -1,4 +1,7 @@
 function [pos, predErr] = DecodePos(gt, varargin)
+% [pos, predErr] = DecodePos(gt, varargin)
+% [binSize, IF_REPORTFIG, type, state, ratemaps, cluId, binOverlap]
+% {200e-3, 0, 'display', 'RUN', defRateMaps, defCluId, 0}
 % decode position 
 % gt - GenericTrial Object
 
@@ -35,19 +38,21 @@ function [pos, predErr] = DecodePos(gt, varargin)
                 end
             end
             markerNo = 1;
+            %            stateXY = SelectPeriods(sq(gt.position(:, markerNo, :)), ConvertFs(statePeriods, gt.lfpSampleRate, gt.trackingSampleRate), 'c');
             statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
-            
+            statePeriods = gt.LoadStatePeriods(state, gt.sampleRate, cluId);
           case 'SWS'
             statePeriods = gt.TrajectoryEvents('SWS', cluId);
-    end
-
+        end
     if isempty(gt.res)
         gt = gt.LoadCR;
     end
-    [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, binOverlap);
-    fprintf('compution posterior... ');
+    fprintf('\n computing instantaneous firing rate... ')
+    [sc, bc, xy] = GetSpikeCounts(gt, binSize, statePeriods, cluId, binOverlap);
+    fprintf('\n compution posterior... ');
     tic, posterior = decode_bayesian_poisson(ratemaps, sc);toc
     pos = decodedPosMAP(gt, posterior);
+    keyboard;
     % bcidx = round(bc * gt.trackingSampleRate)+1;
     % bcidx(end) = [];
     bc = round(bc * gt.trackingSampleRate) + 1;
@@ -60,4 +65,5 @@ function [pos, predErr] = DecodePos(gt, varargin)
     h = figure;
     plot(predErr);
     title([num2str(binSize * 1e3), 'ms bins']);
+    keyboard;
 end

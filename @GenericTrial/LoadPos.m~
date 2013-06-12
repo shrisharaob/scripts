@@ -1,0 +1,14 @@
+function pos = LoadPos(gt, state)
+
+
+    switch gt.datasetType
+      case 'kenji'
+        defMarker = 1;
+      case 'MTA'
+        defMarker = 7;
+    end
+    [markerNo] = DefaultArgs(varargin, {defMarker});
+
+    sts = gt.LoadStateperiods(state, gt.trackingSampleRate, 0);
+    pos = SelectPeriods(gt.position(:, markerNo, :), sts, 'c');
+end

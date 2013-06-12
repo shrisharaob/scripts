@@ -1,9 +1,9 @@
 function statePeriods = LoadStatePeriods(gt, varargin)
 % statePeriods = LoadStatePeriods(gt, varargin)
+% [state, fs, IF_INGOODPOS]
 % loads the specified state periods @lfp fs
 
     [state, fs, IF_INGOODPOS] = DefaultArgs(varargin, {'RUN', 0, 1});
-
 
     switch gt.datasetType
       case  'MTA'
@@ -41,7 +41,7 @@ function statePeriods = LoadStatePeriods(gt, varargin)
         trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
         posStatePeriods = IntersectRanges(posStatePeriods, gt.goodPosPeriods + trialStartTime_pos); 
     end
-
+    
     if fs ~= 0
         statePeriods = ConvertFs(posStatePeriods, gt.trackingSampleRate, fs);
     else
