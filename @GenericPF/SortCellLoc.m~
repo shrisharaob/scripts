@@ -1,0 +1,4 @@
+function sortedCellId = 
+
+     SortCellLoc = cell2mat(rateMap1D);
+     [~, sortedCellidx] = max(rm, [], 2);

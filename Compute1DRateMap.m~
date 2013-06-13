@@ -1,0 +1,22 @@
+function rateMap1D  = Compute1DRateMap(gt, res, pos, varargin)
+% rateMap1D  = Compute1DRateMap(gt, res, pos, varargin)
+% res in tracking sample rate
+
+   defPosRange = [max(pos), min(pos)];
+   [nBins, smoothSigma, posRange] = DefaultArgs(varargin,{50,[], defPosRange});
+  
+   binSiz = diff(defPosRange) ./ nBins;
+   edges = linspace(posRange(1), posRange(2), binSiz);
+   [posCount, binnedPos] = histc(pos, edges);
+   occupancy = posCount ./ gt.trackingSampleRate;
+   indx = res(find(res > 0 & res <= length(binnedPos)));
+   spkCount = Accumulate(res(indx), 1, [1, nBins]);
+   rateMap1D = spkCount ./ occupancy;
+   keyboard;
+end
+   
+   
+
+   
+   
+

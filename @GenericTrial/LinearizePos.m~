@@ -1,0 +1,4 @@
+function linPos = LinearizePos(gt, varargin);
+% linPos = LinearizePos(gt, varargin);
+
+

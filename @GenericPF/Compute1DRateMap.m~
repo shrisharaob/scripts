@@ -1,0 +1,4 @@
+function rateMap1D  = Compute1DRateMap(gt, res, pos, varargin)
+
+   [Nbin,Smooth, IF_COMPUTE_RM] = DefaultArgs(varargin,{50,[], 1});
+

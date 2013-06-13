@@ -22,15 +22,16 @@ function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
     if isempty(trial.res)
         trial = trial.LoadCR;
     end
-    [res, origIdx] = SelectPeriods(trial.res, statePeriods, 'd');
+    [res, origIdx] = SelectPeriods(trial.res, statePeriods, 'd', 1, 1);
     xy = SelectPeriods(sq(trial.position(:, markerNo, :)), trial.goodPosPeriods, 'c');
     clu = trial.clu(origIdx);
     res = res(ismember(clu, cluIdx));
     clu = clu(ismember(clu, cluIdx));
     res = res ./ trial.sampleRate; % res in seconds
-    startEdges = statePeriods(1, 1) ./ trial.sampleRate : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate - winSiz;
-    endEdges = statePeriods(1, 1) ./ trial.sampleRate + winSiz : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate;
-    winEdges = [startEdges', endEdges'];
+%     startEdges = statePeriods(1, 1) ./ trial.sampleRate : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate - winSiz;
+%     endEdges = statePeriods(1, 1) ./ trial.sampleRate + winSiz : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate;
+    edges = 1 : winSiz * (1 - overlap) : res(end) + winSiz;
+    winEdges = [edges(1: end-1)', edges(2 :end)'];
     winEdgesATPosFs = round(RecenterPeriods(winEdges) .* trial.trackingSampleRate) + 1 ;
     nWins = size(winEdges, 1);
     sc = zeros(nClus, nWins);   
@@ -42,6 +43,8 @@ function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
         end
         if winEdges(mWin, 2) <= size(xy, 1)
             posInWin(mWin, :) = nanmean(xy(winEdgesATPosFs(mWin, 1): winEdgesATPosFs(mWin, 2), :), 1);
+        else 
+            posInWin(mWin, :) = [nan, nan];
         end
     end
     varargout{1} = posInWin;

@@ -1,19 +1,28 @@
-function out = SearchKenji(varargin)
-    % returns the filebase and trial names stisfying the search keys
-    % args.arena - search struct 
-    %   args.arena.arena
-    %   args.arena.args.roi
+function [out, varargout] = SearchKenji(varargin)
+% returns the filebase and trial names matching the search keys
+% args.arena - search struct 
+% args.arena.arena
+% args.arena.args.roi
+% If filebase or filename is passed, then returns the roi and arena
     defArgs = struct('roi', 'CA3', 'arena', 'bigSquare');     
     [args, searchInFilebase, trialName, IF_GET_MAZE] = DefaultArgs(varargin, {defArgs, [], [], false});
+    varargout{1} = [];
     IN_FILEBASE = ~isempty(searchInFilebase);
     load('~/data/kenji/Beh_time_ind.mat'); % loads var Beh
     out = Beh(:, [2, 4]); %[filebase, trialName];
     idx = true(size(Beh,1), 1);
    if ~isstruct(args), IF_GET_MAZE = true; end
     if IF_GET_MAZE
+        elPos = importdata(['~/data/kenji/ElePosition.txt']);
         out = Beh(strcmp(Beh(:, 2), args) & ~strcmp(Beh(:, 5), 'sleep'), [2, 4, 5]);
+        rowId = find(~cellfun(@isempty, regexp(elPos, args)));
+        rowCell = regexp(elPos{rowId}, '\s', 'split');
+        varargout{1} = rowCell(5 : end);
         if isempty(out) % check if arg is a trial name
-             out = Beh(strcmp(Beh(:, 4), args) & ~strcmp(Beh(:, 5), 'sleep'), [5]);
+            out = Beh(strcmp(Beh(:, 4), args) & ~strcmp(Beh(:, 5), 'sleep'), [2 5]);
+            rowId = find(~cellfun(@isempty, regexp(elPos, out(1))));
+            rowCell = regexp(elPos{rowId}, '\s', 'split');
+            varargout{1} = rowCell(5 : end);
         end
         if isempty(out)
             out{1} = '';

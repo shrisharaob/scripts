@@ -102,4 +102,4 @@ function PlotRateMaps(pfObject, varargin)
             end
         end
     end
-    end
+end
