@@ -1,10 +1,13 @@
 function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
+% function sc = GetSpikeCounts(trial, varargin) 
+% [winSiz, statePeriods, cluIdx, overlap, markerNo] 
+% {200e-3, [], [], 0, defMarker}
 %  returns spike counts in wins
 % trial - generic trial class object
 % winSize in secs
 % statePeriod - in samplerate
 % overlap - overlap factor of windows
-% function sc = GetSpikeCounts(trial, winSize, cluIdx)
+
     format long;
     switch trial.datasetType
       case 'kenji'
@@ -12,19 +15,15 @@ function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
       case 'MTA'
         defMarker = 7;
     end
-    [winSiz, statePeriods, cluIdx, overlap, markerNo] =  ...
+    [winSiz, state, cluIdx, overlap, markerNo] =  ...
         DefaultArgs(varargin, {200e-3, [], [], 0, defMarker});
-    %  xySegLength = size(trial.position, 1);
-    %  winSiz = round(winSiz * trial.sampleRate);
-    %  nWins = ceil(xySegLength ./ (trial.trackingSampleRate * winSize));
-    %  winEdges = linspace(0, xySegLength / trial.trackingSampleRate, nWins);
     nClus = length(cluIdx);
     if isempty(trial.res)
         trial = trial.LoadCR;
     end
-    [res, origIdx] = SelectPeriods(trial.res, statePeriods, 'd', 1, 1);
-    xy = SelectPeriods(sq(trial.position(:, markerNo, :)), trial.goodPosPeriods, 'c');
-    clu = trial.clu(origIdx);
+    %[res, origIdx] = SelectPeriods(trial.res, statePeriods, 'd', 1, 1);
+    %y = SelectPeriods(sq(trial.position(:, markerNo, :)), trial.goodPosPeriods, 'c');
+    [res, clu, xy] = trial.LoadStateRes(state, 1, 0);
     res = res(ismember(clu, cluIdx));
     clu = clu(ismember(clu, cluIdx));
     res = res ./ trial.sampleRate; % res in seconds

@@ -122,8 +122,7 @@ function out = MultiPeakPFDistance(gt, varargin)
                         if length(res1) > 5 & length(res2) > 5
                             mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
                             [mCCg, ccgTAx, ~] = myCCG([res1; res2], mClu, binSize, halfBins, gt.sampleRate, cellPairs(mCellPair, :), 'count', [], 1);
-
-                            %%%% DISPLAY %%%%%
+                            xsc%%%% DISPLAY %%%%%
                             subplot(2,2,4);
                             cla;
                             imagesc(occupancy); colormap('gray');

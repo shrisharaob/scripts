@@ -1,6 +1,6 @@
 function pairs = GenPairs(a, b)
 % pairs = GenPairs(a, b)
-% returns all pairings of vectors a and b
+% returns all unique pairings of vectors a and b 
 
     a = a(:)';
     b = b(:)';

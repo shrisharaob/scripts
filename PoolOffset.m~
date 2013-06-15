@@ -32,6 +32,7 @@ function PoolOffset(varargin)
     end
     keyboard;
     out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows
+    selectedFBs = filebases(logical(sum(~cellfun(@isempty, out), 2)));
     nTrs = sum(~cellfun(@isempty, out), 2);
     out = out(nTrs > 1, :);
     nTrs = nTrs(nTrs > 1);
@@ -42,10 +43,25 @@ function PoolOffset(varargin)
         evalStr = [];
         for lTr = 1 : nTrs(mBase)
             eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
+            %            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeaks;']);
             evalStr = [evalStr, ',' cntrPeakNames{lTr}];
         end
-        [tf, locf] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
-        STABLE_CNTRS{mBase}  = cellfun(@sum, tf);
+        [tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
+        %        nStableCntrs{mBase} = 
+        STABLE_CNTRS{mBase}  = logical(cellfun(@sum, tf{mBase}));
+        for mTr = 1 : nTrs(mBase)
+            idx = tf{mBase}(STABLE_CNTRS{mBase});
+            cntrVertices = out{mBase, mTr}.cntrVertices(STABLE_CNTRS{mBase});
+            cntrPeaks = out{mBase, mTr}.cntrPeals(STABLE_CNTRS{mBase});
+            % commonCntrs.CntrPeaks{mBase, mTr} = out{mBase, mTr}.cntrPeaks(logical(STABLE_CNTRS{mBase}));
+            nStableCells = sum(STABLE_CNTRS{mBase});
+            nStableCntrs = cellfun(@sum, tf{mBase});
+            for kCell = 1 : nStableCells
+                kIdx = idx{kCell};
+                tempCntr = cntrVertices{kCell};
+                cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
+            end
+        end
     end
     keyboard;
     f11 = offset;
@@ -62,7 +78,6 @@ function PoolOffset(varargin)
     fy = polyval([1, 0], xx(:, 1));
     resudials = vnorm([xx(:, 1), fy]' - xx');
     nPairs = size(pooledOffset, 1); 
-    
     for kResample = 1 : nResample 
         % scramble cell ids
         pfr = [pooledOffset(randperm(nPairs), 1), pooledOffset(randperm(nPairs), 2)];

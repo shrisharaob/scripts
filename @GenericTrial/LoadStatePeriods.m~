@@ -30,8 +30,8 @@ function statePeriods = LoadStatePeriods(gt, varargin)
           case 'RUN'
             markerNo = 1;
             statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
-
           case 'SWS'
+            statePeriods = gt.TrajectoryEvents(state);
             return;
         end
     end

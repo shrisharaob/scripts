@@ -1,5 +1,6 @@
-classdef GenericTrial
+classdef GenericTrial < handle
     % class to structure general recording data
+    %
     %-------
     % History:
     %  Shrisha - Created

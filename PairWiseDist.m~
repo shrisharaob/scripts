@@ -1,0 +1,5 @@
+function PairWiseDist(varargin)
+
+    [roi, arena] = DefaultArgs(varargin, {'CA3', 'bigSquare'});
+
+    

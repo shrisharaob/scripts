@@ -9,5 +9,6 @@ function pairs = GenPairs(a, b)
     maxB = max(b);
     pairs(pairs(:, 1) > maxA, :) = [];
     pairs(pairs(:, 2) > maxB, :) = [];
+    pairs = unique(sortrows(pairs), 'rows');
 end
     

@@ -19,7 +19,7 @@
 %             %kBase 
 %         end
 %     end
-
+load('~/thesis/temp/poolOffset_cntrs');
 matches = SearchKenji;
 filebases = unique(matches(:, 1));
 out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows

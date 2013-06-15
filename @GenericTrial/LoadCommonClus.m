@@ -1,4 +1,5 @@
 function commonClus = LoadCommonClus(gt, varargin)
+% commonClus = LoadCommonClus(gt, varargin)
 
     [roi, arena] = DefaultArgs(varargin, {'CA3', 'bigSquare'});
     load([gt.paths.analysis, gt.filebase,GenFiletag(roi, arena), 'commonClus.mat']);

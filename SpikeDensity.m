@@ -32,7 +32,7 @@ function [spikeDensity, binEdges] = SpikeDensity(res, varargin)
     gw = gw ./ sum(gw);
     spikeDensity = conv(counts, gw, 'same');
 
-    %% ksd with Gaussian kernel
+    %% ksd with Gaussian kernel : shd be faster with fft
 %    nSamples = length(res);
 %    maxSamples = max(1 : nSamples + 3 * bandWidth);
 %    n = 2 ^ (nextpow2(maxSamples));

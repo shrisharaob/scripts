@@ -1,11 +1,12 @@
 function PlotRaster(Res,Clu,varargin)
 %function PlotRaster(Res,Clu,SampleRate)
-[SampleRate, Color] = DefaultArgs(varargin,{20000,'k'});
+[SampleRate, Color, cluOrder] = DefaultArgs(varargin,{20000, 'k', unique(Clu)});
 
 Colors = colormap;
 Colors = repmat(Colors,10,1);
-MyClu = unique(Clu);
-%clf; hold on;
+%MyClu = unique(Clu, 'stable');
+MyClu = cluOrder;
+
 for c=1:length(MyClu)
     MyRes = Res(find(Clu==MyClu(c)));
     if isempty(Color)

@@ -3,7 +3,7 @@ function ProcessFigure(hFigure, fileName, varargin)
 % Dmytro Velychko - Created
 % Shrisha - Modified
     
-    [fontSiz, paperSize] = DefaultArgs(varargin, {8, [5.5, 5.5]});
+    [fontSize, paperSize] = DefaultArgs(varargin, {8, [5.5, 5.5]});
     allAxesInFigure = findall(hFigure, 'type', 'axes');
     for hAxis = allAxesInFigure'
         set(hAxis, 'box', 'off');

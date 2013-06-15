@@ -1,18 +1,19 @@
-function rateMap1D  = Compute1DRateMap(gt, varargin)
+function rateMap1D  = Compute1DRateMap(gt, IF_COMPUTE, varargin)
 % rateMap1D  = Compute1DRateMap(gt, res, linPos, varargin)
 % res in tracking sample rate
 
-    [res, clu, pos, psp]  = gt.LoadStateRes('RUN', 1, gt.trackingSampleRate);
-    [~, linPos] = cart2pol(pos(:, 1), pos(:, 2));
-    defPosRange = [min(linPos), max(linPos)];
-    if isempty(gt.clu), gt = gt.LoadCR; end
-    defCluId = unique(gt.clu);
-    [IF_COMPUTE, cluId, nBins, smoothSigma, posRange] = ...
-        DefaultArgs(varargin,{0, defCluId, 50, 3e-2, defPosRange});
     if ~IF_COMPUTE
         load([gt.paths.analysis,  gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']);
         return;
     end
+    [res, clu, pos, psp]  = gt.LoadStateRes('RUN', 1, gt.trackingSampleRate);
+    [~, linPos] = cart2pol(pos(:, 1), pos(:, 2));
+    defPosRange = [min(linPos), max(linPos)];
+    defCluId = 1 : Nclusters(gt);
+    [cluId, nBins, smoothSigma, posRange] = ...
+        DefaultArgs(varargin,{defCluId, 50, 3e-2, defPosRange});
+
+    if isempty(gt.clu), gt = gt.LoadCR; end
     binSiz = diff(defPosRange) ./ nBins;
     edges = linspace(posRange(1), posRange(2), nBins);
     [posCount, binnedPos] = histc(linPos, edges);
