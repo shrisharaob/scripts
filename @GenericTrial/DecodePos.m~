@@ -58,23 +58,36 @@ function [pos, predErr] = DecodePos(gt, varargin)
     end
     fprintf('\n computing instantaneous firing rate... ')
     keyboard
-    [sc, bc, xy] = GetSpikeCounts(gt, binSize, statePeriods, cluId, binOverlap);
+    [sc, bc, xyInWin] = GetSpikeCounts(gt, binSize, statePeriods, cluId, binOverlap);
     fprintf('\n compution posterior... ');
     options = struct('prior', [], 'bins', size(sc, 2), 'alpha', 5);
     tic, posterior = decode_bayesian_poisson(ratemaps, sc, options);toc
     pos = decodedPosMAP(gt, posterior);
-    keyboard;
-    % bcidx = round(bc * gt.trackingSampleRate)+1;
-    % bcidx(end) = [];
-%     bc = round(bc * gt.trackingSampleRate) + 1;
-%     for kWin = 1 : size(bc, 1)
-%         xy(kWin, :) = nanmean(SelectPeriods(stateXY , bc, 'c'));
+
+
+    figure;
+    imagesc(sum(posterior, 3));
+    title(['#cells ' num2str(length(clus))  '  winSize:'  num2str(winSiz)])
+
+    [dmap, dbin] = decodedPosMAP(gt, posterior);
+    err = vnorm(xyInWin - dmap, 2);
+    figure;
+    hist(err, 1e2)
+    hold on
+    line([mean(err), mean(err)], ylim,'color', 'r');
+    title(['error distr   #cells ' num2str(length(clus))  '  winSize:'  num2str(winSiz) ' s'])
+    xlabel('cm')
+
+
+
+
+
+%     keyboard;
+%     for kBin = 1 : size(pos,1) - 1
+%         predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));
 %     end
-    for kBin = 1 : size(pos,1) - 1
-        predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));
-    end
-    h = figure;
-    plot(predErr);
-    title([num2str(binSize * 1e3), 'ms bins']);
-    keyboard;
+%     h = figure;
+%     plot(predErr);
+%     title([num2str(binSize * 1e3), 'ms bins']);
+%     keyboard;
 end
