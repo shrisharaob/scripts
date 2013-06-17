@@ -1,14 +1,14 @@
 function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
-% out = TrajectoryEvents(gt, varargin)
+% trajEvntPeriods = TrajectoryEvents(gt, varargin) @sample fs
     if ~IF_COMPUTE
         load([gt.paths.anslysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat']);
     end
     if isempty(gt.pfObject), gt.LoadPF; end
-    defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .7);
+    defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .35);
     [state, clus2Select, minEvntCells, binSize, bandWidth] = ...
-        DefaultArgs(varargin, {'SWS', defClus2Select, 10, 250e-3, 30e-3});
+        DefaultArgs(varargin, {'SWS', defClus2Select, 5, 250e-3, 30e-3});
 
-    [res, clu] = gt.LoadStateRes(state);
+    [res, clu] = gt.LoadStateRes(state, [],[],[],1);
     [res, resIdx] = sort(res);
     clu = clu(resIdx);
     tres = res;
@@ -35,7 +35,7 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;
     save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
-
+    keyboard;
 %     mu = mean(spikeDensity);
 %     sigma = std(spikeDensity);
 %     trajEvnt = InOut(spikeDensity >= mu + 3 * sigma); % detect traj events

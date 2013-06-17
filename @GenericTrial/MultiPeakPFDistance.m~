@@ -19,7 +19,7 @@ function out = MultiPeakPFDistance(gt, varargin)
     for kCell = 1 : nCells
         if IF_SMRM
             idx = ismember(gpf.acceptedUnits, cellIds(kCell));
-            if ~isempty(idx)
+            if ~isempty(idx) & sum(idx) ~= 0
                 kSmoothRM = gpf.smoothRateMap(:, :, idx);
                 rateThresh = nSTD * std(kSmoothRM(:));
                 kPk = LocalMinima2(-1 * kSmoothRM', -1 * rateThresh, 2);
@@ -72,9 +72,15 @@ function out = MultiPeakPFDistance(gt, varargin)
             end
         end
     end
-    cellIds = cellIds(SELECTED_CELL);
-    out.cntrVertices = cntrVertices;
-    out.cntrPeaks = cntrPeaks;
+    if ~(exist('SELECTED_CELL', 'var')), 
+        out.cntrVertices = [];
+        out.cntrPeaks = [];
+        cellIds = [];
+    else
+        cellIds = cellIds(SELECTED_CELL);
+        out.cntrVertices = cntrVertices;
+        out.cntrPeaks = cntrPeaks;
+    end
     %%%%%%  CCG 
     if IF_COMPUTE_CCG
         if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 

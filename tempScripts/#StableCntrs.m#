@@ -99,7 +99,7 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
     stableCntrs(diffFbIdx, :) = cmnCntrs; 
     selectedClu = cell(1, nFbs);
     selectedClu(diffFbIdx) = clu;
-    for  mBase = 1 : length(identicalFbIdx)
+    for   mBase = 1 : length(identicalFbIdx)
         load(['~/data/analysis/kenji/', filebases{identicalFbIdx(mBase)}, '/', filebases{identicalFbIdx(mBase)}, GenFiletag(roi, arena), 'commonClus.mat']);
         cmnClus{mBase} = commonClus;
     end

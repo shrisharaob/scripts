@@ -20,49 +20,51 @@ function PoolOffset(varargin)
                 % load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(arena, roi), 'CCG.mat' ]);
 %                 load(['~/data/analysis/kenji/', filebases{kBase}, '/', filebases{kBase}, '.', trialNames{mTr}, GenFiletag(arena, roi), 'CCG.mat' ]);
 %                 offset{kBase, mTr} = abs(fout.offset);
-                commonClus = gt.LoadCommonClus;
-                out{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
+                commonClus = gt.LoadCommonClus(roi, arena);
+                cntrs{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
                 trNo = trNo + 1;
                 trNames{trNo} = trialNames{mTr}; 
             catch err
                 fprintf(['\n error ' trialNames{mTr}, '\n']);
+                keyboard;
             end     
             %kBase 
         end
     end
+    save(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat'], 'cntrs');
     keyboard;
-    out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows
-    selectedFBs = filebases(logical(sum(~cellfun(@isempty, out), 2)));
-    nTrs = sum(~cellfun(@isempty, out), 2);
-    out = out(nTrs > 1, :);
-    nTrs = nTrs(nTrs > 1);
-    % find pks of cntrs which are stable acorss sessions
-    for mBase = 1 : size(out, 1)
-        DetectCmnPks = GenDetectCmnPks(nTrs(mBase), 'ismemberf', 3);
-        cntrPeakNames = genvarname(cellstr(repmat('cntrPeak', nTrs(mBase), 1)));
-        evalStr = [];
-        for lTr = 1 : nTrs(mBase)
-            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
-            %            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeaks;']);
-            evalStr = [evalStr, ',' cntrPeakNames{lTr}];
-        end
-        [tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
-        %        nStableCntrs{mBase} = 
-        STABLE_CNTRS{mBase}  = logical(cellfun(@sum, tf{mBase}));
-        for mTr = 1 : nTrs(mBase)
-            idx = tf{mBase}(STABLE_CNTRS{mBase});
-            cntrVertices = out{mBase, mTr}.cntrVertices(STABLE_CNTRS{mBase});
-            cntrPeaks = out{mBase, mTr}.cntrPeals(STABLE_CNTRS{mBase});
-            % commonCntrs.CntrPeaks{mBase, mTr} = out{mBase, mTr}.cntrPeaks(logical(STABLE_CNTRS{mBase}));
-            nStableCells = sum(STABLE_CNTRS{mBase});
-            nStableCntrs = cellfun(@sum, tf{mBase});
-            for kCell = 1 : nStableCells
-                kIdx = idx{kCell};
-                tempCntr = cntrVertices{kCell};
-                cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
-            end
-        end
-    end
+%     out = out(logical(sum(~cellfun(@isempty, out), 2)), :); % remove empty rows
+%     selectedFBs = filebases(logical(sum(~cellfun(@isempty, out), 2)));
+%     nTrs = sum(~cellfun(@isempty, out), 2);
+%     out = out(nTrs > 1, :);
+%     nTrs = nTrs(nTrs > 1);
+%     % find pks of cntrs which are stable acorss sessions
+%     for mBase = 1 : size(out, 1)
+%         DetectCmnPks = GenDetectCmnPks(nTrs(mBase), 'ismemberf', 3);
+%         cntrPeakNames = genvarname(cellstr(repmat('cntrPeak', nTrs(mBase), 1)));
+%         evalStr = [];
+%         for lTr = 1 : nTrs(mBase)
+%             eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeals;']);
+%             %            eval([cntrPeakNames{lTr} '=out{mBase, lTr}.cntrPeaks;']);
+%             evalStr = [evalStr, ',' cntrPeakNames{lTr}];
+%         end
+%         [tf{mBase}, locf{mBase}] = eval(['cellfun(DetectCmnPks' evalStr, ',', '''uniformoutput''' ', 0);']);
+%         %        nStableCntrs{mBase} = 
+%         STABLE_CNTRS{mBase}  = logical(cellfun(@sum, tf{mBase}));
+%         for mTr = 1 : nTrs(mBase)
+%             idx = tf{mBase}(STABLE_CNTRS{mBase});
+%             cntrVertices = out{mBase, mTr}.cntrVertices(STABLE_CNTRS{mBase});
+%             cntrPeaks = out{mBase, mTr}.cntrPeals(STABLE_CNTRS{mBase});
+%             % commonCntrs.CntrPeaks{mBase, mTr} = out{mBase, mTr}.cntrPeaks(logical(STABLE_CNTRS{mBase}));
+%             nStableCells = sum(STABLE_CNTRS{mBase});
+%             nStableCntrs = cellfun(@sum, tf{mBase});
+%             for kCell = 1 : nStableCells
+%                 kIdx = idx{kCell};
+%                 tempCntr = cntrVertices{kCell};
+%                 cmnCntrs.cntrVertices{mBase, mTr} = tempCntr{kIdx};
+%             end
+%         end
+%     end
     keyboard;
     f11 = offset;
     offset = offset(logical(sum(~cellfun(@isempty, offset), 2)), :);

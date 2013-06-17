@@ -1,5 +1,5 @@
 function PlotRaster(Res,Clu,varargin)
-%function PlotRaster(Res,Clu,SampleRate)
+%function PlotRaster(Res,Clu,SampleRate, color, cluOrder)
 [SampleRate, Color, cluOrder] = DefaultArgs(varargin,{20000, 'k', unique(Clu)});
 
 Colors = colormap;

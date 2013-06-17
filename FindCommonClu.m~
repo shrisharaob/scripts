@@ -8,10 +8,14 @@ function FindCommonClu(varargin)
 
     switch datasetType
       case 'kenji'
-        searchStruct.roi = roi;
-        searchStruct.arena = arena;
-        list = SearchKenji(searchStruct);
-        filebases = unique(list(:, 1));
+        if isempty(filebases)
+            searchStruct.roi = roi;
+            searchStruct.arena = arena;
+            list = SearchKenji(searchStruct);
+            filebases = unique(list(:, 1));
+        else 
+            if ~iscell(filebases), filebases = cellstr(filebases); end
+        end
       case 'MTA'
         roi = 'CA1';
         arena = 'cof';
@@ -19,14 +23,16 @@ function FindCommonClu(varargin)
     end
     
     for i = 1 : length(filebases)
-        switch datasetType 
-          case 'kenji'
-            trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
-          case 'MTA'
-            trNames = MTATrialNames(filebases{i});
-            trialNames = trNames(find(~cellfun(@strcmp, trNames, repmat({'all'}, length(trNames), 1))));
-            
-      end
+        %   switch datasetType 
+        %           case 'kenji'
+        %             %            trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
+        %             trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
+        %           case 'MTA'
+        % %             trNames = MTATrialNames(filebases{i});
+        % %             trialNames = trNames(find(~cellfun(@strcmp, trNames, repmat({'all'}, length(trNames), 1))));
+        %             trialNames = TrialNames(filebases{i}, 'MTA'
+        %       end
+        trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
         if ~isempty(trialNames)
             fprintf('\n ********* filebase: %s ************** \n', filebases{i});
             cnt = 1;
@@ -43,8 +49,7 @@ function FindCommonClu(varargin)
                     fprintf('error  !!!!! \n');
                 end
             end
-            filetag = GenFiletag(roi, arena);
-            save([gt.paths.analysis, gt.filebase, filetag, '.commonClus.mat'], 'commonClus');
+            save([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat'], 'commonClus');
         end
     end
 end

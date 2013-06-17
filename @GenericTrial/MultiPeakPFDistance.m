@@ -75,11 +75,13 @@ function out = MultiPeakPFDistance(gt, varargin)
     if ~(exist('SELECTED_CELL', 'var')), 
         out.cntrVertices = [];
         out.cntrPeaks = [];
+        out.cluId = [];
         cellIds = [];
     else
         cellIds = cellIds(SELECTED_CELL);
         out.cntrVertices = cntrVertices;
         out.cntrPeaks = cntrPeaks;
+        out.cluId = cellIds;
     end
     %%%%%%  CCG 
     if IF_COMPUTE_CCG

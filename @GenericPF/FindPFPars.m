@@ -1,10 +1,11 @@
 function pfPars = FindPFPars(arg, varargin)
 % pfPars = FindPFPars(trial/pfObject, varargin)
-%varargin - [pyrCluIdx, smoothFactor, IF_OVERWRITE]
+% varargin - [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy]
+    
     if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
-        = DefaultArgs(varargin, {[], 'crt1', 0.02, 1, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
-
+        = DefaultArgs(varargin, {[], 'crt1', 0.02, 1, {'head', 'theta'}, 0.5, 3, 0.35, 0.6, 9});
+    
     pfPars.com = [];
     pfPars.smoothRateMap = [];
     pfPars.selectedPairs = [];
@@ -20,7 +21,6 @@ function pfPars = FindPFPars(arg, varargin)
     pfPars.entropy = [];
     if isa(arg, 'GenericPF')
         pfObject = arg;
-        %         pyrCluIdx = pfObject.acceptedUnits;
     elseif isa(arg, 'GenericTrial')
         pfObject = GenericPF(arg);
     elseif isa(arg, 'MTATrial')
@@ -33,10 +33,6 @@ function pfPars = FindPFPars(arg, varargin)
         posOfDots = regexp(filebase,'\.');
         filebase = filebase(1: posOfDots(1) -1);
         arg = MTATrial(filebase, [],pfObject.trialName);
-%     else % if filebase name
-%         gt = GenricTrial(arg);
-%         gt = gt.LoadPF;
-%         pfObject = gt.pfObject;
     end
     if isempty(pyrCluIdx )
         pyrCluIdx = 1 : length(pfObject.rateMap);
@@ -100,10 +96,8 @@ function pfPars = FindPFPars(arg, varargin)
         pfPars.acceptedUnits = acceptedUnits; 
         %%  compute place field overlap params
         nOverlappingPairs = sum(IS_PF_OVERLAP);
-        %for kPair = 1 : nOverlappingPairs
-         for mPair = 1 : nPairs
-             %            units = pfPars.selectedPairs(kPair, :);
-            units = cellPairs(mPair, :);
+        for mPair = 1 : nPairs
+             units = cellPairs(mPair, :);
             unitA = units(1);
             unitB = units(2);
             comA = pfPars.com(acceptedUnits == unitA, :);
@@ -142,7 +136,6 @@ function pfPars = FindPFPars(arg, varargin)
                 curOccupancy = occupancy{acceptedUnits(kUnit)};
             end
             smoothedRateMap = pfPars.smoothRateMap(:,:,kUnit);
-            %             smoothedRateMap(isnan(smoothedRateMap)) = 0;
             sparsity(kUnit) = (curOccupancy(:)' * smoothedRateMap(:)) ^2 / (curOccupancy(:)' * (smoothedRateMap(:) .^2)); 
             jointEntropy(kUnit) = Entropy(smoothedRateMap);
         end

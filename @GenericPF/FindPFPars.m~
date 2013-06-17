@@ -3,7 +3,7 @@ function pfPars = FindPFPars(arg, varargin)
 %varargin - [pyrCluIdx, smoothFactor, IF_OVERWRITE]
     if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
-        = DefaultArgs(varargin, {[], 'crt1', 0.01, 1, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
+        = DefaultArgs(varargin, {[], 'crt1', 0.02, 1, {'head', 'theta'}, 0.5, 3, 0.07, 0.6, 9});
 
     pfPars.com = [];
     pfPars.smoothRateMap = [];

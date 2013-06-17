@@ -1,51 +1,71 @@
-function [pos, predErr] = DecodePos(gt, ratemaps, cluId, varargin)
+function [decodedPos, err] = DecodePos(gt, varargin)
+% [pos, predErr] = DecodePos(gt, varargin)
+% [binSize, IF_REPORTFIG, type, state, ratemaps, cluId, binOverlap]
+% {200e-3, 0, 'display', 'RUN', defRateMaps, defCluId, 0}
 % decode position 
 % gt - GenericTrial Object
-    [binSize, IF_REPORTFIG, type, state] = DefaultArgs(varargin, {200e-3, 0, 'display', 'RUN'});
 
+    if isempty(gt.pfObject), gt.LoadPF; end
+    defCluId = gt.pfObject.acceptedUnits;
+    defRateMaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, defCluId));
     switch gt.datasetType
-      case 'MTA'
-        markerNo = 7;
-        for i = 1:length(gt.states)
-            if strcmp(state, 'RUN')
-                state = 'walk';
-            end
-            if strcmp(gt.states{i}.label, state),
-                statePeriods = gt.states{i}.statePeriods;
-                break;
-            end
-        end
-        % convert 2 samplerate
-        stateXY = SelectPeriods(sq(gt.position(:, markerNo, :)), statePeriods, 'c');
-        statePeriods = ConvertFs(statePeriods, gt.trackingSampleRate, gt.sampleRate);
       case 'kenji'
-        for i = 1:length(gt.states)   
-            if strcmp(gt.states{i}.name, state)
-                statePeriods = gt.states{i}.statePeriods; % @ lfp fs
-                break;
-            end
-        end
-        markerNo = 1;
-        statePeriods = ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate);
+        defMarker = 1;
+      case 'MTA'
+        defMarker = 7;
     end
+    
+    [binSize, type, cluId, dim, state, IF_REPORTFIG, ratemaps,  binOverlap, markerNo] = ...
+        DefaultArgs(varargin, {200e-3, 'display', defCluId, 2, 'RUN', false, defRateMaps, 0, defMarker});
 
-    if isempty(gt.res)
-        gt = gt.LoadCR;
+    cluId = cluId(ismember(cluId, gt.pfObject.acceptedUnits));
+
+    switch type
+      case 'compute'
+        if isempty(gt.res), gt.LoadCR; end
+        fprintf('\n computing instantaneous firing rate... ')
+        [sc, winEdges, xyInWin] = GetSpikeCounts(gt, binSize,  state, cluId, binOverlap);
+        switch dim
+          case 2
+            ratemaps = gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, cluId));
+          case 1
+            ratemaps = cell2mat(Compute1DRateMap(gt, 0))';
+            ratemaps = ratemaps(:, ismember(gt.pyrCluIdx, cluId));
+        end
+
+        fprintf('\n compution posterior... ');
+        options = struct('prior', [], 'bins', size(sc, 2), 'alpha', 1);
+        tic, posterior = decode_bayesian_poisson(ratemaps, sc, options);toc
+        [decodedPos, dbin] = decodedPosMAP(gt, posterior);
+        switch dim
+          case 2 
+0
+          case 1
+            [~, linearXY] = cart2pol(xyInWin(:,1), xyInWin(:,2));
+            decodedPos = linearXY(dbin);
+            xyInWin = linearXY;
+        end
+        err = vnorm(xyInWin - decodedPos, 2);        
+        posterior = sparse(posterior);
+        pars.winSize = binSize;
+        pars.clu = cluId;
+        keyboard;   
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
+   
+      case 'display'
+        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
+        posterior = full(posterior);
+        figure;
+        imagesc(sum(posterior, 3));
+        set(gca, 'YDir', 'normal');
+        % set(gca,  'YTickLabel', get(gca, 'XTick') .* par.winSize);
+        title(['#cells ' num2str(length(pars.clu))  '  winSize:'  num2str(pars.winSize)])
+        figure;
+        hist(err, 1e2)
+        axis tight
+        hold on
+        line([mean(err), mean(err)], ylim,'color', 'r');
+        title(['error distr   #cells ' num2str(length(pars.clu)) '  winSize:'  num2str(pars.winSize) ' s'])
+        xlabel('cm')
     end
-    [sc, bc] = GetSpikeCounts(gt, binSize, statePeriods, cluId, 0.6);
-    fprintf('compution posterior... ');
-    tic, posterior = decode_bayesian_poisson(ratemaps, sc);toc
-    pos = decodedPosMAP(gt, posterior);
-    % bcidx = round(bc * gt.trackingSampleRate)+1;
-    % bcidx(end) = [];
-    bc = round(bc * gt.trackingSampleRate) + 1;
-    for kWin = 1 : size(bc, 1)
-        xy(kWin, :) = nanmean(SelectPeriods( , bc, 'c'));
-    end
-    for kBin = 1 : size(pos,1) - 1
-        predErr(kBin) = norm(xy(kBin,:) - pos(kBin,:));
-    end
-    h = figure;
-    plot(predErr);
-    title([num2str(binSize * 1e3), 'ms bins']);
 end

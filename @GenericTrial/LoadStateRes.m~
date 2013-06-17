@@ -50,7 +50,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
             end
 
 
-            if isempty(posInPeriods)
+            if isempty(posInPeriods) 
                 [res, resInd] = SelectPeriods(gt.res, statePeriods, 'd', 1, 1);
                 clu = gt.clu(resInd);
                 if fs > 0

@@ -49,20 +49,23 @@ function [decodedPos, err] = DecodePos(gt, varargin)
         posterior = sparse(posterior);
         pars.winSize = binSize;
         pars.clu = cluId;
+        keyboard;   
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
-        
+   
       case 'display'
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
         posterior = full(posterior);
         figure;
         imagesc(sum(posterior, 3));
-        title(['#cells ' num2str(length(cluId))  '  winSize:'  num2str(binSize)])
+        set(gca, 'YDir', 'normal');
+        % set(gca,  'YTickLabel', get(gca, 'XTick') .* par.winSize);
+        title(['#cells ' num2str(length(pars.clu))  '  winSize:'  num2str(pars.winSize)])
         figure;
         hist(err, 1e2)
         axis tight
         hold on
         line([mean(err), mean(err)], ylim,'color', 'r');
-        title(['error distr   #cells ' num2str(length(cluId)) '  winSize:'  num2str(binSize) ' s'])
+        title(['error distr   #cells ' num2str(length(pars.clu)) '  winSize:'  num2str(pars.winSize) ' s'])
         xlabel('cm')
     end
 end
