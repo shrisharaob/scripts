@@ -2,9 +2,10 @@ function FindCommonClu(varargin)
 % this script returns clusters which are active acros trials in all filebases
 % [filebases, datasetType,roi, arena, sparsityThresh]
 % filebases - cell array containing list of fbs    
-    
+     
     [filebases, datasetType,roi, arena, sparsityThresh] = ...
         DefaultArgs(varargin, {{}, 'kenji', {'CA3'}, {'bigSquare'}, 0.35});
+  
 
     switch datasetType
       case 'kenji'
@@ -25,10 +26,12 @@ function FindCommonClu(varargin)
     for i = 1 : length(filebases)
         trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
         if ~isempty(trialNames)
-            fprintf('\n ********* filebase: %s ************** \n', filebases{i});
+            fprintf('\n  filebase: %s \n', filebases{i});
             cnt = 1;
             for kTr = 1 : length(trialNames)
-                fprintf('subtrial %d of %d \n', kTr, length(trialNames));
+              kTrArena = SearchKenji(trialNames{kTr});
+              if strcmp(kTrArena{2}, 'linear'), sparsityThresh = 0.6; end
+              fprintf('subtrial %d of %d \n', kTr, length(trialNames));
                 try
                     gt = GenericTrial(filebases{i}, trialNames{kTr});
                     gt.LoadPF;

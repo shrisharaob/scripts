@@ -23,15 +23,6 @@ function FindCommonClu(varargin)
     end
     
     for i = 1 : length(filebases)
-        %   switch datasetType 
-        %           case 'kenji'
-        %             %            trialNames = list(strcmp(list(:, 1), filebases(i)), 2);
-        %             trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
-        %           case 'MTA'
-        % %             trNames = MTATrialNames(filebases{i});
-        % %             trialNames = trNames(find(~cellfun(@strcmp, trNames, repmat({'all'}, length(trNames), 1))));
-        %             trialNames = TrialNames(filebases{i}, 'MTA'
-        %       end
         trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
         if ~isempty(trialNames)
             fprintf('\n ********* filebase: %s ************** \n', filebases{i});
@@ -40,7 +31,7 @@ function FindCommonClu(varargin)
                 fprintf('subtrial %d of %d \n', kTr, length(trialNames));
                 try
                     gt = GenericTrial(filebases{i}, trialNames{kTr});
-                    gt = gt.LoadPF;
+                    gt.LoadPF;
                     kClu{kTr} = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < sparsityThresh);
                     if cnt == 1, commonClus = kClu{1}; end
                     commonClus = intersect(commonClus, kClu{cnt});
@@ -50,6 +41,7 @@ function FindCommonClu(varargin)
                 end
             end
             save([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat'], 'commonClus');
+            commonClus
         end
     end
 end

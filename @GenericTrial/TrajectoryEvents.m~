@@ -1,20 +1,19 @@
 function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
-% out = TrajectoryEvents(gt, varargin)
+% trajEvntPeriods = TrajectoryEvents(gt, varargin) @sample fs
+    fprintf('\n traj evnts \n')
     if ~IF_COMPUTE
         load([gt.paths.anslysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat']);
     end
     if isempty(gt.pfObject), gt.LoadPF; end
-    defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .7);
+    defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .5);
     [state, clus2Select, minEvntCells, binSize, bandWidth] = ...
-        DefaultArgs(varargin, {'SWS', defClus2Select, 10, 250e-3, 30e-3});
+        DefaultArgs(varargin, {'SWS', defClus2Select, 5, 250e-3, 30e-3});
 
-    [res, clu] = gt.LoadStateRes(state);
+    [res, clu] = gt.LoadStateRes(state, [],[],[],1);
     [res, resIdx] = sort(res);
     clu = clu(resIdx);
-    tres = res;
-    tclu = clu;
-%     res = tres(1 : 1e4);
-%     clu = tclu(1 : 1e4);
+    tres = res(1 : 1e4);
+    tclu = clu(1 : 1e4);
     res = res(ismember(clu, clus2Select));
     clu = clu(ismember(clu, clus2Select));
     %    [spikeDensity, binEdges] = SpikeDensity(res, gt.sampleRate, binSize, bandWidth);
@@ -35,8 +34,7 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;
     save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
-
-%     mu = mean(spikeDensity);
+    %     mu = mean(spikeDensity);
 %     sigma = std(spikeDensity);
 %     trajEvnt = InOut(spikeDensity >= mu + 3 * sigma); % detect traj events
 %     trajEvnt = trajEvnt{1};

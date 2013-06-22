@@ -19,7 +19,6 @@ function [decodedPos, err] = DecodePos(gt, varargin)
         DefaultArgs(varargin, {200e-3, 'display', defCluId, 2, 'RUN', false, defRateMaps, 0, defMarker});
 
     cluId = cluId(ismember(cluId, gt.pfObject.acceptedUnits));
-
     switch type
       case 'compute'
         if isempty(gt.res), gt.LoadCR; end
@@ -32,7 +31,7 @@ function [decodedPos, err] = DecodePos(gt, varargin)
             ratemaps = cell2mat(Compute1DRateMap(gt, 0))';
             ratemaps = ratemaps(:, ismember(gt.pyrCluIdx, cluId));
         end
-
+        keyboard;
         fprintf('\n compution posterior... ');
         options = struct('prior', [], 'bins', size(sc, 2), 'alpha', 1);
         tic, posterior = decode_bayesian_poisson(ratemaps, sc, options);toc
@@ -47,7 +46,8 @@ function [decodedPos, err] = DecodePos(gt, varargin)
         end
         err = vnorm(xyInWin - decodedPos, 2);        
         posterior = sparse(posterior);
-        pars.winSize = binSize;
+        pars.binSize = binSize;
+        pars.binOverlap = binOverlap;
         pars.clu = cluId;
         keyboard;   
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');

@@ -5,7 +5,6 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
     defCellPairs = nchoosek(defClu, 2);
     [cellPairs, IF_SMRM, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag] = ...
         DefaultArgs(varargin, {defCellPairs, 1, 3, 0.5, 2, 'RUN', 10e-3, 200e-3});
-    
 
     cellIds = unique(cellPairs(:));
     nCells = length(cellIds);
@@ -14,7 +13,9 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
     occThreshold = occThreshFac * std(occupancy(:));
     occupancy(occupancy <= occThreshold) = 0;
     validXYBins = Ind2Sub(size(occupancy), find(occupancy > 0));
+    SELECTED_CELL = false(1, nCells);
     % detect individual contours and their centers satisfying minimum area criterion
+
     for kCell = 1 : nCells
         if IF_SMRM
             idx = ismember(gpf.acceptedUnits, cellIds(kCell));
@@ -32,7 +33,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                     nContrs = nContrs + 1;
                     mClm(nContrs) = 1 + sum(nVals) + (nContrs - 1);
                     if mClm(nContrs) > nClmns,
-                         mClm(nContrs) = nClmns;
+                        mClm(nContrs) = nClmns;
                         nContrs = nContrs - 1;
                         IS_DONE = 1; continue; 
                     end
@@ -62,7 +63,6 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
                 IS_VALID_CNTR{kCell} = mArea >= areaThresh & ~isnan(cntrPk(1,1));
                 cntrVertices{kCell} = mCntrVertices(IS_VALID_CNTR{kCell});
                 cntrPeaks{kCell} = cntrPk(IS_VALID_CNTR{kCell}, :);
-                SELECTED_CELL(kCell) = false;
                 for lValidCntr =  1 : sum(IS_VALID_CNTR{kCell})
                     % the unit is selected if it has more than thresh occupancy
                     SELECTED_CELL(kCell) = SELECTED_CELL(kCell) | any(InPolygon(validXYBins, mCntrVertices{1}));
@@ -73,6 +73,7 @@ function out = MultiPeakPFDistance(gpf, gt, varargin)
         end
     end
     cellIds = cellIds(SELECTED_CELL);
+    out.selectedCells = SELECTED_CELL;
     if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 
     else, fprintf('\n no cells with adequate sampling found'); return; end
     [res, residx] =SelectPeriods(gt.res, ConvertFs(gt.trialPeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, 1);

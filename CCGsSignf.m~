@@ -1,0 +1,25 @@
+function out = CCGsSignf(res, clu, samplerate, varargin)
+
+    if length(unique(clu)) > 1, defPairs = nchoosek(unique(clus), 2); end
+    [pairs2Test, type]  =  DefaultArgs(varargin, {defPairs, 'jitter'});
+    
+     switch type
+       case 'jitter'
+
+     pRes1 = pRes(pClu == cellPairs(lPair, 1));
+     pRes2 = pRes(pClu == cellPairs(lPair, 2));
+     jitter = @(jitterWinSiz, x) round((- jitterWinSiz / 2) + round(jitterWinSiz) .* rand(size(x))); 
+     for kResample  = 1 : nResamples % use 1s scram
+            jitteredRes1 = pRes1 + jitter(jitterWinSiz, pRes1);
+            jitteredRes2 = pRes2 + jitter(jitterWinSiz, pRes2);
+            [shuffledCCGmat, ~, ~] = myCCG([jitteredRes1; jitteredRes2], pClu, binSize, halfBins, gt.sampleRate, cellPairs(lPair, :), 'count');
+            shuffledCCG(:, kResample) = sq(shuffledCCGmat(:, 1, 2));
+            %  gaussian with std ccgSmthFactor
+            yy = conv(shuffledCCG(:, kResample), gw, 'same');
+            shuffledCCGSmooth = spline(ccgTimeAx',yy,tt);
+            [~, sOffset(kResample, lPair), ~] = FindCCGPars(shuffledCCGSmooth, tt);
+            kResample
+     end            
+     out.pVal(lPair) = sum(sum(shuffledCCG > repmat(ccgOut(:, 1, 2), 1, kResample))) ./ kResample ;  
+     end
+end

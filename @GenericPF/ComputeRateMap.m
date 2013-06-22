@@ -2,6 +2,7 @@
     % Justin's code
     % [RateMap, varargout] = ComputeRateMap(Session,spiket,pos,varargin)
     % spiket in pos sampling rate    
+    % ratemaps in hz
    [Nbin,Smooth,type, IF_COMPUTE_RM] = DefaultArgs(varargin,{50,[],'xy', 1});
 
 
@@ -55,7 +56,7 @@
     X(X>Nbin) = Nbin;
     Y(Y>Nbin) = Nbin;
 
-    %% Occupancy
+    %% Occupancy in time
     Occ = Accumulate([X Y],1,msize)./Session.trackingSampleRate;
 
     %% spike count

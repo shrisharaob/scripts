@@ -49,8 +49,9 @@ function [decodedPos, err] = DecodePos(gt, varargin)
         posterior = sparse(posterior);
         pars.winSize = binSize;
         pars.clu = cluId;
+        keyboard;   
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
-        
+   
       case 'display'
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' num2str(dim), '.' mfilename, '.mat'], 'posterior', 'err', 'pars', 'decodedPos');
         posterior = full(posterior);

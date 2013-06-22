@@ -1,7 +1,7 @@
 function inOutIdx = InOut(y, varargin)
      % inoutIdx = InOut(y)
      % returns the in and out indices of a binary time series
-    [alphabets] = DefaultArgs(varargin, {[-1, 1]});
+    [alphabets, minSamples] = DefaultArgs(varargin, {[-1, 1], []});
      inOutIdx = [];
      if length(y) < 2, return; end
      a = unique(y);
@@ -19,9 +19,14 @@ function inOutIdx = InOut(y, varargin)
      if size(y, 2) == length(y), y = y';end % clmn vector
      y(y == a(1)) = 0;
      y(y == a(2)) = 1;
-   
      inOutIdx{1} = FindIdxInOut(y);
      inOutIdx{2}= FindIdxInOut(~y);
+     if ~isempty(minSamples),
+        INVALID  = diff(inOutIdx{1}, 1, 2) < minSamples;
+        temp = inOutIdx{1};
+        temp(INVALID, :) = [];
+        inOutIdx{1} = temp;
+     end
 end
  
 function idx = FindIdxInOut(y)

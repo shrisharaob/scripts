@@ -14,7 +14,7 @@ function sortedCellId = SortCellLoc(gt, varargin)
     cluIdx =  validCellId(sortedCellIdx);
     sortedCellId = clus2Select(cluIdx);
     rm =rateMaps;     
-    rmm = rm ./ repmat(max(rm , [],2), 1, 100);
+    rmm = rm ./ repmat(max(rm , [],2), 1, size(rm, 2));
     figure;
     imagesc(rmm(cluIdx, :))
     set(gca, 'YTick', [1 : length(clus2Select)] );

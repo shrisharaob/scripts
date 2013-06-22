@@ -70,7 +70,5 @@ function out = CCGPars(gt, varargin)
      out.offset = offset;
      out.firstPeak = firstPeak;
      save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
-     keyboard;
-     close all;
-end
+ end
         

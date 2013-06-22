@@ -17,12 +17,12 @@ function [out, varargout] = SearchKenji(varargin)
         out = Beh(strcmp(Beh(:, 2), args) & ~strcmp(Beh(:, 5), 'sleep'), [2, 4, 5]);
         rowId = find(~cellfun(@isempty, regexp(elPos, args)));
         rowCell = regexp(elPos{rowId}, '\s', 'split');
-        varargout{1} = rowCell(5 : end);
+        varargout{1} = unique(rowCell(5 : end));
         if isempty(out) % check if arg is a trial name
             out = Beh(strcmp(Beh(:, 4), args) & ~strcmp(Beh(:, 5), 'sleep'), [2 5]);
             rowId = find(~cellfun(@isempty, regexp(elPos, out(1))));
             rowCell = regexp(elPos{rowId}, '\s', 'split');
-            varargout{1} = rowCell(5 : end);
+            varargout{1} = unique(rowCell(5 : end));
         end
         if isempty(out)
             out{1} = '';

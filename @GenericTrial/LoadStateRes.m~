@@ -5,7 +5,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
 % fs : convert res to fs
 % loads clu res for the specified state
 
-    [state, IF_INGOODPOS, fs, posInPeriods] = DefaultArgs(varargin, {'RUN', 1, 0, []});
+    [state, IF_INGOODPOS, fs, posInPeriods, IF_SQUASH] = DefaultArgs(varargin, {'RUN', 1, 0, [], 0});
 
     if isempty(gt.res), gt = gt.LoadCR; end
 
@@ -32,7 +32,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
         switch state
           case 'SWS'
-            [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, 1);
+            [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
             clu = gt.clu(resIdx);
             varargout = {[], []};
           case 'RUN'

@@ -40,11 +40,12 @@ function PlotRateMaps(pfObject, varargin)
                         yAxis = pfObject.yBin;
                         IN_CM = false; 
                     end
-                    xAxis = xAxis - xAxis(1); % recenter to 0 
-                    yAxis = yAxis - yAxis(1); 
                     imagescnan({xAxis, yAxis, rateMap});
-                    text(xAxis(1) + 30 ,yAxis(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
+                    xAxis = xlim; % recenter to 0 
+                    yAxis = ylim; 
+                    colorbar;
                     set(gca,'YDir','normal');
+                    text(xAxis(end) - xAxis(end) * 2 / 10 ,yAxis(end) - yAxis(end) * 2 / 10, num2str(max(rateMap(:))),'color','k','FontWeight', 'bold', 'fontsize', 14);
                     hold on;
                     if IN_CM
                         xlabel('cm');
@@ -60,7 +61,7 @@ function PlotRateMaps(pfObject, varargin)
                     end
                     title(['clu #', num2str(cellCluIdx(mCell))]);
                     % title(elCluStr);
-                    if IF_WAITFORBTNPRESS, waitforbuttonpress; end
+                    if IF_WAITFORBTNPRESS, waitforbuttonpress; clf; end
                 else
                     title(num2str(cellCluIdx(mCell)));
                 end

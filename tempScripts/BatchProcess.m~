@@ -60,7 +60,7 @@ function BatchProcess(funcHandle, varargin)
                         fprintf(fp, ['\n ::: '  gt.trialName]);
                         fclose(fp)
                     catch err
-                        fprintf('error');
+                        
                     end
                 end
                 if IF_SAVE
@@ -88,7 +88,7 @@ function BatchProcess(funcHandle, varargin)
                         end
                     else
                         try 
-                            fout = feval(funcHandle, filebases{i}, funcArgs{:});
+                            feval(funcHandle, filebases{i}, funcArgs{:});
                             fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
                             fprintf(fp, ['\n ::: '  filebases{i}]);
                             fclose(fp);
@@ -99,8 +99,10 @@ function BatchProcess(funcHandle, varargin)
             end
           case 'passFb' % pass the filebase as an argument and all the subtrials are taken care 
             fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
+            %                goodUnits(i).filebase = filebases{i};
             try
                 fout =feval(funcHandle, filebases{i}, funcArgs{:});
+                %                    goodUnits(i).clu = fout;
             catch err
                 fprintf('error .......  !!!!!!');
             end
@@ -108,9 +110,9 @@ function BatchProcess(funcHandle, varargin)
 
         end
     end
-    if IF_SAVE
-        save(['~/data/analysis/', datasetType, func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'fout');
-    end
+%     if IF_SAVE
+%         save(['~/data/analysis/kenji/', func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'goodUnits');
+%     end
     fclose('all');
 end
 

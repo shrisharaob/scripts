@@ -3,7 +3,7 @@ function out = CCGPars(gt, varargin)
 % compute ccg for specified cell pairs in  the trial
 
     [cluId, roi, arena, binSize, maxTimeLag, ccgSmthFactor, jitterWinSiz, nResamples, alpha] = ...
-        DefaultArgs(varargin, {[], 'CA3', 'bigSquare', 10e-3, 200e-3, 0.03, 10, 1e2, 5e-2});
+        DefaultArgs(varargin, {[], 'CA3', 'bigSquare', 120e-3, 3000e-3, 0.03, 10, 1e2, 5e-2});
 
     if isempty(cluId), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
     else commonClus = cluId; end

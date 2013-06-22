@@ -95,8 +95,8 @@ function PlotRateMaps(pfObject, varargin)
                 else
                     plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
                 end
-                grid on
-                if IF_WAITFORBTNPRESS, waitforbuttonpress; end
+                grid on;
+                if IF_WAITFORBTNPRESS, waitforbuttonpress; clf;end
             else
                 fprintf('\n *** the specified unit with cluster ID %d was discarded *** \n', cellCluIdx(mCell));
             end

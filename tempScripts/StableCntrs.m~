@@ -93,6 +93,7 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
         end
     end
     clu{mBase} = commonClus(STABLE_CELLS{mBase});
+    if length(clu{mBase}) ~= length(cntrs.cntrPeaks), keyboard; end
     end
     stableCntrs = cell(nFbs, maxTrs);
     stableCntrs(identicalFbIdx) = passedCntrs(identicalFbIdx);

@@ -29,10 +29,17 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         trialStartTime_pos = 0;
         markerNo = 1;
       case  'kenji'
-        statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
+        if ~strcmp(state, 'trajEvnts'),
+            statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
+        end
         switch state
           case 'SWS'
-            [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
+             [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
+             clu = gt.clu(resIdx);
+             varargout = {[], []};
+          case 'trajEvnts'
+            sts = gt.TrajectoryEvents(1);
+            [res, resIdx] = SelectPeriods(gt.res, sts, 'd', 1, 1);
             clu = gt.clu(resIdx);
             varargout = {[], []};
           case 'RUN'

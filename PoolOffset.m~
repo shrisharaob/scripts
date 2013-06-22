@@ -7,7 +7,6 @@ function PoolOffset(varargin)
           sK.arena = arena;
           filebases = SearchKenji(sK);
           filebases = unique(filebases(:, 1));
-          
     end
     trNo = 0;
     for kBase = 1 : length(filebases)
@@ -21,14 +20,19 @@ function PoolOffset(varargin)
 %                 load(['~/data/analysis/kenji/', filebases{kBase}, '/', filebases{kBase}, '.', trialNames{mTr}, GenFiletag(arena, roi), 'CCG.mat' ]);
 %                 offset{kBase, mTr} = abs(fout.offset);
                 commonClus = gt.LoadCommonClus(roi, arena);
-                cntrs{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
+                if  isempty(commonClus)
+                    cntrs{kBase, mTr} = struct('cntrVertices', [], 'cntrPeaks', []);
+                elseif length(commonClus) < 2
+                    cntrs{kBase, mTr} = struct('cntrVertices', [], 'cntrPeaks', []);
+                else
+                    cntrs{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
+                end
                 trNo = trNo + 1;
                 trNames{trNo} = trialNames{mTr}; 
             catch err
                 fprintf(['\n error ' trialNames{mTr}, '\n']);
                 keyboard;
             end     
-            %kBase 
         end
     end
     save(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat'], 'cntrs');

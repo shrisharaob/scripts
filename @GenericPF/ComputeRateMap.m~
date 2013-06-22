@@ -1,6 +1,7 @@
     function [RateMap, varargout] = ComputeRateMap(Session,spiket,pos,varargin)
     % Justin's code
-
+    % [RateMap, varargout] = ComputeRateMap(Session,spiket,pos,varargin)
+    % spiket in pos sampling rate    
    [Nbin,Smooth,type, IF_COMPUTE_RM] = DefaultArgs(varargin,{50,[],'xy', 1});
 
 

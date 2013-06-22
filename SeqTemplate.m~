@@ -1,0 +1,7 @@
+function out = SeqTemplate(gt)
+
+xy = sq(gt.position(:, 1, :));
+[th, linearXY] = cart2pol(xy(:, 1), xy(:,2));
+smthLinXY = smooth(lxy, 64);
+linVel = diff(smthLinXY);
+smthLinXY = smthLinXY(1: end-1);

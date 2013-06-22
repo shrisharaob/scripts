@@ -4,12 +4,10 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
 % this scripts looks for stable sub-fields across trials in similar arena, if only one trial exists, 
 % returns cntrs identical to  inCntrs
 
-%load('~/thesis/temp/poolOffset_cntrs');
     sk.roi = roi;
     sk.arena = arena;
     matches = SearchKenji(sk);
     filebases = unique(matches(:, 1));
-
     passedCntrs = inCntrs;
     inCntrs = inCntrs(logical(sum(~cellfun(@isempty, inCntrs), 2)), :); % remove empty rows
     selectedFBs = filebases(logical(sum(~cellfun(@isempty, inCntrs), 2)));
@@ -23,6 +21,14 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
     diffFbIdx = find(nTrs > 1); % fbs with nore than 1 trial
     maxTrs = max(nTrs);
     nTrs = nTrs(nTrs > 1);
+    cmnCntrs = cell(1, length(diffFbIdx));
+    clu = cell(1, length(diffFbIdx));
+    for kBase = 1 : size(inCntrs, 1)
+        cmnClu{kBase} = inCntrs{kBase, 1}.cluId;
+        for lTr = 1 : nTrs(kBase)
+            cmnClu{kBase} = intersect(cmnClu{kBase}, inCntrs{kBase, lTr}.cluId);
+        end
+    end
     % find pks of cntrs which are stable acorss sessions
     for mBase = 1 : size(inCntrs, 1)
         DetectCmnPks = GenDetectCmnPks(2, 'ismemberf', 3);
@@ -32,11 +38,19 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
         if length(commonClus) < 2, continue; end
         trPairs = nchoosek(1 : nTrs(mBase), 2);
         trPairs(trPairs(:, 1) ~= 1 ,:) = [] ;
-        for lTr = 1 : nTrs(mBase)
-            eval([cntrPeakNames{lTr} '=inCntrs{mBase, lTr}.cntrPeaks;']);
-        end
         for kTrPr = 1 : size(trPairs, 1)
             evalStr = [];
+            % select common cells across the trials
+            idxPr1 = ismember(inCntrs{mBase, trPairs(kTrPr, 1)}.cluId, cmnClu{mBase});
+            idxPr2 = ismember(inCntrs{mBase, trPairs(kTrPr, 2)}.cluId, cmnClu{mBase});
+            inCntrs{mBase, trPairs(kTrPr, 1)}.cntrPeaks =   inCntrs{mBase, trPairs(kTrPr, 1)}.cntrPeaks(idxPr1);
+            inCntrs{mBase, trPairs(kTrPr, 1)}.cntrVertices =   inCntrs{mBase, trPairs(kTrPr, 1)}.cntrVertices(idxPr1);
+            inCntrs{mBase, trPairs(kTrPr, 1)}.cluId =   inCntrs{mBase, trPairs(kTrPr, 1)}.cluId(idxPr1);
+            inCntrs{mBase, trPairs(kTrPr, 2)}.cntrPeaks =   inCntrs{mBase, trPairs(kTrPr, 2)}.cntrPeaks(idxPr2);
+            inCntrs{mBase, trPairs(kTrPr, 2)}.cntrVertices =   inCntrs{mBase, trPairs(kTrPr, 2)}.cntrVertices(idxPr2);
+            inCntrs{mBase, trPairs(kTrPr, 2)}.cluId =   inCntrs{mBase, trPairs(kTrPr, 2)}.cluId(idxPr2);
+            eval([cntrPeakNames{trPairs(kTrPr, 1)} '=inCntrs{mBase, trPairs(kTrPr, 1)}.cntrPeaks;']);
+            eval([cntrPeakNames{trPairs(kTrPr, 2)} '=inCntrs{mBase, trPairs(kTrPr, 2)}.cntrPeaks;']);
             for kPr = 1 : 2
                 evalStr = [evalStr, ',' cntrPeakNames{trPairs(kTrPr, kPr)}];
                 IS_EMPTY = eval(['isempty(' cntrPeakNames{trPairs(kTrPr, kPr)} ');']);
@@ -85,14 +99,13 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
                         tempPeaks = cntrPeaks{kCell};
                         cntrs.cntrVertices{kCell} = tempCntr(kIdx);
                         cntrs.cntrPeaks{kCell} = tempPeaks(kIdx, :);
-                        %                    else
-                        %cntrs = struct('cntrVertices', [], 'cntrPeaks', []);
                     end
                 end
-            cmnCntrs{mBase, trPairs(mTrPr, lPr)} = cntrs;
+
+                cmnCntrs{mBase, trPairs(mTrPr, lPr)} = cntrs;
+            end
         end
-    end
-    clu{mBase} = commonClus(STABLE_CELLS{mBase});
+        clu{mBase} = cmnClu{mBase}(STABLE_CELLS{mBase});
     end
     stableCntrs = cell(nFbs, maxTrs);
     stableCntrs(identicalFbIdx) = passedCntrs(identicalFbIdx);
@@ -105,55 +118,70 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
     end
     selectedClu(identicalFbIdx) = cmnClus;
     
-     
     
     
     
     
-% %% Rate remapping
-% for kBase = 1 : length(selectedFBs)
-%     kTrials = matches(strcmp(matches(:, 1), selectedFBs{kBase}), 2);
-%     kClu = y.clu{kBase};
-%     refTr = 1;
-%     for lTr = 1 : length(kTrials)
-%         gt = GenericTrial(selectedFBs{kBase}, kTrials{lTr});
-%         gt = gt.LoadPF;
-%         srm = reshape(gt.pfObject.smoothRateMap(:,:, ismember(gt.pfObject.acceptedUnits, y.clu{kBase})), [], length(kClu));
-%         for mCell = 1 : length(kClu);
-%             mCellIdx = Sub2Ind([length(gt.pfObject.xBin), length(gt.pfObject.yBin)], y.cmnCntrs{kBase, lTr}.cntrPeaks{mCell});
-%             kSrm = srm(:, mCell);
-%             mCellPk{mCell} = kSrm(mCellIdx);
-%             tempPk(:, lTr) = mCellPk{mCell};
-%         end
-%         %        rmpk{lTr} = mCellPk;
+    
+    % %% Rate remapping
+    % for kBase = 1 : length(selectedFBs)
+    %     kTrials = matches(strcmp(matches(:, 1), selectedFBs{kBase}), 2);
+    %     kClu = y.clu{kBase};
+    %     refTr = 1;
+    %     for lTr = 1 : length(kTrials)
+    %         gt = GenericTrial(selectedFBs{kBase}, kTrials{lTr});
+    %         gt = gt.LoadPF;
+    %         srm = reshape(gt.pfObject.smoothRateMap(:,:, ismember(gt.pfObject.acceptedUnits, y.clu{kBase})), [], length(kClu));
+    %         for mCell = 1 : length(kClu);
+    %             mCellIdx = Sub2Ind([length(gt.pfObject.xBin), length(gt.pfObject.yBin)], y.cmnCntrs{kBase, lTr}.cntrPeaks{mCell});
+    %             kSrm = srm(:, mCell);
+    %             mCellPk{mCell} = kSrm(mCellIdx);
+    %             tempPk(:, lTr) = mCellPk{mCell};
+    %         end
+    %         %        rmpk{lTr} = mCellPk;
 
-% %         if lTr == refTr
-% %             refTrRMPk = rmpk{lTr};
-% %         end
-%     end
-%     for mTr = 1: length(kTrials)
-%         if mTr ~= refTr
-%             plot(tempPk(:, refTr), tempPk(:, mTr), '.');
-%             hold all;
-%            end
+    % %         if lTr == refTr
+    % %             refTrRMPk = rmpk{lTr};
+    % %         end
+    %     end
+    %     for mTr = 1: length(kTrials)
+    %         if mTr ~= refTr
+    %             plot(tempPk(:, refTr), tempPk(:, mTr), '.');
+    %             hold all;
+    %            end
 
-% end
+    % end
 
-%% compute distance between peaks of stable cntrs
+    %% compute distance between peaks of stable cntrs
 
-% for kBase = 1 : size(inCntrs, 1)
-%     for kTr = 1 : nTrs(kBase)
-%         for mCells  = 1 : length(cmnCntrs{kBase, kTr}.cntrVertices)
-%             sc1 = c1{ii};
-%             sc2 = c2{ii};sc3 = c3{ii};
-%             for jj = 1 : length(sc1)
-%                 plot(sc1{jj}(:,1), sc1{jj}(:,2));
-%                 hold on;
-%                 plot(sc2{jj}(:,1), sc2{jj}(:,2), 'r');plot(sc3{jj}(:,1), sc3{jj}(:,2), 'g');
-%             end
-%             waitforbuttonpress
-%         end
-%     end
-% end
+    % for kBase = 1 : size(inCntrs, 1)
+    %     for kTr = 1 : nTrs(kBase)
+    %         for mCells  = 1 : length(cmnCntrs{kBase, kTr}.cntrVertices)
+    %             sc1 = c1{ii};
+    %             sc2 = c2{ii};sc3 = c3{ii};
+    %             for jj = 1 : length(sc1)
+    %                 plot(sc1{jj}(:,1), sc1{jj}(:,2));
+    %                 hold on;
+    %                 plot(sc2{jj}(:,1), sc2{jj}(:,2), 'r');plot(sc3{jj}(:,1), sc3{jj}(:,2), 'g');
+    %             end
+    %             waitforbuttonpress
+    %         end
+    %     end
+    % end
 
+end
+
+
+function funcHdl = GenDetectCmnPks(n, varargin)
+% generates func hdl with variable no of input args for detecting common peaks across sessions
+    
+    [funcName, tolerence] = DefaultArgs(varargin, {'ismemberf', 2});
+    str = [];
+    for i = 1 : n    
+        if i == 1, str = 'A1'; 
+        else
+            str = [str, ',A' num2str(i)];
+        end
+    end
+    funcHdl = str2func(['@(' str ')' funcName '(' str ',' , '''row''', ',', '''tol''',  ',', num2str(tolerence), ')']);
 end

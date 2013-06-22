@@ -35,23 +35,17 @@ function [out, varargout] = SearchKenji(varargin)
             
             for kArena = 1 : length(args.arena)
                 filebases = unique(Beh(strcmp(Beh(:, 5), args.arena{kArena}), 2));
-%                 trialNames = Beh(strcmp(Beh(:, 5), args.arena{kArena}), 4);
                 if kArena == 1
                     validFilebases = filebases;
                 end
-%                 trialNames = trialNames(ismember(filebases, validFilebases));
                 validFilebases = filebases(ismember(filebases, validFilebases));
             end
             idx = false(size(Beh,1), 1);
             for nBase = 1 : length(validFilebases)
                 for mArena = 1 : length(args.arena)
                     idx = idx | strcmp(Beh(:, 2),validFilebases{nBase}) & strcmp(Beh(:, 5), args.arena{mArena});
-                    %                 trialNames = Beh(strcmp(Beh(:, 5), args.arena{kArena}), 4);
                 end
             end
-%             idx = logical(idx | repmat(sum(idx,2), 1, size(idx,2))); % get all the colums for matches
-%             filebase = Beh(idx, 2); % filebase :: trialname
-%             trialName = Beh(idx, 4);
             out = Beh(idx, [2, 4]); %[filebase, trialName];
             INVALID = false(1,size(out,1));
             for kMatch = 1 : size(out,1)

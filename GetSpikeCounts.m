@@ -21,14 +21,10 @@ function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
     if isempty(trial.res)
         trial = trial.LoadCR;
     end
-    %[res, origIdx] = SelectPeriods(trial.res, statePeriods, 'd', 1, 1);
-    %y = SelectPeriods(sq(trial.position(:, markerNo, :)), trial.goodPosPeriods, 'c');
     [res, clu, xy] = trial.LoadStateRes(state, 1, 0);
     res = res(ismember(clu, cluIdx));
     clu = clu(ismember(clu, cluIdx));
     res = res ./ trial.sampleRate; % res in seconds
-%     startEdges = statePeriods(1, 1) ./ trial.sampleRate : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate - winSiz;
-%     endEdges = statePeriods(1, 1) ./ trial.sampleRate + winSiz : winSiz * (1 - overlap) : statePeriods(end, 2) ./ trial.sampleRate;
     edges = 1 : winSiz * (1 - overlap) : res(end) + winSiz;
     winEdges = [edges(1: end-1)', edges(2 :end)'];
     winEdgesATPosFs = round(RecenterPeriods(winEdges) .* trial.trackingSampleRate) + 1 ;
