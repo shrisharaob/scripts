@@ -21,6 +21,7 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
     binEdges = res(1) : binSize : res(end) + binSize;
     nBins = length(binEdges) - 1;
     [counts, cntIdx] = histc(res, binEdges);
+    IS_EVNT_BIN = false(nBins, 1);
     for mBin = 2 : nBins - 1 % the 1st and last bins cannot be tested for silence
         % candidate evnts identified by number of cells active in the bin
         IS_EVNT_BIN(mBin) = length(unique(clu(cntIdx == mBin))) > minEvntCells; 
@@ -41,6 +42,7 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;
     save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
+
     %     mu = mean(spikeDensity);
 %     sigma = std(spikeDensity);
 %     trajEvnt = InOut(spikeDensity >= mu + 3 * sigma); % detect traj events
