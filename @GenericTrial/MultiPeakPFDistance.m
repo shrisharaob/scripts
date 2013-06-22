@@ -6,6 +6,9 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
     gpf = gt.pfObject;
     %    defClu = gpf.acceptedUnits;
     defClu = gt.LoadCommonClus(roi, arena);
+    out.pkDist = [];
+    if isempty(defClu), return; end
+    if length(defClu) < 2, return; end
     defCellPairs = nchoosek(defClu, 2);
     [cellPairs, IF_SMRM, IF_COMPUTE_CCG, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
         DefaultArgs(varargin, {defCellPairs, 1, 0, 3, 0.5, 0, 'RUN', 10e-3, 1000e-3, true});
@@ -108,6 +111,8 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                 selectedCellpairs(validCntrCnt, :) = cellPairs(mCellPair, :);
                 pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
             end
+        else
+            selectedCellpairs = []; pkDistAB = []; pkAB = [];
         end
     end
 

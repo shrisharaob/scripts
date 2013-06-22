@@ -132,6 +132,7 @@ function out = BatchProcess(funcHandle, varargin)
                         else
                             fout = feval(funcHandle, filebases{i}, funcArgs{:});
                         end
+                        if isempty(eval(['fout.' poolVar])), continue; end
                         nRowsOld = size(poolArray, 1);
                         eval(['poolArray = [poolArray; fout.' poolVar '];']);
                         eval(['nRows = size(fout.', poolVar, ', 1);']);

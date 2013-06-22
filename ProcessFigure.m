@@ -1,14 +1,16 @@
 function ProcessFigure(hFigure, fileName, varargin)
+% ProcessFigure(hFigure, fileName, varargin)
+% [fontSize, paperSize]
 % History:
 % Dmytro Velychko - Created
-% Shrisha - Modified
+% Shrisha - Modified 
     
     [fontSize, paperSize] = DefaultArgs(varargin, {8, [5.5, 5.5]});
     allAxesInFigure = findall(hFigure, 'type', 'axes');
     for hAxis = allAxesInFigure'
         set(hAxis, 'box', 'off');
         set(hAxis, 'TickDir', 'out');
-        set(hAxis,'FontSize', 8);
+        set(hAxis,'FontSize', 12);
         set(get(hAxis,'XLabel'), 'FontSize', fontSize);
         set(get(hAxis,'YLabel'), 'FontSize', fontSize);
     end
