@@ -66,60 +66,66 @@ function out = SeqTemplate(gt, varargin)
         load([gt.paths.analysis, gt.filebase, '.' gt.trialName, '.linPos.mat']);
         out.linPos = linPos;
         out.smthLinPos = smthLinPos;
+        
     end
 
     %% display
     if IF_PLOT
         h = figure;
-        subplot(2, 2, 1)
-        imagesc(fwdRatemaps ./  repmat(max(fwdRatemaps, [], 2), 1, size(fwdRatemaps, 2))) 
-        set(gca, 'YTick', [1 : length(fwdSortedClu)] );
-        set(gca, 'YTickLabel', fwdSortedClu);
+        set(h, 'Position', [1, 25, 1680, 920]);
+        subplot(1, 4, 1)
+        imagesc(out.fwdRatemaps ./  repmat(max(out.fwdRatemaps, [], 2), 1, size(out.fwdRatemaps, 2))) 
+        set(gca, 'YTick', [1 : length(out.fwdSortedClu)] );
+        set(gca, 'YTickLabel', out.fwdSortedClu);
         ylabel('clu id', 'FontSize', 16);
         set(gca, 'FontSize', 10)
         set(gca, 'ydir', 'normal')   
+        title('fwd ratemaps');
 
-        subplot(2, 2, 2)
-        imagesc(rvrsRatemaps ./  repmat(max(rvrsRatemaps, [], 2), 1, size(rvrsRatemaps, 2)))
-        set(gca, 'YTick', [1 : length(rvrsSortedClu)] );
-        set(gca, 'YTickLabel', rvrsSortedClu);
+        subplot(1, 4, 2)
+        imagesc(out.rvrsRatemaps ./  repmat(max(out.rvrsRatemaps, [], 2), 1, size(out.rvrsRatemaps, 2)))
+        set(gca, 'YTick', [1 : length(out.rvrsSortedClu)] );
+        set(gca, 'YTickLabel', out.rvrsSortedClu);
         ylabel('clu id', 'FontSize', 16);
         set(gca, 'FontSize', 10)
         set(gca, 'ydir', 'normal')
+        title('reverse ratemaps');
 
         % fwd rate maps in reverse cell order
-        subplot(2, 2, 3)
-        [~, idx ] = ismember(rvrsSortedClu, fwdSortedClu);
+        subplot(1, 4, 3)
+        [~, idx ] = ismember(out.rvrsSortedClu, out.fwdSortedClu);
         idx(idx == 0) = [];
-        imagesc(fwdRatemaps(idx, :) ./  repmat(max(fwdRatemaps(idx, :), [], 2), 1, size(fwdRatemaps, 2)));
+        imagesc(out.fwdRatemaps(idx, :) ./  repmat(max(out.fwdRatemaps(idx, :), [], 2), 1, size(out.fwdRatemaps, 2)));
         set(gca, 'YTick', [1 : length(idx)] );
-        set(gca, 'YTickLabel', fwdSortedClu(idx));
+        set(gca, 'YTickLabel', out.fwdSortedClu(idx));
         set(gca, 'ydir', 'normal')
+        title('fwdRM in rvrs order');
 
         % reverse rm in forward order
-        subplot(2, 2, 4)
-        [~, idx ] = ismember(fwdSortedClu, rvrsSortedClu);
+        subplot(1, 4, 4)
+        [~, idx ] = ismember(out.fwdSortedClu, out.rvrsSortedClu);
         idx(idx == 0) = [];
-        imagesc(rvrsRatemaps(idx, :) ./  repmat(max(rvrsRatemaps(idx, :), [], 2), 1, size(rvrsRatemaps, 2)));
+        imagesc(out.rvrsRatemaps(idx, :) ./  repmat(max(out.rvrsRatemaps(idx, :), [], 2), 1, size(out.rvrsRatemaps, 2)));
         set(gca, 'YTick', [1 : length(idx)] );
-        set(gca, 'YTickLabel', rvrsSortedClu(idx));
+        set(gca, 'YTickLabel', out.rvrsSortedClu(idx));
         set(gca, 'ydir', 'normal')
+        title('rvrsRM in fwd order');
+
         [~, roi] = SearchKenji(gt.filebase);
         inRegion = [];
-        if any(cell2mat(cellfun(@strcmp, roi, repmat({'CA3'}, 1, length(b)), 'uniformoutput', 0)))
+        if any(cell2mat(cellfun(@strcmp, roi, repmat({'CA3'}, 1, length(roi)), 'uniformoutput', 0)))
             inRegion = [inRegion, '  CA3  ']; end
         
-        if any(cell2mat(cellfun(@strcmp, roi, repmat({'CA1'}, 1, length(b)), 'uniformoutput', 0)))
+        if any(cell2mat(cellfun(@strcmp, roi, repmat({'CA1'}, 1, length(roi)), 'uniformoutput', 0)))
             inRegion = [inRegion, '  , CA1']; end
         reportfig(h, mfilename, 0, [gt.filebase, '--', gt.trialName, ' :::: ', inRegion]); 
-        
+        close(h); 
         %check if the same cell fires at the same location in forward and reverse dirs
-        figure;
-        r1 = rvrsMaxrm(ismember(rvrsSortedClu, fwdSortedClu));
-        r2 = rvrsMaxrm(ismember(fwdSortedClu, rvrsSortedClu));
-        plot(r1, r2, '*');
+%         figure;
+%         r1 = rvrsMaxrm(ismember(out.rvrsSortedClu, out.fwdSortedClu));
+%         r2 = rvrsMaxrm(ismember(out.fwdSortedClu, out.rvrsSortedClu));
+%         plot(r1, r2, '*');
     end
-    keyboard;
 end
 
 

@@ -1,0 +1,5 @@
+function out = PoolPeakDist(varargin)
+
+[roi, arena] = DefaultArgs(varargin, {'CA3', {'bigSquare', 'linear'}});
+
+pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', 'CA3', , 1,{roi, arena, [], 1, 0}, 'pool', 0, options);

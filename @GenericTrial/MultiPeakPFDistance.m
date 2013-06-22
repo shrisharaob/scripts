@@ -84,7 +84,35 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
         out.cntrPeaks = cntrPeaks(SELECTED_CELL);
         out.cluId = cellIds(SELECTED_CELL);
     end
-    %%%%%%  CCG for spikes fired when the animal is in the region covered by contour pairs
+   
+    %% Peak distances
+    nCellPairs = size(cellPairs, 1);
+    for mCellPair = 1 : nCellPairs
+        validCntrCnt = 0;
+        cntrA = cntrVertices{cellIds == cellPairs(mCellPair, 1)}; 
+        cntrB = cntrVertices{cellIds == cellPairs(mCellPair, 2)};
+        nCntrA = length(cntrA);
+        nCntrB = length(cntrB);
+        mCellPair
+        if nCntrA >= 1 && nCntrB >= 1, 
+            cntrPairs = nchoosek([1 : nCntrA, 1 : nCntrB], 2); % all pairs of selected sub contours
+            cntrPairs(cntrPairs(:, 1) > nCntrA, :) = [];
+            cntrPairs(cntrPairs(:, 2) > nCntrB, :) = [];
+            cntrPairs = sortrows(unique(cntrPairs, 'rows')); 
+            pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
+            pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
+            for kCntrPr = 1 : size(cntrPairs, 1)
+                kCntrPr 
+                validCntrCnt = validCntrCnt + 1;
+                pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
+                selectedCellpairs(validCntrCnt, :) = cellPairs(mCellPair, :);
+                pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
+            end
+        end
+    end
+
+    out.pkDist = [selectedCellpairs, pkDistAB', pkAB];
+    %%  CCG for spikes fired when the animal is in the region covered by contour pairs
     if IF_COMPUTE_CCG
         if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 
         else, fprintf('\n no cells with adequate sampling found'); return; end
@@ -111,11 +139,13 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                 cntrPairs = sortrows(unique(cntrPairs, 'rows')); 
                 pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
                 pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
+                validCntrCnt = 0;
                 for kCntrPr = 1 : size(cntrPairs, 1)
-                    validCntrCnt = 0;
+                    
                     kCntrPr 
                     % if the sub cntrs overlap
                     pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
+                    
                     if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
                         POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                         POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
