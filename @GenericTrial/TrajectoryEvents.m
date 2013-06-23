@@ -6,14 +6,16 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
     end
     if isempty(gt.pfObject), gt.LoadPF; end
     defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .5);
-    [state, clus2Select, minEvntCells, binSize, minSilenceWin] = ...
+    [state, clus2Select, minEvntCells, binSize, overlap, minSilenceWin] = ...
         DefaultArgs(varargin, {'SWS', defClus2Select, 5, 250e-3, 50e-3});
 
     [res, clu] = gt.LoadStateRes(state, [],[],[],1);
     [res, resIdx] = sort(res);
     clu = clu(resIdx);
-    tres = res(1 : 1e4);
-    tclu = clu(1 : 1e4);
+    tres = res;
+    tclu = clu;
+    res = res;
+    clu = clu;
     res = res(ismember(clu, clus2Select));
     clu = clu(ismember(clu, clus2Select));
     %    [spikeDensity, binEdges] = SpikeDensity(res, gt.sampleRate, binSize, bandWidth);
@@ -28,16 +30,14 @@ function trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, varargin)
         if IS_EVNT_BIN(mBin) % check if it is flanked by silence in minSilenceWin
             [preCount, ~] = histc(res, [binEdges(mBin) - minSilenceWin, binEdges(mBin)]);
             [sucCount, ~] = histc(res, [binEdges(mBin), binEdges(mBin) + minSilenceWin]);
-            if preCount > 1 & sucCount > 1, IS_EVNT_BIN(mBin) = false; end 
+            if preCount(1) >  1 | sucCount(1) > 1, IS_EVNT_BIN(mBin) = false; end 
         end
     end
 
-
-    cellOrder = SortCellLoc(gt, clus2Select);
     evntBins = find(IS_EVNT_BIN);
     counts = counts ./ (nBins * binSize);
     trajEvntPeriods = round([binEdges(evntBins)', binEdges(evntBins + 1)'] .* gt.sampleRate);
-    
+keyboard;
     pars.clus2Select = clus2Select;
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;

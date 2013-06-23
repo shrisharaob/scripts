@@ -6,7 +6,12 @@ function pkDistAB = PoolPeakDist(varargin)
 
     if IF_COMPUTE
         options.poolVar = 'pkDist';
-        pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', roi, inArenaPair, 1, {roi, inArenaPair, [], 1, 0}, 'pool', 0, options);
+        if FileExists(['~/data/analysis/kenji/PooledMultiPkDistance.CA3.bigSquare.linear.mat'])
+            temp = load(['~/data/analysis/kenji/PooledMultiPkDistance.CA3.bigSquare.linear.mat'],'pkDist')'
+            pkDist = temp.pkDist;
+        else
+            pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', roi, inArenaPair, 1, {roi, inArenaPair, [], 1, 0}, 'pool', 0, options);
+        end
         fb = pkDist.poolArrayId(:, 1);
         arenas = pkDist.poolArrayId(:, 3);
         filebases = unique(fb);
@@ -19,6 +24,7 @@ function pkDistAB = PoolPeakDist(varargin)
             arenaBIdx  = cellfun(@strcmp, lArenas, repmat(inArenaPair(2), size(lArenas)));
             poolArrayIdxA = lPoolArrayIdx(arenaAIdx);
             poolArrayIdxB = lPoolArrayIdx(arenaBIdx);
+            if sum(arenaAIdx) == 0 | sum(arenaBIdx) == 0, continue; end
             arenaPairs = GenPairs(1 : sum(arenaAIdx), 1 : sum(arenaBIdx));
             for kArenaPr = 1 : size(arenaPairs, 1)
                 kArenaPr
