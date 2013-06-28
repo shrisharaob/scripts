@@ -1,0 +1,16 @@
+function out = CatTrials(filebase, roi, arena)
+% out = CatTrials(filebase, roi, arena)
+
+      out  = [];
+      [matches, fbRoi] =  SearchKenji(filebase)
+      if ~any(cellfun(@strcmp, fbRoi, repmat({roi}, size(fbRoi)))); return; end
+      trialNames = matches(cellfun(@strcmp(matches(:, 3)), repmat({arena}, size(matches(:, 3)))), 2);
+      trialPeriods = [];
+      for mTr = 1 : length(trialNames)
+          gt = GenericTrial(filebase, trialNames{mTr});
+          trialPeriods = [trialPeriods; gt.trialPeriods];
+      end
+      statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]);
+      out.catPeriods = IntersectRanges(trialPeriods, statePeriods);
+keyboard;
+end

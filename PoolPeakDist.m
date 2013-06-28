@@ -6,8 +6,8 @@ function pkDistAB = PoolPeakDist(varargin)
 
     if IF_COMPUTE
         options.poolVar = 'pkDist';
-        if FileExists(['~/data/analysis/kenji/PooledMultiPkDistance.CA3.bigSquare.linear.mat'])
-            temp = load(['~/data/analysis/kenji/PooledMultiPkDistance.CA3.bigSquare.linear.mat'],'pkDist')'
+        if FileExists(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, arena), 'mat'])
+            temp = load(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, arena), 'mat'], 'pkDist')
             pkDist = temp.pkDist;
         else
             pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', roi, inArenaPair, 1, {roi, inArenaPair, [], 1, 0}, 'pool', 0, options);

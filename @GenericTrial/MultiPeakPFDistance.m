@@ -10,8 +10,8 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
     if isempty(defClu), return; end
     if length(defClu) < 2, return; end
     defCellPairs = nchoosek(defClu, 2);
-    [cellPairs, IF_SMRM, IF_COMPUTE_CCG, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
-        DefaultArgs(varargin, {defCellPairs, 1, 0, 3, 0.5, 0, 'RUN', 10e-3, 1000e-3, true});
+    [cellPairs, IF_SMRM, IF_COMPUTE_CCG, IF_CAT_TRIALS, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
+        DefaultArgs(varargin, {defCellPairs, 1, 0, 0, 3, 0.5, 0, 'RUN', 20e-3, 1000e-3, true});
     
     cellIds = unique(cellPairs(:));
     nCells = length(cellIds);
@@ -121,7 +121,14 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
     if IF_COMPUTE_CCG
         if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 
         else, fprintf('\n no cells with adequate sampling found'); return; end
-        [res, clu] = gt.LoadStateRes(state, 1);
+        if IF_CAT_TRIALS
+            if isempty(gt.clu), gt.LoadCR; end
+            catTrPeriods = CatTrials(gt.filebase, roi, arena, state, gt.sampleRate);
+            [res, resIdx] = SelectPeriods(gt.res, catTrPeriods, 'd', 1, 1);
+            clu  = gt.clu(resIdx);
+        else
+            [res, clu] = gt.LoadStateRes(state, 1);
+        end
         clu = clu(ismember(clu, cellIds));
         res = res(ismember(clu, cellIds));
         binnedPos = BinPos(gt);
@@ -146,11 +153,9 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                 pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
                 validCntrCnt = 0;
                 for kCntrPr = 1 : size(cntrPairs, 1)
-                    
                     kCntrPr 
                     % if the sub cntrs overlap
                     pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
-                    
                     if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
                         POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                         POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
@@ -160,7 +165,7 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                         timesInAB = ConvertFs(IntersectRanges(timesInAB, ConvertFs(stsp, gt.lfpSampleRate, gt.trackingSampleRate)), gt.trackingSampleRate, gt.sampleRate);
                         res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd');
                         res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd');
-                        if length(res1) > 1 & length(res2) > 1
+                        if length(res1) > 10 & length(res2) > 10
                             PF_OVERLAP(mCellPair) = true;
                             mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
                             options = struct('type', 'jitter', 'winSize', 20e-3, 'nResamples', 1e2);

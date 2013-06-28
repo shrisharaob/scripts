@@ -116,7 +116,7 @@ function [stableCntrs, selectedClu, allFbs, processedFbs] = StableCntrs(inCntrs,
         load(['~/data/analysis/kenji/', filebases{identicalFbIdx(mBase)}, '/', filebases{identicalFbIdx(mBase)}, GenFiletag(roi, arena), 'commonClus.mat']);
         cmnClus{mBase} = commonClus;
     end
-    selectedClu(identicalFbIdx) = cmnClus;
+    if ~isempty(identicalFbIdx),  selectedClu(identicalFbIdx) = commonClus; end
     
     
     

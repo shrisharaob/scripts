@@ -1,4 +1,4 @@
-for i = 1 : 51 
+for i = 1 : 15
 icntr = cntrVertices{i};
 ipk = cntrPeaks{i};
 i
@@ -9,6 +9,6 @@ plot(ipk(jj, 1), ipk(jj, 2), 'k*')
 xlim([1 50]);
 ylim([1 50]);
 end
-waitforbuttonpress
-clf
+%waitforbuttonpress
+%clf
 end

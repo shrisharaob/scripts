@@ -26,7 +26,7 @@ function PoolOffset(varargin)
                     elseif length(commonClus) < 2
                         tcntrs{kBase, mTr} = []; %struct('cntrVertices', [], 'cntrPeaks', [], 'cluId', []);
                     else
-                        tcntrs{kBase, mTr} = gt.MultiPeakPFDistance(nchoosek(commonClus, 2));
+                        tcntrs{kBase, mTr} = gt.MultiPeakPFDistance( roi, arena, nchoosek(commonClus, 2));
                         if isempty({tcntrs{kBase, mTr}.cluId}), tcntrs{kBase, mTr} = []; end
                     end
                     trNo = trNo + 1;
@@ -39,7 +39,7 @@ function PoolOffset(varargin)
         cntrs{lArena} = tcntrs;
         clear tcntrs;
     end
-    save(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat'], 'cntrs');
+    save(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat'], 'cntrs', 'filebases');
 
     %%
     keyboard;

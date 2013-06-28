@@ -1,12 +1,14 @@
 function out = SeqTemplate(gt, varargin)
 % out = SeqTemplate(gt)
+% [IF_COMPUTE, IF_PLOT, smootherSpan]
 
     [IF_COMPUTE, IF_PLOT, smootherSpan] = DefaultArgs(varargin,{0, 0, 33});
-
+    format short;
     if IF_COMPUTE
         %% linearize position 
         if FileExists([gt.paths.analysis, gt.filebase, '.' gt.trialName, '.linPos.mat'])
             load([gt.paths.analysis, gt.filebase, '.' gt.trialName, '.linPos.mat']);
+            linVel = diff(smthLinPos);
         else
             fprintf('\n computing linear pos ...');
             xy = sq(gt.position(:, 1, :));
@@ -36,8 +38,8 @@ function out = SeqTemplate(gt, varargin)
         fwdClu = clu(fwdResIdx);
         [rvrsRes, rvrsResIdx] = SelectPeriods(res, rvrsTimePeriods, 'd');
         rvrsClu = clu(rvrsResIdx);
-        fwdRM = Compute1DRatemap(fwdRes, fwdClu, fwdXY, 1);
-        rvrsRM = Compute1DRatemap(rvrsRes, rvrsClu, rvrsXY, 1);
+        fwdRM = Compute1DRatemap(fwdRes, fwdClu, fwdXY, gt.trackingSampleRate, 1);
+        rvrsRM = Compute1DRatemap(rvrsRes, rvrsClu, rvrsXY, gt.trackingSampleRate, 1);
 
         %% sort cell id 
         validCellId = cluIds(~cellfun(@isempty, fwdRM));
@@ -73,43 +75,47 @@ function out = SeqTemplate(gt, varargin)
     if IF_PLOT
         h = figure;
         set(h, 'Position', [1, 25, 1680, 920]);
-        subplot(1, 4, 1)
+        subplot(1, 2, 1)
         imagesc(out.fwdRatemaps ./  repmat(max(out.fwdRatemaps, [], 2), 1, size(out.fwdRatemaps, 2))) 
+        set(gca, 'ydir', 'normal')   
         set(gca, 'YTick', [1 : length(out.fwdSortedClu)] );
         set(gca, 'YTickLabel', out.fwdSortedClu);
         ylabel('clu id', 'FontSize', 16);
         set(gca, 'FontSize', 10)
-        set(gca, 'ydir', 'normal')   
+        text(repmat(2, size(out.fwdSortedClu)), get(gca, 'Ytick'), num2str(max(out.fwdRatemaps, [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
         title('fwd ratemaps');
 
-        subplot(1, 4, 2)
+        subplot(1, 2, 2)
         imagesc(out.rvrsRatemaps ./  repmat(max(out.rvrsRatemaps, [], 2), 1, size(out.rvrsRatemaps, 2)))
         set(gca, 'YTick', [1 : length(out.rvrsSortedClu)] );
         set(gca, 'YTickLabel', out.rvrsSortedClu);
         ylabel('clu id', 'FontSize', 16);
         set(gca, 'FontSize', 10)
         set(gca, 'ydir', 'normal')
+        text(repmat(2, size(out.rvrsSortedClu)), get(gca, 'Ytick'), num2str(max(out.rvrsRatemaps, [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
         title('reverse ratemaps');
 
-        % fwd rate maps in reverse cell order
-        subplot(1, 4, 3)
-        [~, idx ] = ismember(out.rvrsSortedClu, out.fwdSortedClu);
-        idx(idx == 0) = [];
-        imagesc(out.fwdRatemaps(idx, :) ./  repmat(max(out.fwdRatemaps(idx, :), [], 2), 1, size(out.fwdRatemaps, 2)));
-        set(gca, 'YTick', [1 : length(idx)] );
-        set(gca, 'YTickLabel', out.fwdSortedClu(idx));
-        set(gca, 'ydir', 'normal')
-        title('fwdRM in rvrs order');
+%         % fwd rate maps in reverse cell order
+%         subplot(1, 4, 3)
+%         [~, idx ] = ismember(out.rvrsSortedClu, out.fwdSortedClu);
+%         idx(idx == 0) = [];
+%         imagesc(out.fwdRatemaps(idx, :) ./  repmat(max(out.fwdRatemaps(idx, :), [], 2), 1, size(out.fwdRatemaps, 2)));
+%         set(gca, 'YTick', [1 : length(idx)] );
+%         set(gca, 'YTickLabel', out.fwdSortedClu(idx));
+%         set(gca, 'ydir', 'normal')
+%         title('fwdRM in rvrs order');
+%         text(repmat(2, size(out.fwdSortedClu(idx))), get(gca, 'Ytick'), num2str(max(out.fwdRatemaps(idx, :), [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
 
-        % reverse rm in forward order
-        subplot(1, 4, 4)
-        [~, idx ] = ismember(out.fwdSortedClu, out.rvrsSortedClu);
-        idx(idx == 0) = [];
-        imagesc(out.rvrsRatemaps(idx, :) ./  repmat(max(out.rvrsRatemaps(idx, :), [], 2), 1, size(out.rvrsRatemaps, 2)));
-        set(gca, 'YTick', [1 : length(idx)] );
-        set(gca, 'YTickLabel', out.rvrsSortedClu(idx));
-        set(gca, 'ydir', 'normal')
-        title('rvrsRM in fwd order');
+%         % reverse rm in forward order
+%         subplot(1, 4, 4)
+%         [~, idx ] = ismember(out.fwdSortedClu, out.rvrsSortedClu);
+%         idx(idx == 0) = [];
+%         imagesc(out.rvrsRatemaps(idx, :) ./  repmat(max(out.rvrsRatemaps(idx, :), [], 2), 1, size(out.rvrsRatemaps, 2)));
+%         set(gca, 'YTick', [1 : length(idx)] );
+%         set(gca, 'YTickLabel', out.rvrsSortedClu(idx));
+%         set(gca, 'ydir', 'normal')
+%         title('rvrsRM in fwd order');
+%         text(repmat(2, size(out.rvrsSortedClu(idx))),get(gca, 'Ytick'), num2str(max(out.rvrsRatemaps(idx, :), [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
 
         [~, roi] = SearchKenji(gt.filebase);
         inRegion = [];

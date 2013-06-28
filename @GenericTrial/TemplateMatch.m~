@@ -1,0 +1,5 @@
+fucntion out = TemplateMatch(gt, varargin);
+
+     [] = DefaultArgs(varargin, {});
+
+end

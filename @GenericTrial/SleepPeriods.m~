@@ -1,0 +1,9 @@
+function sleepPeriods = SleepPeriods(gt)
+% sleepPeriods = SleepPeriods(gt)
+% returns sleep before and after trial
+
+   sts = gt.LoadStatePeriods('SWS', 0);
+   preTrialPeriods = sts(sts(:, 2) < gt.trialPeriods(1));
+   preTrialPeriods = sts(sts(:, 1) > gt.trialPeriods(2));
+
+

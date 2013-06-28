@@ -3,7 +3,7 @@ function out = CCGPars(res, clu, sampleRate, varargin)
     if length(unique(clu)) > 1, defPairs = nchoosek(unique(clu), 2); end
     defOptions = struct('type', 'jitter', 'winSize', 20e-3, 'nResamples', 1e2);
     [pairs2Test, options, binSize, maxTimeLag, ccgSmthFactor, IF_RESAMPLE, IF_PLOT]  =  ...
-        DefaultArgs(varargin, {defPairs, defOptions, 10e-3, 500e-3, 0.03, 0, 0});
+        DefaultArgs(varargin, {defPairs, defOptions, 20e-3, 1000e-3, 0.03, 0, 1});
     
     halfBins = round(maxTimeLag / binSize); % number of bins on each side of zero lag
     binSize = round(binSize * sampleRate);

@@ -30,8 +30,13 @@ function statePeriods = LoadStatePeriods(gt, varargin)
           case 'RUN'
             markerNo = 1;
             statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
-          case 'SWS'
+          case 'traj'
             statePeriods = gt.TrajectoryEvents(state);
+            return;
+          case 'SWS'
+            if fs ~= 0
+                statePeriods = ConvertFs(statePeriods, gt.trackingSampleRate, fs);
+            end
             return;
         end
     end
@@ -44,7 +49,7 @@ function statePeriods = LoadStatePeriods(gt, varargin)
     
     if fs ~= 0
         statePeriods = ConvertFs(posStatePeriods, gt.trackingSampleRate, fs);
-    else
+    elseif fs == 0 & IF_INGOODPOS
         statePeriods = ConvertFs(posStatePeriods, gt.trackingSampleRate, gt.lfpSampleRate);
     end
 end
