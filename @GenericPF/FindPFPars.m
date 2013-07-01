@@ -4,7 +4,7 @@ function pfPars = FindPFPars(arg, varargin)
     
     if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...
-        = DefaultArgs(varargin, {[], 'crt1', 0.02, 1, {'head', 'theta'}, 0.5, 3, 0.35, 0.6, 9});
+        = DefaultArgs(varargin, {[], 'crt1', 0.02, 1, {'head', 'theta'}, 1, 3, 0.35, 0.6, 9});
     
     pfPars.com = [];
     pfPars.smoothRateMap = [];

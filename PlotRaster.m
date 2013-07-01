@@ -1,6 +1,6 @@
 function PlotRaster(Res,Clu,varargin)
 %function PlotRaster(Res,Clu,SampleRate, linestyle, color, cluOrder)
-[SampleRate, Color, linestyle, cluOrder] = DefaultArgs(varargin,{20000, 'k', '-',unique(Clu)});
+[SampleRate, Color, linestyle, cluOrder, ONLY_FIRST_SPK] = DefaultArgs(varargin,{20000, 'k', '-',unique(Clu), 0});
 
 Colors = colormap;
 Colors = repmat(Colors,10,1);
@@ -8,7 +8,11 @@ Colors = repmat(Colors,10,1);
 MyClu = cluOrder;
 
 for c=1:length(MyClu)
-    MyRes = Res(find(Clu==MyClu(c)));
+    if ONLY_FIRST_SPK
+        MyRes = Res(find(Clu == MyClu(c), 1, 'first'));
+    else
+        MyRes = Res(find(Clu==MyClu(c)));
+    end
     if isempty(Color)
         plot(repmat(MyRes(:)',2,1)/SampleRate, repmat(c+[0;.6],1,length(MyRes)), 'color', Colors(c,:), 'linestyle', linestyle);
     else

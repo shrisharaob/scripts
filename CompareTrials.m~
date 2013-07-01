@@ -31,14 +31,16 @@ function CompareTrials(filebase, varargin)
             for mTr = 1 : nTrials
                 subplot(1, nTrials, mTr);
                 curgt = gta{mTr};
-                curgt.pfObject.PlotRateMaps(1, 0, 1, [],[],[], commonClus(lClu));
+                curgt.pfObject.PlotRateMaps(0, 0, 1, [],[],[], commonClus(lClu));
                 axis square;
                 srm = gta{mTr}.pfObject.smoothRateMap(:,:,ismember(gta{mTr}.pfObject.acceptedUnits, commonClus(lClu)));
+           keyboard;
                 mapEntropy(lClu, mTr) = Entropy(srm);
                 
             end
         end
-        
+keyboard;
+
         if IF_REPORTFIG
             reportfig(hFig, [mfilename, filebase, GenFiletag(roi,arena)], 0, [filebase, '    sparsity : ' num2str(sparsity(lClu, :)), 'entr  ' num2str(mapEntropy(lClu, :))]);
         end

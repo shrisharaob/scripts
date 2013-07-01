@@ -2,9 +2,11 @@ function rateMap1D  = Compute1DRateMap(gt, IF_COMPUTE, varargin)
 % rateMap1D  = Compute1DRateMap(gt, res, linPos, varargin)
 % res in tracking sample rate
 
-    if ~IF_COMPUTE
+    if ~IF_COMPUTE & FileExists([gt.paths.analysis,  gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'])
         load([gt.paths.analysis,  gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']);
         return;
+    else
+        fprintf('\n computing 1D ratemaps... ');
     end
     [res, clu, pos, psp]  = gt.LoadStateRes('RUN', 1, gt.trackingSampleRate);
     [~, linPos] = cart2pol(pos(:, 1), pos(:, 2));

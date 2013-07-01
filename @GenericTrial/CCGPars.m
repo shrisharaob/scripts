@@ -50,7 +50,7 @@ function out = CCGPars(gt, varargin)
          jitter = @(jitterWinSiz, x) round((- jitterWinSiz / 2) + round(jitterWinSiz) .* rand(size(x))); 
          lPair
          drawnow;
-         waitforbuttonpress;
+keyboard;
 %         for kResample  = 1 : nResamples % use 1s scram
 %             jitteredRes1 = pRes1 + jitter(jitterWinSiz, pRes1);
 %             jitteredRes2 = pRes2 + jitter(jitterWinSiz, pRes2);

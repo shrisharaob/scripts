@@ -1,12 +1,12 @@
 function smoothRateMap = SmoothRM(gt,  varargin)
 % Skagg's 1996, Hippocampus
 
-    [cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {[], 1e4, 50, 'RUN'});
+    [cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {[], 1e6, 50, 'RUN'});
     if isempty(gt.pfObject)
-        gt = gt.LoadPF;
+        gt.LoadPF;
     end
     if isempty(gt.res)
-        gt = gt.LoadCR;
+        gt.LoadCR;
     end
     if isempty(cluIdx)
         cluIdx = gt.pfObject.acceptedUnits;
@@ -41,7 +41,6 @@ function smoothRateMap = SmoothRM(gt,  varargin)
         statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
         posStatePeriods = round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
         statePeriods = round(statePeriods .* gt.sampleRate ./ gt.lfpSampleRate) + 1;       
-        %posStatePeriods = round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
         trialStartTime_pos =  round(gt.trialPeriods(1, 1) .*  gt.trackingSampleRate ./ gt.lfpSampleRate) + 1;
         posStatePeriods = IntersectRanges(posStatePeriods, gt.goodPosPeriods + trialStartTime_pos); 
         markerNo = 1;
@@ -53,13 +52,6 @@ function smoothRateMap = SmoothRM(gt,  varargin)
     [res, resIdx] = SelectPeriods(res, posStatePeriods, 'd', 1, 1);
     clu = clu(resIdx);
     nClu = length(cluIdx);
-
-    %    [res, resIdx] = SelectPeriods(gt.res, gt.trialPeriods, 'd', 1, 1);
-    % clu = gt.clu(resIdx);
-    % [res, resIdx] = SelectPeriods(res, gt.goodPosPeriods, 'd', 1, 1);
-    % clu = clu(resIdx);
-    % pos = SelectPeriods(gt.position( :, 1 ,:), gt.goodPosPeriods, 'c');
-    %    [~, occCount] = Occupancy(gt);
     for lClu = 1 : nClu
          [~, d1, d2, d3, spkCnt(:, :, lClu), occCount(:, :, lClu)] = GenericPF.ComputeRateMap(gt, res(clu == cluIdx(lClu)), pos, [], .03, [], 0); 
     end
@@ -72,13 +64,16 @@ function smoothRateMap = SmoothRM(gt,  varargin)
                     occSamples = GetPxInRadius(occCount(:, :, kClu) , x, y, radius);
                     nOccSamples = sum(~isnan(occSamples));
                     xySpkCnt =  sum(GetPxInRadius(spkCnt(:,:,kClu), x, y, radius));
-                    while radius > alpha / (nOccSamples * sqrt(xySpkCnt) + eps) 
+                    condition = (alpha / (nOccSamples * sqrt(xySpkCnt)));
+                    while radius <= condition | isinf(condition) | isnan(condition)
                         radius = radius + 1;
+                        if radius > length(gt.pfObject.xBin) | radius > length(gt.pfObject.yBin), break; end
                         occSamples = GetPxInRadius(occCount, x, y, radius);
                         nOccSamples = sum(~isnan(occSamples));
                         xySpkCnt =  sum(GetPxInRadius(spkCnt(:,:,kClu), x, y, radius));
+                        condition = (alpha / (nOccSamples * sqrt(xySpkCnt)));
                     end
-                    smoothMap(x, y) = gt.trackingSampleRate * xySpkCnt / nOccSamples;                
+                    smoothMap(x, y) = gt.trackingSampleRate * xySpkCnt / (nOccSamples * radius);                
                 end
             end                   
             keyboard;

@@ -1,6 +1,8 @@
 function out = CatTrialCCG(filebase, roi,  arena, state, varargin)
+% thi script concatinates trials in the same arena and computes ccgs for overlapping subfields,
+% since the subfields might be slightly shifted across trials, in di
 
-     [cellPairs, datasetType] = DefaultArgs(varargin, {[], 'kenji'});
+    [cellPairs, datasetType] = DefaultArgs(varargin, {[], 'kenji'});
 
     [matches, fbRoi] =  SearchKenji(filebase);
     if ~any(cellfun(@strcmp, fbRoi, repmat({roi}, size(fbRoi)))); return; end
@@ -16,9 +18,9 @@ function out = CatTrialCCG(filebase, roi,  arena, state, varargin)
         cntrVertices = mpf.cntrVertices;
         cntrPeaks = mpf.cntrPeaks;
         trialPeriods = [trialPeriods; gt.LoadStatePeriods(state, 0, 0)];
-        [res, clu] = gt.LoadStateRes(state, 1);
-        clu = clu(ismember(clu, cellIds));
-        res = res(ismember(clu, cellIds));
+        %        [res, clu] = gt.LoadStateRes(state, 1);
+        clu = gt.clu(ismember(gt.clu, cellIds));
+        res = gt.res(ismember(gt.clu, cellIds));
         binnedPos = BinPos(gt);
         nCellPairs = size(cellPairs, 1);
         stsp = gt.LoadStatePeriods(state, gt.lfpSampleRate, 1);
@@ -40,31 +42,29 @@ function out = CatTrialCCG(filebase, roi,  arena, state, varargin)
                 cntrPairs = nchoosek([1 : nCntrA, 1 : nCntrB], 2); % all pairs of selected sub contours
                 cntrPairs(cntrPairs(:, 1) > nCntrA, :) = [];
                 cntrPairs(cntrPairs(:, 2) > nCntrB, :) = [];
-                cntrPairs = sortrows(unique(cntrPairs, 'rows')); 
+                cntrPairs = sortrows(unique(cntrPairs, 'rows'));
                 pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
                 pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
                 validCntrCnt = 0;
                 ncntrpr(mTr) = ncntrpr(mTr) + size(cntrPairs, 1);
                 tcatRes = [];
                 tcatClu = [];
-
                 for kCntrPr = 1 : size(cntrPairs, 1)
-                    kCntrPr 
+                    kCntrPr
                     % if the sub cntrs overlap
                     %pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
-                    if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
+                    if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)}));
                         POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                         POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
                         POS_IN_AB = POS_IN_CNTR_A | POS_IN_CNTR_B;
                         inout = InOut(POS_IN_AB);
-                        timesInAB = inout{1};
-                        timesInAB = ConvertFs(IntersectRanges(timesInAB, ConvertFs(stsp, gt.lfpSampleRate, gt.trackingSampleRate)), gt.trackingSampleRate, gt.sampleRate);
-                        res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd', 1, 1);
-                        res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd', 1, 1);
-                        mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
                         cntrprCounter = cntrprCounter + 1;
+                        timesInAB{mTr, cntrprCounter} = ConvertFs(IntersectRanges(ConvertFs(inout{1}, gt.trackingSampleRate, gt.lfpSampleRate) + gt.trialPeriods(1), stsp), gt.lfpSampleRate, gt.sampleRate);
+                        res1 = SelectPeriods(gt.res(gt.clu == cellPairs(mCellPair, 1)), timesInAB{mTr, kCntrPr}, 'd', 1, 1);
+                        res2 = SelectPeriods(gt.res(gt.clu == cellPairs(mCellPair, 2)), timesInAB{mTr, kCntrPr}, 'd', 1, 1);
+                        mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
                         if mTr == 1, catRes{cntrprCounter} = []; catClu{cntrprCounter} = []; end
-                        catRes{cntrprCounter} = [catRes{cntrprCounter}; res1; res2];
+                        catRes{cntrprCounter} = [catRes{cntrprCounter}; res1 + ~isempty(catRes{cntrprCounter}) * catRes{cntrprCounter}(end); res2 + ~isempty(catRes{cntrprCounter}) * catRes{cntrprCounter}(end)];
                         catClu{cntrprCounter} = [catClu{cntrprCounter}; mClu];
                         pkDistAB(cntrprCounter) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                         PF_OVERLAP(mCellPair) = true;
@@ -73,17 +73,17 @@ function out = CatTrialCCG(filebase, roi,  arena, state, varargin)
             end
         end
     end
-keyboard;
+    keyboard;
 end
 
-        
+
 
 %                         if length(res1) > 10 & length(res2) > 10
 %                             PF_OVERLAP(mCellPair) = true;
 %                             mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
 %                             options = struct('type', 'jitter', 'winSize', 20e-3, 'nResamples', 1e2);
 %                             h1 = figure(79);
-                            
+
 %                             tccg = CCGPars([res1; res2], mClu, gt.sampleRate, [], options, binSize, maxTimeLag, [],  0, IF_PLOT);
 %                             validCntrCnt = validCntrCnt + 1;
 %                             ccgPars{mCellPair, validCntrCnt} = tccg{1};
@@ -120,12 +120,10 @@ end
 %                         end
 %                     end
 %                 end
-                
+
 %             else
 %                disp('here');
 %             end
 %             %}
-    
 
 
-   

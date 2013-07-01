@@ -2,7 +2,7 @@ function out = SeqTemplate(gt, varargin)
 % out = SeqTemplate(gt)
 % [IF_COMPUTE, IF_PLOT, smootherSpan]
 
-    [IF_COMPUTE, IF_PLOT, smootherSpan] = DefaultArgs(varargin,{0, 0, 33});
+    [IF_COMPUTE, IF_PLOT, smootherSpan, rateThresh] = DefaultArgs(varargin,{0, 0, 33, 2});
     format short;
     if IF_COMPUTE
         %% linearize position 
@@ -45,13 +45,19 @@ function out = SeqTemplate(gt, varargin)
         validCellId = cluIds(~cellfun(@isempty, fwdRM));
         fwdRatemaps = cell2mat(fwdRM(find(~cellfun(@isempty, fwdRM))));
         rvrsRatemaps = cell2mat(rvrsRM(find(~cellfun(@isempty, rvrsRM))));
-        [~, fwdMaxrm] = max(fwdRatemaps, [], 2);
+        [maxVal, fwdMaxrm] = max(fwdRatemaps, [], 2);
+        validCellId(maxVal < rateThresh) = [];
+        fwdMaxrm(maxVal < rateThresh) = [];
+        fwdRatemaps(maxVal < rateThresh, :) = [];
         [~, sortedCellIdx] = sort(fwdMaxrm);
         fwdRatemaps = fwdRatemaps(sortedCellIdx, :);
         fwdSortedClu =  validCellId(sortedCellIdx);
 
         validCellId = cluIds(~cellfun(@isempty, rvrsRM));
-        [~, rvrsMaxrm] = max(rvrsRatemaps, [], 2);
+        [maxVal, rvrsMaxrm] = max(rvrsRatemaps, [], 2);
+        validCellId(maxVal < rateThresh) = [];
+        rvrsMaxrm(maxVal < rateThresh) = [];
+        rvrsRatemaps(maxVal < rateThresh, :) = [];
         [~, sortedCellIdx] = sort(rvrsMaxrm);
         rvrsSortedClu =  validCellId(sortedCellIdx);
         rvrsRatemaps = rvrsRatemaps(sortedCellIdx, :);
@@ -81,7 +87,7 @@ function out = SeqTemplate(gt, varargin)
         set(gca, 'YTick', [1 : length(out.fwdSortedClu)] );
         set(gca, 'YTickLabel', out.fwdSortedClu);
         ylabel('clu id', 'FontSize', 16);
-        set(gca, 'FontSize', 10)
+        set(gca, 'FontSize', 12)
         text(repmat(2, size(out.fwdSortedClu)), get(gca, 'Ytick'), num2str(max(out.fwdRatemaps, [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
         title('fwd ratemaps');
 
@@ -90,7 +96,7 @@ function out = SeqTemplate(gt, varargin)
         set(gca, 'YTick', [1 : length(out.rvrsSortedClu)] );
         set(gca, 'YTickLabel', out.rvrsSortedClu);
         ylabel('clu id', 'FontSize', 16);
-        set(gca, 'FontSize', 10)
+        set(gca, 'FontSize', 12)
         set(gca, 'ydir', 'normal')
         text(repmat(2, size(out.rvrsSortedClu)), get(gca, 'Ytick'), num2str(max(out.rvrsRatemaps, [], 2), '%.1f'), 'Color', 'w', 'FontWeight', 'bold');
         title('reverse ratemaps');

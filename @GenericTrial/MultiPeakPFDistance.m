@@ -10,8 +10,8 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
     if isempty(defClu), return; end
     if length(defClu) < 2, return; end
     defCellPairs = nchoosek(defClu, 2);
-    [cellPairs, IF_SMRM, IF_COMPUTE_CCG, IF_CAT_TRIALS, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
-        DefaultArgs(varargin, {defCellPairs, 1, 0, 0, 3, 0.5, 0, 'RUN', 20e-3, 1000e-3, true});
+    [cellPairs, IF_SMRM, IF_COMPUTE_CCG, IF_CAT_TRIALS, rateThreshFactor, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
+        DefaultArgs(varargin, {defCellPairs, 1, 0, 0, 0.2, 0.5, 0, 'RUN', 10e-3, 1000e-3, true});
     
     cellIds = unique(cellPairs(:));
     nCells = length(cellIds);
@@ -28,7 +28,8 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
             idx = ismember(gpf.acceptedUnits, cellIds(kCell));
             if ~isempty(idx) & sum(idx) ~= 0
                 kSmoothRM = gpf.smoothRateMap(:, :, idx);
-                rateThresh = nSTD * std(kSmoothRM(:));
+                %rateThresh = nSTD * std(kSmoothRM(:));
+                rateThresh = rateThreshFactor * max(kSmoothRM(:));
                 kPk = LocalMinima2(-1 * kSmoothRM', -1 * rateThresh, 2);
                 kContr = contour(kSmoothRM, [1, 1] .* rateThresh);
                 [nRows, nClmns] = size(kContr);
@@ -155,7 +156,7 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                 for kCntrPr = 1 : size(cntrPairs, 1)
                     kCntrPr 
                     % if the sub cntrs overlap
-                    pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
+                    %pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                     if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
                         POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                         POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
@@ -173,6 +174,7 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
                             tccg = CCGPars([res1; res2], mClu, gt.sampleRate, [], options, binSize, maxTimeLag, [],  0, IF_PLOT);
                             validCntrCnt = validCntrCnt + 1;
                             ccgPars{mCellPair, validCntrCnt} = tccg{1};
+                            pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                             %%%% DISPLAY %%%%%
                             if IF_PLOT
                                 cellPairs(mCellPair, :)

@@ -1,22 +1,18 @@
-function out = CatTrialCCG(filebase, roi,  arena, state)
+function out = CatTrialCCG(filebase, roi,  arena, state, varargin)
 
-     [cellPairs] = DefaultArgs(varargin, {[]});
-
+     [cellPairs, datasetType] = DefaultArgs(varargin, {[], 'kenji'});
 
     [matches, fbRoi] =  SearchKenji(filebase);
     if ~any(cellfun(@strcmp, fbRoi, repmat({roi}, size(fbRoi)))); return; end
     trialNames = matches(cellfun(@strcmp, matches(:, 3), repmat({arena}, size(matches(:, 3)))), 2);
     trialPeriods = [];
-    catRes = [];
-    catClu = [];
+    load(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat'], 'cntrs', 'filebases');
+    [stableCntrs, cellIds] = StableCntrs(cntrs(cellfun(@strcmp, filebases, repmat({filebase}, size(filebases))), :), roi, arena);
+    cellIds = cell2mat(cellIds);
     for mTr = 1 : length(trialNames)
         gt = GenericTrial(filebase, trialNames{mTr});
-        if  mTr == 1
-            cellIds = gt.LoadCommonClus(roi, arena);
-            if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); 
-            else, fprintf('\n no cells with adequate sampling found'); return; end
-        end
-        mpf = gt.MultiPeakPFDistance(roi, arena, [], 1, 0, 0);
+        if length(cellIds) > 1, cellPairs = nchoosek(cellIds, 2); else, fprintf('\n no pairs found'); return; end
+        mpf = stableCntrs{mTr};
         cntrVertices = mpf.cntrVertices;
         cntrPeaks = mpf.cntrPeaks;
         trialPeriods = [trialPeriods; gt.LoadStatePeriods(state, 0, 0)];
@@ -30,6 +26,10 @@ function out = CatTrialCCG(filebase, roi,  arena, state)
         counterPk = 0;
         PF_OVERLAP = false(nCellPairs, 1);
         ccgPars = [];
+        ncntrpr(mTr) = 0;
+        catRes{1} = [];
+        catClu{1} = [];
+        cntrprCounter = 0;
         for mCellPair = 1 : nCellPairs
             cntrA = cntrVertices{cellIds == cellPairs(mCellPair, 1)}; 
             cntrB = cntrVertices{cellIds == cellPairs(mCellPair, 2)};
@@ -44,10 +44,14 @@ function out = CatTrialCCG(filebase, roi,  arena, state)
                 pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
                 pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
                 validCntrCnt = 0;
+                ncntrpr(mTr) = ncntrpr(mTr) + size(cntrPairs, 1);
+                tcatRes = [];
+                tcatClu = [];
+
                 for kCntrPr = 1 : size(cntrPairs, 1)
                     kCntrPr 
                     % if the sub cntrs overlap
-                    pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
+                    %pkDistAB(validCntrCnt + 1) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                     if any(InPolygon(cntrA{cntrPairs(kCntrPr, 1)}, cntrB{cntrPairs(kCntrPr, 2)})); 
                         POS_IN_CNTR_A = InPolygon(binnedPos, cntrA{cntrPairs(kCntrPr, 1)});
                         POS_IN_CNTR_B = InPolygon(binnedPos, cntrB{cntrPairs(kCntrPr, 2)});
@@ -55,11 +59,15 @@ function out = CatTrialCCG(filebase, roi,  arena, state)
                         inout = InOut(POS_IN_AB);
                         timesInAB = inout{1};
                         timesInAB = ConvertFs(IntersectRanges(timesInAB, ConvertFs(stsp, gt.lfpSampleRate, gt.trackingSampleRate)), gt.trackingSampleRate, gt.sampleRate);
-                        res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd');
-                        res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd');
+                        res1 = SelectPeriods(res(clu == cellPairs(mCellPair, 1)), timesInAB, 'd', 1, 1);
+                        res2 = SelectPeriods(res(clu == cellPairs(mCellPair, 2)), timesInAB, 'd', 1, 1);
                         mClu = [ones(length(res1), 1) * cellPairs(mCellPair, 1); ones(length(res2), 1) * cellPairs(mCellPair, 2)];
-                        catRes = [catRes; res1; res2];
-                        catClu = [catClu; mClu];
+                        cntrprCounter = cntrprCounter + 1;
+                        if mTr == 1, catRes{cntrprCounter} = []; catClu{cntrprCounter} = []; end
+                        catRes{cntrprCounter} = [catRes{cntrprCounter}; res1; res2];
+                        catClu{cntrprCounter} = [catClu{cntrprCounter}; mClu];
+                        pkDistAB(cntrprCounter) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
+                        PF_OVERLAP(mCellPair) = true;
                     end
                 end
             end

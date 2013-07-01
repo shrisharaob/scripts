@@ -6,7 +6,7 @@ function out = TemplateMatch(gt, varargin);
     
     sqTemplate = SeqTemplate(gt); % returns template struct
     clus2Select = union(sqTemplate.fwdSortedClu, sqTemplate.rvrsSortedClu);
-    [evntPeriods, params] = gt.TrajectoryEvents(0, preOrPost, [], clus2Select, [], [], 0.1);
+    [evntPeriods, params] = gt.TrajectoryEvents(1, preOrPost, [], clus2Select, [], [], 0.1);
     [res, clu] = gt.LoadStateRes('SWS');
     fwdPair = [];
     rvrsPair = [];
@@ -68,4 +68,7 @@ function out = TemplateMatch(gt, varargin);
     out.fwdCorr = fwdCorr;
     out.rvrsCorr = rvrsCorr;
     save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' preOrPost, '.', mfilename, '.mat'], 'out');
+
+
+
 end

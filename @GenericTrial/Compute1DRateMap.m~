@@ -9,7 +9,7 @@ function rateMap1D  = Compute1DRateMap(gt, IF_COMPUTE, varargin)
     [res, clu, pos, psp]  = gt.LoadStateRes('RUN', 1, gt.trackingSampleRate);
     [~, linPos] = cart2pol(pos(:, 1), pos(:, 2));
     defPosRange = [min(linPos), max(linPos)];
-    defCluId = 1 : Nclusters(gt);
+    defCluId = 1 : NClusters(gt);
     [cluId, nBins, smoothSigma, posRange] = ...
         DefaultArgs(varargin,{defCluId, 50, 3e-2, defPosRange});
 

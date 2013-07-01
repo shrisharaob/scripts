@@ -1,7 +1,7 @@
 function CompareTrials(filebase, varargin)
 
     [arena, roi, cluIdx, IF_SmthRM, IF_REPORTFIG] = ...
-        DefaultArgs(varargin, {{'bigSquare'}, {'CA1'}, [], 1, 0});
+        DefaultArgs(varargin, {{'bigSquare'}, {'CA3'}, [], 1, 0});
     kenjiSearch.roi = roi;
     kenjiSearch.arena = arena;
     matches = SearchKenji(kenjiSearch);
@@ -34,7 +34,6 @@ function CompareTrials(filebase, varargin)
                 curgt.pfObject.PlotRateMaps(0, 0, 1, [],[],[], commonClus(lClu));
                 axis square;
                 srm = gta{mTr}.pfObject.smoothRateMap(:,:,ismember(gta{mTr}.pfObject.acceptedUnits, commonClus(lClu)));
-           keyboard;
                 mapEntropy(lClu, mTr) = Entropy(srm);
                 
             end
