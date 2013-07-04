@@ -1,0 +1,3 @@
+signfEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'signfEvntCorr'));
+allEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'evntCorrs'));
+be = linspace(-1, 1, 1e2);

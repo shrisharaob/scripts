@@ -6,11 +6,11 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     if isempty(gt.clu), gt.LoadCR; end
     defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < 0.7);
     [state, clus2Select, minEvntCells, binSize, overlap, minSilenceWin] = ...
-        DefaultArgs(varargin, {'SWS', defClus2Select, 5, 250e-3, 0, 50e-3 });
+        DefaultArgs(varargin, {'SWS', defClus2Select, 5, 150e-3, 0, 50e-3 });
 
-    if ~FileExists([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
+    if ~FileExists([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
     if ~IF_COMPUTE
-        load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat']);
+        load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
     end
 
     sts  = gt.SleepPeriods(gt.sampleRate);
@@ -20,7 +20,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
       case 'post'
         sts = sts{2};
     end
-    [res, resIdx] = SelectPeriods(gt.res, sts, 'd', 1, 1);
+    [res, resIdx] = SelectPeriods(gt.res, sts, 'd');
     clu  = gt.clu(resIdx);
     [res, resIdx] = sort(res);
     clu = clu(resIdx);
@@ -56,6 +56,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     pars.binSize = binSize;
     save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
 end
+
 
 
 

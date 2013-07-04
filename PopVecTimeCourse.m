@@ -18,14 +18,16 @@ avgVector = [];
         roi = 'CA1';
         arena = 'cof';
     end
+    if isempty(gt.pfObject), gt.LoadPF; end
     dp = @(a, b) a' * b ./ (norm(a) * vnorm(b)); % normalized dot product
     if isempty(commonClus), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']); end
     if ~IF_COMPUTE & ~IF_CHUNKS
         fprintf('loading  ...');
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
         avgVector = mean(popVec, 4);
-        dotProd = atan(dp(sRateMaps(:), pv));
-        popVec = pv;
+        sRateMaps = sq(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)));
+        dotProd = [];%atan(dp(sRateMaps(:), pv));
+                     %popVec = pv;
         return;
     end
     %% COMPUTE AVG RATE MAPS FOR CHUNKS

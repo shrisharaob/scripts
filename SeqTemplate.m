@@ -4,6 +4,7 @@ function out = SeqTemplate(gt, varargin)
 
     [IF_COMPUTE, IF_PLOT, smootherSpan, rateThresh] = DefaultArgs(varargin,{0, 0, 33, 2});
     format short;
+    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
     if IF_COMPUTE
         %% linearize position 
         if FileExists([gt.paths.analysis, gt.filebase, '.' gt.trialName, '.linPos.mat'])

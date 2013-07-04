@@ -1,0 +1,16 @@
+nResample = 1e3;
+signfEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'signfEvntCorr'));
+allEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'evntCorrs'));
+surgtCorr = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'surrogate'));
+be = linspace(-1, 1, 1e2);
+signfEvntCount = histc(signfEvnts.poolArray, be);
+allEvntCount = histc(allEvnts.poolArray, be);
+surCount = histc(surgtCorr.poolArray, be);
+surCount = surCount ./ nResample;
+bar(be, allEvntCount, 'facecolor', 'w', 'edgecolor', 'k');
+hold on;
+bar(be, signfEvntCount, 'facecolor', 'r', 'edgecolor', 'none');
+legend( 'All Events', 'Signf Events');
+xlabel('Correlation value');
+ylabel('Number of events');
+title('Preplay');
