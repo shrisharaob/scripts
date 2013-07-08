@@ -1,6 +1,6 @@
 function out = BatchProcess(funcHandle, varargin)
 % function BatchKenji(funcHandle, varargin)
-% [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE]
+% [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE, options]
 % '', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0
 % evaluate func for all filebases
 
@@ -60,14 +60,15 @@ function out = BatchProcess(funcHandle, varargin)
                         else
                             feval(funcHandle, filebases{i}, funcArgs{:});
                         end
-                        if lTr == 1
-                            fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
-                            fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
-                        end
-                        fprintf(fp, ['\n ::: '  gt.trialName]);
-                        fclose(fp)
+                        %if lTr == 1
+                        %    fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
+                        %   fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
+                        %end
+                        %fprintf(fp, ['\n ::: '  gt.trialName]);
+                        %fclose(fp)
                     catch err
                         fprintf('error');
+                        keyboard;
                     end
                 end
                 if IF_SAVE
@@ -109,6 +110,7 @@ function out = BatchProcess(funcHandle, varargin)
             try
                 fout =feval(funcHandle, filebases{i}, funcArgs{:});
             catch err
+                
                 fprintf('error .......  !!!!!!');
             end
     

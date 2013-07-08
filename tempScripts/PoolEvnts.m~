@@ -1,3 +1,30 @@
+nResample = 1e3;
 signfEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'signfEvntCorr'));
 allEvnts = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'evntCorrs'));
+surgtCorr = BatchProcess(@TemplateMatch, 'kenji', 'CA3', 'linear', 1, {}, 'pool', 0, struct('poolVar', 'surrogate'));
 be = linspace(-1, 1, 1e2);
+signfEvntCnt = histc(signfEvnts.poolArray, be);
+evntCnt = histc(allEvnts.poolArray, be);
+surCnt = histc(surgtCorr.poolArray, be);
+
+hFig = figure;
+set(hFig, 'position', [1          28        1918         917]);
+hBar1 = bar(be, evntCnt, 'FaceColor', 'w', 'BarWidth', 0.5, 'LineWidth', 1);
+grid on;
+hold on;
+hBar2 = bar(be-.01, surCnt , 0.1,'FaceColor', 'c', 'BarWidth', .5, 'EdgeColor', 'none');
+hBar3 = bar(be, signfEvntCnt, 'FaceColor', 'r', 'EdgeColor', 'none', 'BarWidth', 0.5);
+legend([hBar3, hBar2, hBar1], 'Signf Events', 'surrogate', 'All Events');
+legend('boxoff');
+xlabel('Correlation value');
+ylabel('Number of events');
+keyboard;
+
+
+% bar(be, allEvntCount, 'facecolor', 'w', 'edgecolor', 'k');
+% hold on;
+% bar(be, signfEvntCount, 'facecolor', 'r', 'edgecolor', 'none');
+% legend( 'All Events', 'Signf Events');
+% xlabel('Correlation value');
+% ylabel('Number of events');
+% title('Preplay');

@@ -1,7 +1,8 @@
-function smoothRateMap = SmoothRM(gt,  varargin)
-% Skagg's 1996, Hippocampus
+function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
+% smoothRateMap = SmoothRM(gt,  varargin)
+% adaptive smoothing - Skagg's 1996, Hippocampus
 
-    [IF_COMPUTE, cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {0, [], 1e6, 50, 'RUN'});
+    [IF_COMPUTE, cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {0, [], 1e1, 50, 'RUN'});
     if ~IF_COMPUTE & FileExists([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat'])
         load([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat']);
         return;
@@ -61,7 +62,6 @@ function smoothRateMap = SmoothRM(gt,  varargin)
     end
     for kClu = 1 : nClu
         if ~isempty(gt.pfObject.rateMap{cluIdx(kClu)})
-         
             for x = 1 : length(gt.pfObject.xBin)
                 for y = 1 : length(gt.pfObject.yBin)
                     radius = 1;
@@ -69,6 +69,7 @@ function smoothRateMap = SmoothRM(gt,  varargin)
                     nOccSamples = sum(~isnan(occSamples));
                     xySpkCnt =  sum(GetPxInRadius(spkCnt(:,:,kClu), x, y, radius));
                     condition = (alpha / (nOccSamples * sqrt(xySpkCnt)));
+                    % expand the radius until r > condition
                     while radius <= condition | isinf(condition) | isnan(condition)
                         radius = radius + 1;
                         if radius > length(gt.pfObject.xBin) | radius > length(gt.pfObject.yBin), break; end

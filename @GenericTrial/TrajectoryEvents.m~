@@ -12,7 +12,6 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     if ~IF_COMPUTE
         load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
     end
-
     sts  = gt.SleepPeriods(gt.sampleRate);
     switch preOrPost
       case 'pre'
@@ -24,17 +23,12 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     clu  = gt.clu(resIdx);
     [res, resIdx] = sort(res);
     clu = clu(resIdx);
-    tres = res;
-    tclu = clu;
-    %    res = res(1:1e3);
-    % clu = clu(1:1e3);
     res = res(ismember(clu, clus2Select));
     clu = clu(ismember(clu, clus2Select));
     % [spikeDensity, binEdges] = SpikeDensity(res, gt.sampleRate, binSize, bandWidth);
     res = res ./ gt.sampleRate; % res in sec
     binEdges = [[res(1) : binSize * (1 - overlap) : res(end)]',  [res(1) + binSize : binSize * (1 - overlap) : res(end) + binSize]'];
     nBins = size(binEdges, 1) - 1;
-    %    [counts, cntIdx] = histc(res, binEdges);
     IS_EVNT_BIN = false(nBins, 1);
     for mBin = 2 : nBins - 1 % the 1st and last bins cannot be tested for silence
     % candidate evnts identified by number of cells active in the bin
@@ -47,7 +41,6 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
             if preCount(1) >  1 | sucCount(1) > 1, IS_EVNT_BIN(mBin) = false; end 
         end
     end
-
     evntBins = find(IS_EVNT_BIN);
     counts = counts ./ (nBins * binSize);
     trajEvntPeriods = round(binEdges(evntBins, :) .* gt.sampleRate);

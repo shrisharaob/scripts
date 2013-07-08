@@ -1,5 +1,6 @@
-function smoothRateMap = SmoothRM(gt,  varargin)
-% Skagg's 1996, Hippocampus
+function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
+% smoothRateMap = SmoothRM(gt,  varargin)
+% adaptive smoothing - Skagg's 1996, Hippocampus
 
     [IF_COMPUTE, cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {0, [], 1e6, 50, 'RUN'});
     if ~IF_COMPUTE & FileExists([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat'])
