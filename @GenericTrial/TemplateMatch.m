@@ -3,7 +3,7 @@ function out = TemplateMatch(gt, varargin);
 % [resemble, proposed]
 
     [IF_PLOT, nResample, preOrPost, type, overlap, alpha, minCellsInSeq] = ...
-        DefaultArgs(varargin, {false, 1e3, 'pre', 'load', 0.5, 0.025, 5});
+        DefaultArgs(varargin, {false, 1e3, 'pre', 'load', 0.5, 0.025, 2});
     
     switch type
       case 'compute'
@@ -15,6 +15,8 @@ function out = TemplateMatch(gt, varargin);
         rvrsPair = [];
         fwdCorr = nan(size(evntPeriods, 1), 1);
         rvrsCorr = nan(size(evntPeriods, 1), 1);
+        nCellsFwd = {};
+        nCellsRvrs = {};
         matlabpool local 8
         parfor kEvntPeriod = 1 : size(evntPeriods, 1)
             [r1, r1i] = SelectPeriods(res, evntPeriods(kEvntPeriod,:), 'd', 1,1);
@@ -27,21 +29,24 @@ function out = TemplateMatch(gt, varargin);
             if ~isempty(fwdPair)
                 temp = corr(fwdPair, 'type', 'spearman', 'rows', 'complete');
                 fwdCorr(kEvntPeriod) = temp(1, 2);
+                nCellsFwd{kEvntPeriod} = fwdPair(:, 1);
             end
             rvrsPair =  [evntSeq(ismember(evntSeq, seqRvrsOrder)), seqRvrsOrder]; 
             if ~isempty(rvrsPair)
                 temp = corr(rvrsPair, 'type', 'spearman',  'rows', 'complete');
                 rvrsCorr(kEvntPeriod) = temp(1, 2);
+                nCellsRvrs{kEvntPeriod} = rvrsPair(:, 1);
             end
-            if rvrsCorr(kEvntPeriod) == -1 | fwdCorr(kEvntPeriod) == -1 , keyboard; end
+            %            if rvrsCorr(kEvntPeriod) == -1 | fwdCorr(kEvntPeriod) == -1 , keyboard; end
         end
         matlabpool close
-        keyboard;
         %% surrogate
         if nResample
-            out.fwdSurrogate = nan(nResample, size(evntPeriods, 1));
-            out.rvrsSurrogate = nan(nResample, size(evntPeriods, 1));
-            for kEvntPeriod = 1 : size(evntPeriods, 1)
+            fwdSurrogate = nan(nResample, size(evntPeriods, 1));
+            rvrsSurrogate = nan(nResample, size(evntPeriods, 1));
+            fprintf('resampling \n ');
+            matlabpool local 8
+            parfor kEvntPeriod = 1 : size(evntPeriods, 1)
                 [r1, r1i] = SelectPeriods(res, evntPeriods(kEvntPeriod,:), 'd', 1,1);
                 c1 = clu(r1i);
                 evntSeq = MyUnique(c1);
@@ -52,20 +57,32 @@ function out = TemplateMatch(gt, varargin);
                     lRvrsPair =  [evntSeq(ismember(evntSeq, seqRvrsOrder)), seqRvrsOrder(randperm(length(seqRvrsOrder)))];  
                     if ~isempty(lRvrsPair)
                         trs = corr(lRvrsPair, 'type','Spearman', 'rows', 'complete');
-                        out.rvrsSurrogate(lResample, kEvntPeriod) = trs(1, 2);
+                        rvrsSurrogate(lResample, kEvntPeriod) = trs(1, 2);
                     end
                     if ~isempty(lFwdPair)
                         trs = corr(lFwdPair, 'type','Spearman', 'rows', 'complete');
-                        out.fwdSurrogate(lResample, kEvntPeriod) = trs(1, 2);
+                        fwdSurrogate(lResample, kEvntPeriod) = trs(1, 2);
                     end
                 end
             end
+            matlabpool close
+            out.fwdSurrogate = fwdSurrogate;
+            out.rvrsSurrogate = rvrsSurrogate;
         end
+        params.nResample = nResample;
+        params.overlap = overlap;
+        params.minCellsInSeq = minCellsInSeq;
+        %%%%%%%%%%%%%%%%%%%%%%%%%
+        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
+        %%%%%%%%%%%%%%%%%%%%%%%%%
         out.fwdCorr = fwdCorr;
-        out.rvrsCorr = rvrsCorr;keyboard;
+        out.nCellsFwd = nCellsFwd;
+        out.nCellsRvrs = nCellsRvrs;
+        out.rvrsCorr = rvrsCorr;
+        out.params = params;
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.' preOrPost, '.', mfilename, '.mat'], 'out');
       case 'load'
-        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.pre.', mfilename, '.mat'], 'out');
+        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.pre.', mfilename, '.mat']);
         preOut =  out;
         nResample = size(preOut.fwdSurrogate, 1);
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
@@ -91,23 +108,29 @@ function out = TemplateMatch(gt, varargin);
         out.postSignfEvntCorr = out.postEvntCorrs(IS_SIGNF_POST);
         out.preSurrogate = [preOut.fwdSurrogate(:); preOut.rvrsSurrogate(:)];
         out.postSurrogate = [postOut.fwdSurrogate(:); postOut.rvrsSurrogate(:)];
-        %        keyboard;
+        out.preNCellsFwd = preOut.nCellsFwd;
+        out.preNCellsRvrs = preOut.nCellsRvrs;
+        out.postNCellsFwd = postOut.nCellsFwd;
+        out.postNCellsRvrs = postOut.nCellsRvrs;
+        out.preNCells = [cellfun(@length, out.preNCellsFwd'); cellfun(@length, out.preNCellsRvrs')];
+        out.postNCells = [cellfun(@length, out.postNCellsFwd'); cellfun(@length, out.postNCellsRvrs')];
+%        keyboard;
         
         if IF_PLOT
-            be = linspace(-1, 1, 1e2);
-            %fwdCnt = histc(out.fwdCorr, be);
-            %fwdSurr = histc(out.fwdSurrogate, be);
-            %rvrsCnt = histc(out.rvrsCorr, be);
-            %rvrsSurr = histc(out.rvrsSurrogate, be);
-            
+            be = linspace(-1, 1, 1e2); % binEdges
+        
             preEvntCnt = histc(out.preEvntCorrs, be);
             preSignfEvntCnt = histc(out.preSignfEvntCorr, be);
             preSurCnt = histc(out.preSurrogate, be);
+            be1 = min(out.preNCells) : max(out.preNCells) + 1; % binEdges for # cells
+            preCellsInEvntCnt = histc(out.preNCells, be1);  
             
             postEvntCnt = histc(out.postEvntCorrs, be);
             postSignfEvntCnt = histc(out.postSignfEvntCorr, be);
             postSurCnt = histc(out.postSurrogate, be);
-
+            be1 = min(out.postNCells) : max(out.postNCells) + 1; % binEdges for # cells
+            postCellsInEvntCnt = histc(out.postNCells, be1);  
+          
             if ~all(isnan(preEvntCnt)) | sum(preEvntCnt) > 10, 
                 hFig = figure;
                 set(hFig, 'position', [1          28        1918         917]);
@@ -116,11 +139,21 @@ function out = TemplateMatch(gt, varargin);
                 hold on;
                 hBar2 = bar(be-.01, preSurCnt / nResample, 0.1,'FaceColor', 'c', 'BarWidth', .5, 'EdgeColor', 'none');
                 hBar3 = bar(be, preSignfEvntCnt, 'FaceColor', 'r', 'EdgeColor', 'none', 'BarWidth', 0.5);
-                legend([hBar3, hBar2, hBar1], 'Signf Events', 'surrogate', 'All Events');
+                
+                legend([hBar3, hBar2, hBar1], 'Signf Events', 'surrogate', 'All Events', 'location', 'NorthWest');
                 legend('boxoff');
                 xlabel('Correlation value');
                 ylabel('Number of events');
-                reportfig(hFig, [mfilename, '.pre'], 0, [gt.filebase, 'trial id     : ' gt.trialName], 200);
+               
+                axHdl =  axes; %('position', [.7, .7, .2, .1]);
+                bar(axHdl, be1, preCellsInEvntCnt);
+                grid on;
+                set(axHdl, 'position', [.7, .8, .2, .1])
+                set(axHdl, 'Box', 'off');
+                xlabel('# cells in events', 'FontSize', 6);
+                ylabel('# events', 'FontSize', 6);
+                set(axHdl, 'FontSize', 6);
+                reportfig(hFig, [mfilename, '.pre'], 0, [gt.filebase, 'trial id     : ' gt.trialName], [200, 150]);
                 close(hFig);
             end
 
@@ -133,10 +166,18 @@ function out = TemplateMatch(gt, varargin);
                 hold on;
                 hBar2 = bar(be-.01, postSurCnt / nResample, 0.1,'FaceColor', 'c', 'BarWidth', .5, 'EdgeColor', 'none');
                 hBar3 = bar(be, postSignfEvntCnt, 'FaceColor', 'r', 'EdgeColor', 'none', 'BarWidth', 0.5);
-                legend([hBar3, hBar2, hBar1], 'Signf Events', 'surrogate', 'All Events');
+                legend([hBar3, hBar2, hBar1], 'Signf Events', 'surrogate', 'All Events', 'Location', 'NorthWest');
                 legend('boxoff');
                 xlabel('Correlation value');
                 ylabel('Number of events');
+                axHdl =  axes; %('position', [.7, .7, .2, .1]);
+                bar(axHdl, be1, postCellsInEvntCnt);
+                grid on;
+                set(axHdl, 'position', [.7, .8, .2, .1])
+                set(axHdl, 'Box', 'off');
+                xlabel('# cells in events', 'FontSize', 6);
+                ylabel('# events', 'FontSize', 6);
+                set(axHdl, 'FontSize', 6);
                 reportfig(hFig, [mfilename, '.post'], 0, [gt.filebase, 'trial id     : ' gt.trialName], 200);
                 close(hFig);
             end

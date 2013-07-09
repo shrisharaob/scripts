@@ -10,7 +10,7 @@ function ProcessFigure(hFigure, fileName, varargin)
     for hAxis = allAxesInFigure'
         set(hAxis, 'box', 'off');
         set(hAxis, 'TickDir', 'out');
-        set(hAxis,'FontSize', 12);
+        set(hAxis,'FontSize', fontSize);
         set(get(hAxis,'XLabel'), 'FontSize', fontSize);
         set(get(hAxis,'YLabel'), 'FontSize', fontSize);
     end

@@ -11,6 +11,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     if ~FileExists([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
     if ~IF_COMPUTE
         load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
+        return;
     end
     sts  = gt.SleepPeriods(gt.sampleRate);
     switch preOrPost

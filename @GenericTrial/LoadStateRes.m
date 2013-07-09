@@ -5,9 +5,9 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
 % fs : convert res to fs
 % loads clu res for the specified state
 
-    [state, IF_INGOODPOS, fs, posInPeriods, IF_SQUASH] = DefaultArgs(varargin, {'RUN', 1, 0, [], 0});
+    [state, IF_INGOODPOS, fs, posInPeriods, IF_SQUASH, prePost] = DefaultArgs(varargin, {'RUN', 1, 0, [], 0, []});
 
-    if isempty(gt.res), gt = gt.LoadCR; end
+    if isempty(gt.res), gt.LoadCR; end
 
     switch gt.datasetType
       case  'MTA'
@@ -34,9 +34,23 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         end
         switch state
           case 'SWS'
-             [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
-             clu = gt.clu(resIdx);
-             varargout = {[], []};
+            varargout = {[], []};
+            if ~isempty(prePost)
+                sts  = gt.SleepPeriods(gt.sampleRate);
+                switch prePost
+                  case 'pre'
+                    sts = sts{1};
+                  case 'post'
+                    sts = sts{2};
+                end
+                if isempty(gt.clu), gt.LoadCR; end
+                [res, resIdx] = SelectPeriods(gt.res, sts, 'd', 1, IF_SQUASH);
+                clu = gt.clu(resIdx);
+                return;
+            end
+            [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
+            clu = gt.clu(resIdx);
+
           case 'trajEvnts'
             sts = gt.TrajectoryEvents(1);
             [res, resIdx] = SelectPeriods(gt.res, sts, 'd', 1, 1);
