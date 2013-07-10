@@ -72,9 +72,6 @@ function out = TemplateMatch(gt, varargin);
         params.nResample = nResample;
         params.overlap = overlap;
         params.minCellsInSeq = minCellsInSeq;
-        %%%%%%%%%%%%%%%%%%%%%%%%%
-        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
-        %%%%%%%%%%%%%%%%%%%%%%%%%
         out.fwdCorr = fwdCorr;
         out.nCellsFwd = nCellsFwd;
         out.nCellsRvrs = nCellsRvrs;
@@ -118,20 +115,15 @@ function out = TemplateMatch(gt, varargin);
         
         if IF_PLOT
             be = linspace(-1, 1, 1e2); % binEdges
-        
             preEvntCnt = histc(out.preEvntCorrs, be);
-            preSignfEvntCnt = histc(out.preSignfEvntCorr, be);
-            preSurCnt = histc(out.preSurrogate, be);
-            be1 = min(out.preNCells) : max(out.preNCells) + 1; % binEdges for # cells
-            preCellsInEvntCnt = histc(out.preNCells, be1);  
-            
             postEvntCnt = histc(out.postEvntCorrs, be);
-            postSignfEvntCnt = histc(out.postSignfEvntCorr, be);
-            postSurCnt = histc(out.postSurrogate, be);
-            be1 = min(out.postNCells) : max(out.postNCells) + 1; % binEdges for # cells
-            postCellsInEvntCnt = histc(out.postNCells, be1);  
-          
-            if ~all(isnan(preEvntCnt)) | sum(preEvntCnt) > 10, 
+            
+            if ~all(isnan(preEvntCnt)) & sum(preEvntCnt) > 10, 
+                preSignfEvntCnt = histc(out.preSignfEvntCorr, be);
+                preSurCnt = histc(out.preSurrogate, be);
+                preBinEdg = min(out.preNCells) : max(out.preNCells) + 1; % binEdges for # cells
+                preCellsInEvntCnt = histc(out.preNCells, preBinEdg);  
+                                %%
                 hFig = figure;
                 set(hFig, 'position', [1          28        1918         917]);
                 hBar1 = bar(be, preEvntCnt, 'FaceColor', 'w', 'BarWidth', 0.5, 'LineWidth', 1);
@@ -146,11 +138,11 @@ function out = TemplateMatch(gt, varargin);
                 ylabel('Number of events');
                
                 axHdl =  axes; %('position', [.7, .7, .2, .1]);
-                bar(axHdl, be1, preCellsInEvntCnt);
+                bar(axHdl, preBinEdg, preCellsInEvntCnt, 'FaceColor', 'k');
                 grid on;
                 set(axHdl, 'position', [.7, .8, .2, .1])
                 set(axHdl, 'Box', 'off');
-                xlabel('# cells in events', 'FontSize', 6);
+                xlabel('# template cells in events', 'FontSize', 5);
                 ylabel('# events', 'FontSize', 6);
                 set(axHdl, 'FontSize', 6);
                 reportfig(hFig, [mfilename, '.pre'], 0, [gt.filebase, 'trial id     : ' gt.trialName], [200, 150]);
@@ -158,7 +150,12 @@ function out = TemplateMatch(gt, varargin);
             end
 
             
-            if ~all(isnan(postEvntCnt)) | sum(postEvntCnt) > 10, 
+            if ~all(isnan(postEvntCnt)) & sum(postEvntCnt) > 10, 
+                postSignfEvntCnt = histc(out.postSignfEvntCorr, be);
+                postSurCnt = histc(out.postSurrogate, be);
+                postBinEdg = min(out.postNCells) : max(out.postNCells) + 1; % binEdges for # cells
+                postCellsInEvntCnt = histc(out.postNCells, postBinEdg);  
+
                 hFig = figure;
                 set(hFig, 'position', [1          28        1918         917]);
                 hBar1 = bar(be, postEvntCnt, 'FaceColor', 'w', 'BarWidth', 0.5, 'LineWidth', 1);
@@ -171,11 +168,11 @@ function out = TemplateMatch(gt, varargin);
                 xlabel('Correlation value');
                 ylabel('Number of events');
                 axHdl =  axes; %('position', [.7, .7, .2, .1]);
-                bar(axHdl, be1, postCellsInEvntCnt);
+                bar(axHdl, postBinEdg, postCellsInEvntCnt, 'FaceColor', 'k');
                 grid on;
-                set(axHdl, 'position', [.7, .8, .2, .1])
+                set(axHdl, 'position', [.7, .8, .2, .1]);
                 set(axHdl, 'Box', 'off');
-                xlabel('# cells in events', 'FontSize', 6);
+                xlabel('# template cells in events', 'FontSize', 5);
                 ylabel('# events', 'FontSize', 6);
                 set(axHdl, 'FontSize', 6);
                 reportfig(hFig, [mfilename, '.post'], 0, [gt.filebase, 'trial id     : ' gt.trialName], 200);

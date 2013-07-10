@@ -1,8 +1,8 @@
 function pkDistAB = PoolPeakDist(varargin)
 % pkDistAB = PoolPeakDist(varargin)
 % [IF_COMPUTE, datasetType, roi, inArenaPair]
-  [IF_COMPUTE, datasetType, roi, inArenaPair] = ...
-        DefaultArgs(varargin, {0, 'kenji', 'CA3', {'bigSquare', 'linear'}});
+  [IF_COMPUTE, IF_PLOT, datasetType, roi, inArenaPair] = ...
+        DefaultArgs(varargin, {0, 0,'kenji', 'CA3', {'bigSquare'}});
 
     if IF_COMPUTE
         options.poolVar = 'pkDist';
@@ -43,17 +43,18 @@ function pkDistAB = PoolPeakDist(varargin)
         save(['~/data/analysis/', datasetType, '/', mfilename, GenFiletag(roi, inArenaPair), 'mat'], 'pkDistAB');
     else
         load(['~/data/analysis/', datasetType, '/', mfilename, GenFiletag(roi, inArenaPair), 'mat']);
-        figure;
-        plot(pkDistAB(:, 1), pkDistAB(:, 2), '*');
-        hold on;
-        line([min(min(xlim, ylim)), max(max(xlim, ylim))], [min(min(xlim, ylim)), max(max(xlim, ylim))], 'color', 'k');
-        axis square;
-        xlabel(['pk distance in  ' inArenaPair{1}, ' (pixels)']);
-        ylabel(['pk distance in  ' inArenaPair{2}, ' (pixels)']);
-        title(roi);
-        grid on;
+        if IF_PLOT
+            figure;
+            plot(pkDistAB(:, 1), pkDistAB(:, 2), '*');
+            hold on;
+            line([min(min(xlim, ylim)), max(max(xlim, ylim))], [min(min(xlim, ylim)), max(max(xlim, ylim))], 'color', 'k');
+            axis square;
+            xlabel(['pk distance in  ' inArenaPair{1}, ' (pixels)']);
+            ylabel(['pk distance in  ' inArenaPair{2}, ' (pixels)']);
+            title(roi);
+            grid on;
+        end
     end
-
 end
            
     

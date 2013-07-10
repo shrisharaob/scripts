@@ -1,0 +1,7 @@
+function CofiringVsDist(gt, varargin)
+
+
+    [prePost ] = DefaultArgs(varargin, {'pre'});
+    prCofiring = PairReactivation(gt, prePost, 
+
+

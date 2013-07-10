@@ -1,4 +1,6 @@
 function out = PairReactivation(gt, varargin)
+% out = PairReactivation(gt, varargin)
+% returns pairwise reactivation likelihood
 
     out = [];
     [prePost, type, winSize, overlap ] = DefaultArgs(varargin, {'pre', 'load', 100e-3, 0});
@@ -73,8 +75,8 @@ function out = PairReactivation(gt, varargin)
         keyboard;
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat'], 'out');
 
-   case 'load'
-     load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']);
+      case 'load'
+        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']);
         
     end
 end
