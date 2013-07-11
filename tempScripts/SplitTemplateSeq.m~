@@ -1,0 +1,3 @@
+function out = SplitTemplateSeq(gt, varargin)
+
+out = [];

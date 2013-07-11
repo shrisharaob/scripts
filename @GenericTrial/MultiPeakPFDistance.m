@@ -97,7 +97,6 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
         cntrB = cntrVertices{cellIds == cellPairs(mCellPair, 2)};
         nCntrA = length(cntrA);
         nCntrB = length(cntrB);
-        mCellPair
         if nCntrA >= 1 && nCntrB >= 1, 
             cntrPairs = nchoosek([1 : nCntrA, 1 : nCntrB], 2); % all pairs of selected sub contours
             cntrPairs(cntrPairs(:, 1) > nCntrA, :) = [];
@@ -106,7 +105,6 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
             pkA = cntrPeaks{cellIds == cellPairs(mCellPair, 1)};
             pkB = cntrPeaks{cellIds == cellPairs(mCellPair, 2)};
             for kCntrPr = 1 : size(cntrPairs, 1)
-                kCntrPr 
                 validCntrCnt = validCntrCnt + 1;
                 pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                 selectedCellpairs(validCntrCnt, :) = cellPairs(mCellPair, :);

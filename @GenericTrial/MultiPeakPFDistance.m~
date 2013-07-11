@@ -11,7 +11,7 @@ function out = MultiPeakPFDistance(gt, roi, arena, varargin)
     if length(defClu) < 2, return; end
     defCellPairs = nchoosek(defClu, 2);
     [cellPairs, IF_SMRM, IF_COMPUTE_CCG, IF_CAT_TRIALS, rateThreshFactor, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
-        DefaultArgs(varargin, {defCellPairs, 1, 0, 0, 0.2, 0.5, 0, 'RUN', 20e-3, 1000e-3, true});
+        DefaultArgs(varargin, {defCellPairs, 1, 0, 0, 0.2, 0.5, 0, 'RUN', 10e-3, 1000e-3, true});
     
     cellIds = unique(cellPairs(:));
     nCells = length(cellIds);
