@@ -3,7 +3,7 @@ function out =  CofiringVsDist(gt, varargin)
 % script to relate pk distances and cofiring likelihood
 
     [prePost, type, roi, arena ] = DefaultArgs(varargin, {'pre', 'load','CA3', 'bigSquare'});
-    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), type = 'compute'; end
+    %    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), type = 'compute'; end
     switch type
         case 'compute'
           out = [];
@@ -35,7 +35,8 @@ function out =  CofiringVsDist(gt, varargin)
                           pkB = cntrPeaks{cellIds == myPairs(mCellPair, 2)};
                           for kCntrPr = 1 : size(cntrPairs, 1)
                               validCntrCnt = validCntrCnt + 1;
-                              probCofiring(validCntrCnt) = pairCofiring.cofiringProb(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
+                              probCofiringRUN(validCntrCnt) = pairCofiring.runCfProb(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
+                              probCofiringSleep(validCntrCnt) = pairCofiring.sleepCfProb(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
                               pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                               selectedCellpairs(validCntrCnt, :) = myPairs(mCellPair, :);
                               pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
@@ -45,12 +46,24 @@ function out =  CofiringVsDist(gt, varargin)
                       end
                   end
               end
-              out.cfVsPkDist = [probCofiring(:), pkDistAB(:)];
+              out.cfVsPkDist = [pkDistAB(:), probCofiringRUN(:), probCofiringSleep(:)];
           end          
           save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
       case 'load'
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
-        plot(cfVsPkDist(:, 2), cfVsPkDist(:, 1));
+        subplot(1, 2, 1);
+        plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
+        axis square;
+        xlabel('peak Dist (px)');
+        ylabel('cofiring probablity');
+        title('RUN');
+        subplot(1, 2, 2);
+        plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 3), '*');
+        axis square;
+        title('SWS');
+        xlabel('peak Dist (px)');
+        ylabel('cofiring probablity');
+        reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName]);
     end
 end
 

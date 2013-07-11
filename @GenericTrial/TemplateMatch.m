@@ -72,9 +72,6 @@ function out = TemplateMatch(gt, varargin);
         params.overlap = overlap;
         params.minCellsInSeq = minCellsInSeq;
         out.fwdCorr = fwdCorr;
-
-        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
-
         out.nCellsFwd = nCellsFwd;
         out.nCellsRvrs = nCellsRvrs;
         out.rvrsCorr = rvrsCorr;
@@ -112,6 +109,9 @@ function out = TemplateMatch(gt, varargin);
         out.postNCellsRvrs = postOut.nCellsRvrs; if isempty(postOut.nCellsRvrs), out.postNCellsRvrs = cell(1, length(postOut.rvrsCorr)); end
         out.preNCells = [cellfun(@length, out.preNCellsFwd'); cellfun(@length, out.preNCellsRvrs')];
         out.postNCells = [cellfun(@length, out.postNCellsFwd'); cellfun(@length, out.postNCellsRvrs')];
+        out.preMinCellIdx = out.preNCells > minCellsInSeq;
+        out.postMinCellIdx = out.postNCells > minCellsInSeq;
+       
 %        keyboard;
         
         if IF_PLOT

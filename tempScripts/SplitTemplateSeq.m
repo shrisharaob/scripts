@@ -3,11 +3,12 @@ function out = SplitTemplateSeq(gt, varargin)
 % script to separate template match according to number of cells in the sequence
 
     out = [];
-    %    [prePost] = DefaultArgs(varargin, {'pre'});
+    % = DefaultArgs(varargin, {'pre'});
     templateMatch = gt.TemplateMatch;
     for prePost = {'pre', 'post'}
         NCells = eval(['unique(templateMatch.' char(prePost), 'NCells);']);
         NCells(NCells == 0) = [];
+        NCells = 
         counter = 0;
         for kNCells = 1 : length(NCells)
             kCellSeqCorr = eval(['templateMatch.', char(prePost), 'EvntCorrs(templateMatch.', char(prePost), 'NCells == NCells(kNCells));']);
@@ -16,6 +17,7 @@ function out = SplitTemplateSeq(gt, varargin)
             counter = counter + 1;
             subplot(length(NCells), 1, kNCells);
             bar(binEdg, kCount);
+            axis off;
             title(['# cells : ' num2str(NCells(kNCells))]);
             grid on;
             eval([char(prePost), 'SplitCorrs(counter, :) = kCount;']);

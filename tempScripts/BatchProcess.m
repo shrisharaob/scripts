@@ -68,7 +68,7 @@ function out = BatchProcess(funcHandle, varargin)
                         %fclose(fp)
                     catch err
                         fprintf('error');
-                        keyboard;
+                        %    keyboard;
                     end
                 end
                 if IF_SAVE
@@ -143,7 +143,7 @@ function out = BatchProcess(funcHandle, varargin)
                         tArena = tArena{2};
                         poolArrayId = [poolArrayId; {filebases{i}, trialNames{lTr}, tArena ,[1 : nRows] + nRowsOld}];
                     catch err
-                        keyboard;
+                        %keyboard;
                         fprintf('error');
                     end
                 end

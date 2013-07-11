@@ -142,12 +142,6 @@ function out = BatchProcess(funcHandle, varargin)
                         if strcmp(datasetType, 'kenji'), tArena = SearchKenji(gt.trialName); end
                         tArena = tArena{2};
                         poolArrayId = [poolArrayId; {filebases{i}, trialNames{lTr}, tArena ,[1 : nRows] + nRowsOld}];
-                       %  if lTr == 1
-%                             fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
-%                             fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
-%                         end
-%                         fprintf(fp, ['\n ::: '  gt.trialName]);
-%                         fclose(fp)
                     catch err
                         keyboard;
                         fprintf('error');

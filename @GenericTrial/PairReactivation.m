@@ -3,7 +3,7 @@ function out = PairReactivation(gt, varargin)
 % returns pairwise reactivation likelihood
 
     out = [];
-    [prePost, type, winSize, overlap ] = DefaultArgs(varargin, {'pre', 'load', 100e-3, 0});
+    [prePost, type, IF_PLOT, winSize, overlap ] = DefaultArgs(varargin, {'pre', 'load', false, 100e-3, 0});
 
     if isempty(gt.pfObject), gt.LoadPF; end
     if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']), type = 'compute'; end
@@ -13,7 +13,7 @@ function out = PairReactivation(gt, varargin)
         [runRes, runClu] = gt.LoadStateRes('RUN', 1, [], [], 1);
         
         cmnClus = intersect(unique(runClu), unique(sleepClu));
-        if cmnClus > 1
+        if length(cmnClus) > 1
             cellPairs = nchoosek(cmnClus, 2);
             % cellPairs = cellPairs(ismember(cellPairs, gt.pfObject.selectPairs));
             nPairs = size(cellPairs, 1);
@@ -78,5 +78,19 @@ function out = PairReactivation(gt, varargin)
       case 'load'
 
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']);
+        out.runCfProb = sum(out.IS_EVNT_BIN_RUN, 2) ./ length(out.IS_EVNT_BIN_RUN);
+        out.sleepCfProb = sum(out.IS_EVNT_BIN_SLEEP, 2) ./ length(out.IS_EVNT_BIN_SLEEP);
+        %        out.cofiringProb = 
+        if IF_PLOT
+            plot(out.runCfProb, out.sleepCfProb, 'ob', 'MarkerSize', 5);
+            xlim([0, 1]);
+            ylim([0, 1]);
+            hold on;
+            line;
+            xlabel('RUN cofiring probablity');
+            ylabel('SWS cofiring probablity');
+            reportfig(gcf, mfilename, 0, [gt.filebase,  '    ', gt.trialName]);
+            clf;
+        end
     end
 end
