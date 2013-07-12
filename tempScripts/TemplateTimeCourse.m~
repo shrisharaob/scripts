@@ -1,0 +1,6 @@
+function out = TemplateTimeCourse(gt, varargin)
+
+    [nChunks] = DefaultArgs(varargin, {5});
+    
+    
+  

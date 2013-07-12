@@ -11,6 +11,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     if ~FileExists([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
     if ~IF_COMPUTE
         load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
+        return;
     end
     sts  = gt.SleepPeriods(gt.sampleRate);
     switch preOrPost
@@ -30,7 +31,8 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     binEdges = [[res(1) : binSize * (1 - overlap) : res(end)]',  [res(1) + binSize : binSize * (1 - overlap) : res(end) + binSize]'];
     nBins = size(binEdges, 1) - 1;
     IS_EVNT_BIN = false(nBins, 1);
-    for mBin = 2 : nBins - 1 % the 1st and last bins cannot be tested for silence
+    matlabpool local 8
+    parfor mBin = 2 : nBins - 1 % the 1st and last bins cannot be tested for silence
     % candidate evnts identified by number of cells active in the bin
         resInBinIdx = res >= binEdges(mBin, 1) & res < binEdges(mBin, 2);
         counts(mBin) = sum(resInBinIdx);
@@ -41,13 +43,14 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
             if preCount(1) >  1 | sucCount(1) > 1, IS_EVNT_BIN(mBin) = false; end 
         end
     end
+    matlabpool close;
     evntBins = find(IS_EVNT_BIN);
     counts = counts ./ (nBins * binSize);
     trajEvntPeriods = round(binEdges(evntBins, :) .* gt.sampleRate);
     pars.clus2Select = clus2Select;
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;
-    save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
+    save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
 end
 
 

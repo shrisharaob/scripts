@@ -1,0 +1,12 @@
+function out = PrePostEvents(gt)
+
+   prePost = {'pre', 'post'};
+   for k = 1 : 2
+       templateMatch = gt.TemplateMatch(0, 5, prePost{k});
+       subplot(1, 2, k);
+       nSignfEvnts = eval(['sum(templateMatch.IS_SIGNF_', upper(prePost{k}), ');']);
+       eval(['hist(find(templateMatch.IS_SIGNF_', upper(prePost{k}), '), ceil(nSignfEvnts))']);
+       
+       reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName]);
+    end
+   

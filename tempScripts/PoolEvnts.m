@@ -1,19 +1,20 @@
-function PoolEvnts(prePost, roi)
+function PoolEvnts(prePost, roi, varargin)
 
-nResample = 1e3;
+[minCellInSeq, nResample] = DefaultArgs(varargin, {5, 1e3});
+
 
 switch prePost
   case 'pre'
-    signfEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'preSignfEvntCorr'));
-    allEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'preEvntCorrs'));
-    surgtCorr = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'preSurrogate'));
-    preNC1ells = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'preNCells'));    be = linspace(-1, 1, 1e2);
+    signfEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'preSignfEvntCorr'));
+    allEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'preEvntCorrs'));
+    surgtCorr = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'preSurrogate'));
+    preNCells = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'preNCells'));    be = linspace(-1, 1, 1e2);
     signfEvntCnt = histc(signfEvnts.poolArray, be);
     evntCnt = histc(allEvnts.poolArray, be);
     surCnt = histc(surgtCorr.poolArray, be);
-    preNCells = preNCells.poolArray;
-    preBinEdg = min(preNCells) : max(preNCells) + 1; % binEdges for # cells
-    preCellsInEvntCnt = histc(preNCells, preBinEdg);  
+    preNCells = preNCells.poolArray(preNCells.poolArray > minCellInSeq);
+    preBinEdg = min(preNCells) - 1 : max(preNCells) + 1; % binEdges for # cells
+    preCellsInEvntCnt = histc(preNCells, preBinEdg);
             
     hFig = figure;
     set(hFig, 'position', [1          28        1918         917]);
@@ -28,26 +29,26 @@ switch prePost
     ylabel('Number of events');
     ylim([0, max(ylim) + 50]);
     axHdl =  axes; %('position', [.7, .7, .2, .1]);
-    bar(axHdl, preBinEdg, preCellsInEvntCnt);
-    xlim(axHdl, [-1, max(xlim(axHdl))]);
-    grid on;
+    bar(axHdl, preBinEdg, log10(preCellsInEvntCnt) + eps);
+    xlim(axHdl, [min(xlim(axHdl)) + 0.25, max(xlim(axHdl))]);
+    grid(axHdl, 'on')
     set(axHdl, 'position', [.65, .8, .25, .1]);
     set(axHdl, 'Box', 'off');
-    xlabel('# template cells in events', 'FontSize', 5);
-    ylabel('# events', 'FontSize', 6);
+    xlabel('# cells in events', 'FontSize', 5);
+    ylabel('# events (log)', 'FontSize', 6);
     set(axHdl, 'FontSize', 6);
-    
+keyboard;    
 case 'post'
-    signfEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'postSignfEvntCorr'));
-    allEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'postEvntCorrs'));
-    surgtCorr = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'postSurrogate'));
-    postNCells = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, 0, prePost}, 'pool', 0, struct('poolVar', 'postNCells'));
+    signfEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postSignfEvntCorr'));
+    allEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postEvntCorrs'));
+    surgtCorr = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postSurrogate'));
+    postNCells = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postNCells'));
     be = linspace(-1, 1, 1e2);
     signfEvntCnt = histc(signfEvnts.poolArray, be);
     evntCnt = histc(allEvnts.poolArray, be);
     surCnt = histc(surgtCorr.poolArray, be);
 
-    postNCells = postNCells.poolArray;
+    postNCells = postNCells.poolArray(postNCells.poolArray > minCellInSeq); 
     postBinEdg = min(postNCells) : max(postNCells) + 1; % binEdges for # cells
     postCellsInEvntCnt = histc(postNCells, postBinEdg);  
           
@@ -66,12 +67,12 @@ case 'post'
 
     axHdl =  axes; %('position', [.7, .7, .2, .1]);
     bar(axHdl, postBinEdg, postCellsInEvntCnt);
-    xlim(axHdl, [-1, max(xlim(axHdl))]);
+    xlim(axHdl, [min(xlim(axHdl)) + 0.25, max(xlim(axHdl))]);
     grid on;
     set(axHdl, 'position', [.65, .8, .25, .1]);
     set(axHdl, 'Box', 'off');
-    xlabel('# cells in events', 'FontSize', 6);
-    ylabel('# events', 'FontSize', 6);
+    xlabel(axHdl, '# cells in events', 'FontSize', 5);
+    ylabel(axHdl, '# events (log)', 'FontSize', 6);
     set(axHdl, 'FontSize', 6);
-    
+    keyboard;
 end
