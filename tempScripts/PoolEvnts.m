@@ -37,8 +37,8 @@ switch prePost
     xlabel('# cells in events', 'FontSize', 5);
     ylabel('# events (log)', 'FontSize', 6);
     set(axHdl, 'FontSize', 6);
-keyboard;    
-case 'post'
+    keyboard;    
+  case 'post'
     signfEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postSignfEvntCorr'));
     allEvnts = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postEvntCorrs'));
     surgtCorr = BatchProcess(@TemplateMatch, 'kenji', roi, 'linear', 1, {0, minCellInSeq, prePost}, 'pool', 0, struct('poolVar', 'postSurrogate'));

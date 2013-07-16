@@ -3,7 +3,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
 
     fprintf('\n traj evnts \n')
     if isempty(gt.pfObject), gt.LoadPF; end
-    if isempty(gt.clu), gt.LoadCR; end
+    if IF_COMPUTE, if isempty(gt.clu), gt.LoadCR; end; end
     defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < 0.7);
     [state, clus2Select, minEvntCells, binSize, overlap, minSilenceWin] = ...
         DefaultArgs(varargin, {'SWS', defClus2Select, 5, 150e-3, 0, 50e-3 });

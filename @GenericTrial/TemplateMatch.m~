@@ -2,8 +2,8 @@ function out = TemplateMatch(gt, varargin);
 % out = Template-Match(gt, ragging);
 % [resemble, proposed]
 
-    [IF_PLOT, nResample, preOrPost, type, overlap, alpha, minCellsInSeq] = ...
-        DefaultArgs(varargin, {false, 1e3, 'pre', 'load', 0.5, 0.025, 2});
+    [IF_PLOT, minCellsInSeq, preOrPost, nResample, type, overlap, alpha] = ...
+        DefaultArgs(varargin, {false, 2, 'pre', 1e3, 'load', 0.5, 0.025});
     
     switch type
       case 'compute'
@@ -72,9 +72,6 @@ function out = TemplateMatch(gt, varargin);
         params.overlap = overlap;
         params.minCellsInSeq = minCellsInSeq;
         out.fwdCorr = fwdCorr;
-
-        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
-
         out.nCellsFwd = nCellsFwd;
         out.nCellsRvrs = nCellsRvrs;
         out.rvrsCorr = rvrsCorr;
@@ -99,21 +96,21 @@ function out = TemplateMatch(gt, varargin);
         IS_SIGNF_POST = postPVal < alpha;
         percentPreplay = 100 * nansum(IS_SIGNF_PRE) / length(IS_SIGNF_PRE);
         percentPost = 100 * nansum(IS_SIGNF_POST) / length(IS_SIGNF_POST);
-        out.evnts = [nansum(IS_SIGNF_PRE(:)), length(IS_SIGNF_PRE), nansum(IS_SIGNF_POST(:)), length(IS_SIGNF_POST)];
-        out.preEvntCorrs = [preOut.fwdCorr(:); preOut.rvrsCorr(:)];
-        out.postEvntCorrs = [postOut.fwdCorr(:); postOut.rvrsCorr(:)];
-        out.preSignfEvntCorr = out.preEvntCorrs(IS_SIGNF_PRE);
-        out.postSignfEvntCorr = out.postEvntCorrs(IS_SIGNF_POST);
-        out.preSurrogate = [preOut.fwdSurrogate(:); preOut.rvrsSurrogate(:)];
-        out.postSurrogate = [postOut.fwdSurrogate(:); postOut.rvrsSurrogate(:)];
-        out.preNCellsFwd = preOut.nCellsFwd; if isempty(preOut.nCellsFwd), out.preNCellsFwd = cell(1, length(preOut.fwdCorr)); end
-        out.preNCellsRvrs = preOut.nCellsRvrs; if isempty(preOut.nCellsRvrs), out.preNCellsRvrs = cell(1, length(preOut.rvrsCorr)); end
-        out.postNCellsFwd = postOut.nCellsFwd; if isempty(postOut.nCellsFwd), out.postNCellsFwd = cell(1, length(postOut.fwdCorr)); end
-        out.postNCellsRvrs = postOut.nCellsRvrs; if isempty(postOut.nCellsRvrs), out.postNCellsRvrs = cell(1, length(postOut.rvrsCorr)); end
-        out.preNCells = [cellfun(@length, out.preNCellsFwd'); cellfun(@length, out.preNCellsRvrs')];
-        out.postNCells = [cellfun(@length, out.postNCellsFwd'); cellfun(@length, out.postNCellsRvrs')];
-%        keyboard;
         
+        out.preNCells = [cellfun(@length, preOut.nCellsFwd'); cellfun(@length, preOut.nCellsRvrs')];
+        out.postNCells = [cellfun(@length, postOut.nCellsFwd'); cellfun(@length, postOut.nCellsRvrs')];
+        preIdx = out.preNCells > minCellsInSeq;
+        postIdx = out.postNCells > minCellsInSeq;
+
+        out.evnts = [nansum(IS_SIGNF_PRE(preIdx)), length(IS_SIGNF_PRE(preIdx)), nansum(Mat2Vec(IS_SIGNF_POST(postIdx))), length(IS_SIGNF_POST(postIdx))];
+        out.preEvntCorrs = [preOut.fwdCorr(:); preOut.rvrsCorr(:)]; out.preEvntCorrs = out.preEvntCorrs(preIdx);
+        out.postEvntCorrs = [postOut.fwdCorr(:); postOut.rvrsCorr(:)]; out.postEvntCorrs = out.postEvntCorrs(postIdx);
+        out.preSignfEvntCorr = out.preEvntCorrs(IS_SIGNF_PRE(preIdx)); 
+        out.postSignfEvntCorr = out.postEvntCorrs(IS_SIGNF_POST(postIdx));
+        out.preSurrogate = [preOut.fwdSurrogate, preOut.rvrsSurrogate]; out.preSurrogate = Mat2Vec( out.preSurrogate(:, preIdx));
+        out.postSurrogate = [postOut.fwdSurrogate, postOut.rvrsSurrogate]; out.postSurrogate = Mat2Vec(out.postSurrogate(:, postIdx));
+        out.IS_SIGNF_PRE = IS_SIGNF_PRE(preIdx);
+        out.IS_SIGNF_POST = IS_SIGNF_POST(postIdx);
         if IF_PLOT
             be = linspace(-1, 1, 1e2); % binEdges
             preEvntCnt = histc(out.preEvntCorrs, be);

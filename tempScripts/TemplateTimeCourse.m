@@ -8,6 +8,7 @@ function out = TemplateTimeCourse(gt, varargin)
     bins = 1 : nChunks : size(evntperiods, 1);
     
     [~, chunkId] = histc(find(templateMatch.IS_SIGNF_PRE), bins);
+    
 end
     
     

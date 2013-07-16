@@ -1,4 +1,5 @@
 function out = PrePostEvents(gt)
+% visualize the time course of  template correlation strength during sleep pre, post trial
 
    prePost = {'pre', 'post'};
    IF_REPORT = false;

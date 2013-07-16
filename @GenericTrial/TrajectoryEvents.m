@@ -2,6 +2,8 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
 % trajEvntPeriods = TrajectoryEvents(gt, varargin) @sample fs
 
     fprintf('\n traj evnts \n')
+    trajEvntPeriods = [];
+    pars = [];
     if isempty(gt.pfObject), gt.LoadPF; end
     if IF_COMPUTE, if isempty(gt.clu), gt.LoadCR; end; end
     defClus2Select = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < 0.7);
@@ -26,7 +28,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     clu = clu(resIdx);
     res = res(ismember(clu, clus2Select));
     clu = clu(ismember(clu, clus2Select));
-    % [spikeDensity, binEdges] = SpikeDensity(res, gt.sampleRate, binSize, bandWidth);
+    if length(res) > 10
     res = res ./ gt.sampleRate; % res in sec
     binEdges = [[res(1) : binSize * (1 - overlap) : res(end)]',  [res(1) + binSize : binSize * (1 - overlap) : res(end) + binSize]'];
     nBins = size(binEdges, 1) - 1;
@@ -51,6 +53,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     pars.minEvntCells  = minEvntCells;
     pars.binSize = binSize;
     save([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat'], 'pars', 'trajEvntPeriods');
+    end
 end
 
 
