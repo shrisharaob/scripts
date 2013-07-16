@@ -87,6 +87,7 @@ function out = PairReactivation(gt, varargin)
                     end
                 end
             end
+        out.IS_EVNT_BIN_SURROGATE  = IS_EVNT_BIN_SURROGATE;    
         end
         matlabpool close
         %% likelihood of cofiring
@@ -95,22 +96,26 @@ function out = PairReactivation(gt, varargin)
         %out.cofiringProb = cofiringProb;
         % out.IS_EVNT_BIN_RUN = IS_EVNT_BIN_RUN;
         out.IS_EVNT_BIN_SLEEP = IS_EVNT_BIN_SLEEP;
+        out.sleepCfProb = sum(out.IS_EVNT_BIN_SLEEP, 2) ./ length(out.IS_EVNT_BIN_SLEEP);
         save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat'], 'out');
       case 'load'
 
         if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat'])
             load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']);
-            out.sleepCfProb = sum(out.IS_EVNT_BIN_SLEEP, 2) ./ length(out.IS_EVNT_BIN_SLEEP);
-            if IF_PLOT
-                plot(out.runCfProb, out.sleepCfProb, 'ob', 'MarkerSize', 5);
-                xlim([0, 1]);
-                ylim([0, 1]);
-                hold on;
-                line;
-                xlabel('RUN cofiring probablity');
-                ylabel('SWS cofiring probablity');
-                reportfig(gcf, mfilename, 0, [gt.filebase,  '    ', gt.trialName]);
-                clf;
+            if ~isempty(out)
+                out.sleepCfProb = sum(out.IS_EVNT_BIN_SLEEP, 2) ./ length(out.IS_EVNT_BIN_SLEEP);
+                if IF_PLOT
+                    plot(out.runCfProb, out.sleepCfProb, 'ob', 'MarkerSize', 5);
+                    xlim([0, 1]);
+                    ylim([0, 1]);
+                    hold on;
+                    line;
+                    xlabel('RUN cofiring probablity');
+                    ylabel('SWS cofiring probablity');
+                    reportfig(gcf, mfilename, 0, [gt.filebase,  '    ', gt.trialName]);
+                    clf;
+                end
+            else, out = []; 
             end
         else, out = [];
         end

@@ -7,7 +7,7 @@ function out = TemplateMatch(gt, varargin);
     out = [];
     switch type
       case 'compute'
-        sqTemplate = SeqTemplate(gt); % returns template stricter
+        sqTemplate = SeqTemplate(gt); % returns template struct
         clus2Select = union(sqTemplate.fwdSortedClu, sqTemplate.rvrsSortedClu);
         [evntPeriods, params] = gt.TrajectoryEvents(0, preOrPost, [], clus2Select, [], [], overlap);
         if size(evntPeriods, 1) > 0
@@ -26,7 +26,6 @@ function out = TemplateMatch(gt, varargin);
                 seqRvrsOrder = sqTemplate.rvrsSortedClu(ismember(sqTemplate.rvrsSortedClu, evntSeq));
                 fwdPair =  [evntSeq(ismember(evntSeq, seqFwdOrder)), seqFwdOrder]; 
                 rvrsPair =  [evntSeq(ismember(evntSeq, seqRvrsOrder)), seqRvrsOrder]; 
-                %if length(seqFwdOrder) < minCellsInSeq & length(seqRvrsOrder) < minCellsInSeq , continue; end
                 if size(fwdPair, 1) > minCellsInSeq 
                     if ~isempty(fwdPair)
                         temp = corr(fwdPair, 'type', 'spearman', 'rows', 'complete');
@@ -42,7 +41,7 @@ function out = TemplateMatch(gt, varargin);
                     end
                 end
             end
-
+            
             %% surrogate
             if nResample
                 fwdSurrogate = nan(nResample, size(evntPeriods, 1));
@@ -86,9 +85,9 @@ function out = TemplateMatch(gt, varargin);
         IF_PLOT_PRE = false;
         IF_PLOT_POST = false;
         if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.pre.', mfilename, '.mat'])
-            load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.pre.', mfilename, '.mat']);
-            preOut =  out;
-            clear out;
+            temp = load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.pre.', mfilename, '.mat']);
+            preOut =  temp.out;
+            clear temp;
             nResample = size(preOut.fwdSurrogate, 1);
             preFwdPval = sum(preOut.fwdSurrogate .* repmat(sign(preOut.fwdCorr'), nResample, 1) >= repmat(abs(preOut.fwdCorr)', nResample, 1)) ./ length(preOut.fwdSurrogate);
             preRvrsPval = sum(preOut.rvrsSurrogate  .* repmat(sign(preOut.rvrsCorr'), nResample, 1) >= repmat(preOut.rvrsCorr', nResample, 1)) ./ length(preOut.rvrsSurrogate);        
@@ -105,9 +104,9 @@ function out = TemplateMatch(gt, varargin);
             IF_PLOT_PRE = true;
         end
         if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
-            load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
-            postOut = out;
-            clear out;
+            temp = load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.post.', mfilename, '.mat']);
+            postOut = temp.out;
+            clear temp;
             nResample = size(postOut.fwdSurrogate, 1);
             postFwdPval = sum(postOut.fwdSurrogate >= repmat(postOut.fwdCorr', size(postOut.fwdSurrogate, 1), 1)) ./ length(postOut.fwdSurrogate);
             postRvrsPval = sum(postOut.rvrsSurrogate >= repmat(postOut.rvrsCorr', size(postOut.rvrsSurrogate, 1), 1)) ./ length(postOut.rvrsSurrogate);

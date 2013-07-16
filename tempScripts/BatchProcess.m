@@ -68,7 +68,7 @@ function out = BatchProcess(funcHandle, varargin)
                         %fclose(fp)
                     catch err
                         fprintf('error');
-                        %    keyboard;
+                        keyboard;
                     end
                 end
                 if IF_SAVE
@@ -135,6 +135,7 @@ function out = BatchProcess(funcHandle, varargin)
                             fout = feval(funcHandle, filebases{i}, funcArgs{:});
                             poolCounter = poolCounter + 1;
                         end
+                        if isempty(fout), continue; end
                         if isempty(eval(['fout.' poolVar])), continue; end
                         nRowsOld = size(poolArray, 1);
                         eval(['poolArray = [poolArray; fout.' poolVar '];']);
