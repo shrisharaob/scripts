@@ -1,0 +1,17 @@
+[dataCDF, xAx] = ecdf(tm.EvntCorrs);
+surCorrs = reshape(tm.Surrogate, 1e3, []);
+[nResample, nEvents] = size(surCorrs);
+
+for ii = 1 : nEvents
+    x = surCorrs(:, ii);
+    [Fi,xi] = ecdf(x);
+    xj = xi(2:end);
+    n = length(xj);
+    Fj = (Fi(1:end-1)+Fi(2:end))/2;
+    xj = [xj(1)-Fj(1)*(xj(2)-xj(1))/((Fj(2)-Fj(1))); xj; ...
+          xj(n)+(1-Fj(n))*((xj(n)-xj(n-1))/(Fj(n)-Fj(n-1)))];
+    Fj = [0; Fj; 1];
+    
+    F = @(y) interp1(xj,Fj,y,'linear','extrap');
+    shuffCDF(:, ii) = F(xAx(2:end));
+end

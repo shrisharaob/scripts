@@ -1,0 +1,1 @@
+[dataCDF, dataX] = ecdf(tm.EvntCorrs);

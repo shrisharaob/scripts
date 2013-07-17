@@ -2,7 +2,8 @@ function out =  CofiringVsDist(gt, varargin)
 % CofiringVsDist(gt, varargin)
 % script to relate pk distances and cofiring likelihood
 
-    [prePost, type, roi, arena ] = DefaultArgs(varargin, {'pre', 'load','CA3', 'bigSquare'});
+    [prePost, IF_PLOT, type, roi, arena] = ...
+        DefaultArgs(varargin, {'pre', 0, 'load','CA3', 'bigSquare'});
     %    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), type = 'compute'; end
     switch type
         case 'compute'
@@ -44,20 +45,27 @@ function out =  CofiringVsDist(gt, varargin)
                           selectedCellpairs = []; pkDistAB = []; pkAB = [];
                       end
                   end
-              end
-              out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:)];
+                  out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:)];
+                  save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
+                  fprintf('\n DONE... \n');
+              else
+                  fprintf('\n no common pairs active both in run and sleep \n ');
+              end              
           end          
-          save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
+
       case 'load'
         if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']);
             load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
-            plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
-            axis square;
-            grid on;
-            title('SWS');
-            xlabel('peak Dist (px)');
-            ylabel('cofiring probablity');
-            reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName]);
+            if IF_PLOT
+                % hist2(out.cfVsPkDist);
+                plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
+                axis square;
+                grid on;
+                title('SWS');
+                xlabel('peak Dist (px)');
+                ylabel('cofiring probablity');
+                reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName, '  roi : ' roi, '  arena : ' arena]);
+            end
         else, out = [];
         end
     end

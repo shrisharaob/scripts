@@ -16,7 +16,6 @@ function out =  CofiringVsDist(gt, varargin)
               pks = gt.MultiPeakPFDistance(roi, arena); close gcf;
               cmnClus = intersect(pks.cluId, cluId);
               cellIds = pks.cluId;
-              
               if length(cmnClus) > 1
                   myPairs = nchoosek(cmnClus, 2);
                   cntrPeaks = pks.cntrPeaks;%(ismember(pks.cluId, cmnClu));
@@ -27,7 +26,7 @@ function out =  CofiringVsDist(gt, varargin)
                       cntrB = cntrVertices{cellIds == myPairs(mCellPair, 2)};
                       nCntrA = length(cntrA);
                       nCntrB = length(cntrB);
-                      if nCntrA >= 1 && nCntrB >= 1, 
+                      if nCntrA == 1 && nCntrB == 1, % select only cells with single pf's 
                           cntrPairs = nchoosek([1 : nCntrA, 1 : nCntrB], 2); % all pairs of selected sub contours
                           cntrPairs(cntrPairs(:, 1) > nCntrA, :) = [];
                           cntrPairs(cntrPairs(:, 2) > nCntrB, :) = [];
@@ -41,14 +40,17 @@ function out =  CofiringVsDist(gt, varargin)
                               selectedCellpairs(validCntrCnt, :) = myPairs(mCellPair, :);
                               pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
                           end
-                      else
-                          selectedCellpairs = []; pkDistAB = []; pkAB = [];
                       end
                   end
-                  out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:)];
-                  save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
-                  fprintf('\n DONE... \n');
+                  if validCntrCnt > 0
+                      out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:)];
+                      save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
+                      fprintf('\n DONE... \n');
+                  else
+                      fprintf('\n no valid cntr pairs \n');
+                  end
               else
+                  out = [];
                   fprintf('\n no common pairs active both in run and sleep \n ');
               end              
           end          
@@ -58,13 +60,15 @@ function out =  CofiringVsDist(gt, varargin)
             load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
             if IF_PLOT
                 % hist2(out.cfVsPkDist);
-                plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
-                axis square;
-                grid on;
-                title('SWS');
-                xlabel('peak Dist (px)');
-                ylabel('cofiring probablity');
-                reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName, '  roi : ' roi, '  arena : ' arena]);
+                if ~isempty(out)
+                    plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
+                    axis square;
+                    grid on;
+                    title('SWS');
+                    xlabel('peak Dist (px)');
+                    ylabel('cofiring probablity');
+                    reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName, '  roi : ' roi, '  arena : ' arena]);
+                end
             end
         else, out = [];
         end
