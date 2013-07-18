@@ -60,8 +60,8 @@ function out = PairReactivation(gt, varargin)
         IS_EVNT_BIN_SLEEP = false(nPairs, nSleepBins);
         jitter = @(jitterWinSiz, x) round((- jitterWinSiz / 2) + round(jitterWinSiz) .* rand(size(x))); 
         %circShuffle = @(shuffle, x) circshift(x(:), [round(shuffle * (-1 + 2  * rand)), 0]);
-        matlabpool local 8
-        parfor kBin = 1 : nSleepBins
+        % matlabpool local 8
+        for kBin = 1 : nSleepBins
             resInBinIdx = sleepRes >= binEdges(kBin, 1) & sleepRes < binEdges(kBin, 2);
             clusInBin = sleepClu(resInBinIdx);
             if length(clusInBin) > 1
@@ -70,10 +70,10 @@ function out = PairReactivation(gt, varargin)
             end
         end
         if nResample
-            parfor kPr = 1 : size(cellPairs) 
+            for kPr = 1 : size(cellPairs) 
                 resA = sleepRes(sleepClu == cellPairs(kPr, 1));
                 resB = sleepRes(sleepClu == cellPairs(kPr, 2));
-                if resA > 1 and resB > 1
+                if length(resA) > 10 & length(resB) > 10
                     for mBin = 1 : nSleepBins
                         for kResample = 1 : nResample
                             jResAB = [jitter(winSize, resA); jitter(winSize, resB)]; % jittered res
@@ -89,7 +89,7 @@ function out = PairReactivation(gt, varargin)
             end
         out.IS_EVNT_BIN_SURROGATE  = IS_EVNT_BIN_SURROGATE;    
         end
-        matlabpool close
+        %        matlabpool close
         %% likelihood of cofiring
         %cofiringProb = (sum(IS_EVNT_BIN_RUN, 2) + sum(IS_EVNT_BIN_SLEEP, 2))  ./ (nRunBins + nSleepBins); 
         out.cellPairs = cellPairs;

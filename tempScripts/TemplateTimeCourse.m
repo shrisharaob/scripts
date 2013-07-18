@@ -46,7 +46,7 @@ function out = TemplateTimeCourse(gt, varargin)
                                 shuffledDiff(:, mResample) = diff(RowWiseShift(empCDFmat, shuffleId), 1, 2);
                             end
                         end
-                        figure(figHdl), hold on;
+                        figure(figHdl),  hold on;
                         linHdl(kChunk) = plot(xd, cdfDiff{kChunk},'o-');
                         set(linHdl(kChunk), 'Color', colours(kChunk, :));
                         grid on;
