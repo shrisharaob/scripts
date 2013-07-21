@@ -44,9 +44,8 @@ function CDFDiff(gt, varargin)
     legend([ dHdl, sHdl, mHdl], {'data', 'shuffle', 'median'}, 'Location', 'NorthWest');
     
     %% pval
-    %    be = linspace(0, 1, 3e3); 
     for kk = 1 : length(xAx) - 1
-        %        be(:, kk) = linspace(min(shuffCDF(kk, :)), max(shuffCDF(kk, :)), 30);
+        be = linspace(min(shuffCDF(kk, :)), max(shuffCDF(kk, :)), 30);
         cc(:, kk) = histc(shuffCDF(kk, :), be);
         pVal(kk) = sum(cc(be <= dataCDF(kk), kk)) ./ sum(cc(:, kk));
     end

@@ -140,11 +140,11 @@ function out = BatchProcess(funcHandle, varargin)
                         nRowsOld = size(poolArray, 1);
                         eval(['poolArray = [poolArray; fout.' poolVar '];']);
                         eval(['nRows = size(fout.', poolVar, ', 1);']);
-                        if strcmp(datasetType, 'kenji'), tArena = SearchKenji(gt.trialName); end
+                        if strcmp(datasetType, 'kenji'), tArena = SearchKenji(trialNames{lTr}); end
                         tArena = tArena{2};
                         poolArrayId = [poolArrayId; {filebases{i}, trialNames{lTr}, tArena ,[1 : nRows] + nRowsOld}];
                     catch err
-                        %keyboard;
+                        keyboard;
                         fprintf('error');
                     end
                 end
@@ -157,7 +157,7 @@ function out = BatchProcess(funcHandle, varargin)
         out.poolArray = poolArray;
     end
     if IF_SAVE
-        save(['~/data/analysis/', datasetType, func2str(funcHandle), GenFiletag(arena, roi) 'mat'], 'fout');
+        save(['~/data/analysis/', datasetType, '.' func2str(funcHandle), '.', poolVar , GenFiletag(arena, roi) 'mat'], 'fout');
     end
 %     if IF_SAVE
 %         save([gt.paths.analysis, func2str(funcHandle), GenFiletag(roi, arena),   'mat'], '');
@@ -165,4 +165,3 @@ function out = BatchProcess(funcHandle, varargin)
 
     fclose('all');
 end
-

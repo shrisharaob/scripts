@@ -3,7 +3,7 @@ function rr = RateRemapping(varargin)
     % list = importdata('~/data/kenji/list');
     load('~/data/kenji/Beh_time_ind.mat');
     elPos = importdata(['~/data/', 'kenji', '/ElePosition.txt']);
-    [ roi, IF_PLOT] = DefaultArgs(varargin, {{'CA1'}, 1});
+    [roi, IF_PLOT] = DefaultArgs(varargin, {{'CA1'}, 1});
     rowId = find(~cellfun(@isempty, regexp(elPos, roi)));
     list = cell(length(rowId));
     for kk = 1 : length(rowId)

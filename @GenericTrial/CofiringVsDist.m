@@ -2,17 +2,16 @@ function out =  CofiringVsDist(gt, varargin)
 % CofiringVsDist(gt, varargin)
 % script to relate pk distances and cofiring likelihood
 
-    [prePost, IF_PLOT, type, roi, arena] = ...
-        DefaultArgs(varargin, {'pre', 0, 'load','CA3', 'bigSquare'});
+    [prePost, IF_PLOT, type, roi, arena, nResample] = ...
+        DefaultArgs(varargin, {'pre', 0, 'load','CA3', 'bigSquare', 500});
     %    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), type = 'compute'; end
     switch type
         case 'compute'
           out = [];
           disp('computing');
-          pairCofiring = PairReactivation(gt, prePost);
+          pairCofiring = PairReactivation(gt, prePost, 'compute', nResample);
           if ~isempty(pairCofiring)
               cluId = unique(pairCofiring.cellPairs(:));
-
               pks = gt.MultiPeakPFDistance(roi, arena); close gcf;
               cmnClus = intersect(pks.cluId, cluId);
               cellIds = pks.cluId;
@@ -35,7 +34,7 @@ function out =  CofiringVsDist(gt, varargin)
                           pkB = cntrPeaks{cellIds == myPairs(mCellPair, 2)};
                           for kCntrPr = 1 : size(cntrPairs, 1)
                               validCntrCnt = validCntrCnt + 1;
-                              probCofiringSleep(validCntrCnt) = pairCofiring.sleepCfProb(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
+                              probCofiringSleep(validCntrCnt) = pairCofiring.cofiringAbvChance(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
                               pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                               selectedCellpairs(validCntrCnt, :) = myPairs(mCellPair, :);
                               pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
@@ -63,6 +62,7 @@ function out =  CofiringVsDist(gt, varargin)
                 if ~isempty(out)
                     plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
                     axis square;
+                    ylim([0, 1]);
                     grid on;
                     title('SWS');
                     xlabel('peak Dist (px)');

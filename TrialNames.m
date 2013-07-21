@@ -8,7 +8,7 @@ function trialNames = TrialNames(arg, varargin)
     trialNames = [];
     if isa(arg, 'GenericTrial')
         filebase = arg.filebase;
-        datasetType = gt.datasetType;
+        datasetType = arg.datasetType;
     else
         filebase = arg;
     end

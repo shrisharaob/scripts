@@ -95,8 +95,11 @@ function out = TemplateMatch(gt, varargin);
             prePVal(prePVal == 0) = nan;
             IS_SIGNF_PRE = prePVal < alpha;
             percentPreplay = 100 * nansum(IS_SIGNF_PRE) / length(IS_SIGNF_PRE);
+
             out.preNCells = [cellfun(@length, preOut.nCellsFwd'); cellfun(@length, preOut.nCellsRvrs')];
             preIdx = out.preNCells > minCellsInSeq;
+            preSeqOrder = [preOut.nCellsFwd'; preOut.nCellsRvrs']; % se
+            out.preSeqOrder = preSeqOrder(preIdx);
             out.preEvntCorrs = [preOut.fwdCorr(:); preOut.rvrsCorr(:)]; out.preEvntCorrs = out.preEvntCorrs(preIdx);
             out.preSignfEvntCorr = out.preEvntCorrs(IS_SIGNF_PRE(preIdx)); 
             out.preSurrogate = [preOut.fwdSurrogate, preOut.rvrsSurrogate]; out.preSurrogate = Mat2Vec( out.preSurrogate(:, preIdx));
@@ -116,6 +119,8 @@ function out = TemplateMatch(gt, varargin);
             percentPost = 100 * nansum(IS_SIGNF_POST) / length(IS_SIGNF_POST);
             out.postNCells = [cellfun(@length, postOut.nCellsFwd'); cellfun(@length, postOut.nCellsRvrs')];
             postIdx = out.postNCells > minCellsInSeq;
+            postSeqOrder = [postOut.nCellsFwd'; postOut.nCellsRvrs']; % se
+            out.postSeqOrder = postSeqOrder(postIdx);
             out.evnts = [nansum(IS_SIGNF_PRE(preIdx)), length(IS_SIGNF_PRE(preIdx)), nansum(Mat2Vec(IS_SIGNF_POST(postIdx))), length(IS_SIGNF_POST(postIdx))];
             out.postEvntCorrs = [postOut.fwdCorr(:); postOut.rvrsCorr(:)]; out.postEvntCorrs = out.postEvntCorrs(postIdx);
             out.postSignfEvntCorr = out.postEvntCorrs(IS_SIGNF_POST(postIdx));

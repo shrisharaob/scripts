@@ -2,8 +2,9 @@ function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
 % smoothRateMap = SmoothRM(gt,  varargin)
 % adaptive smoothing - Skagg's 1996, Hippocampus
 
-    [IF_COMPUTE, cluIdx, alpha, nBins, state] = DefaultArgs(varargin, {0, [], 1e1, 50, 'RUN'});
-    if ~IF_COMPUTE & FileExists([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat'])
+    [IF_COMPUTE, cluIdx, alpha, nBins, state, smoothFactor] = ...
+        DefaultArgs(varargin, {0, [], 1e1, 50, 'RUN', 0.03});
+    if ~IF_COMPUTE & FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename,'.mat'])
         load([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat']);
         return;
     end
@@ -41,7 +42,6 @@ function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
         trialStartTime_pos = 0;
         markerNo = 1;
       case  'kenji'
-        keyboard;
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
         statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
         posStatePeriods = round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
@@ -60,8 +60,10 @@ function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
     for lClu = 1 : nClu
          [~, d1, d2, d3, spkCnt(:, :, lClu), occCount(:, :, lClu)] = GenericPF.ComputeRateMap(gt, res(clu == cluIdx(lClu)), pos, [], .03, [], 0); 
     end
-    for kClu = 1 : nClu
+    matlabpool local 4
+    parfor kClu = 1 : nClu
         if ~isempty(gt.pfObject.rateMap{cluIdx(kClu)})
+            smoothMap = nan(length(gt.pfObject.xBin), length(gt.pfObject.yBin));
             for x = 1 : length(gt.pfObject.xBin)
                 for y = 1 : length(gt.pfObject.yBin)
                     radius = 1;
@@ -81,10 +83,10 @@ function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
                     smoothMap(x, y) = gt.trackingSampleRate * xySpkCnt / (nOccSamples * radius);                
                 end
             end                   
-            keyboard;
-            smoothedRateMap(:, :, kClu) = smoothMap;
+            smoothRateMap(:, :, kClu) = SmoothSurface(smoothMap, smoothFactor);
         end
     end
-    save([gt.paths.analysis, gt.filebase, '.', gt.tralName, '.', mfilename,'.mat'], 'smoothRateMap');
+    matlabpool close
+    save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename,'.mat'], 'smoothRateMap');
 end
 
