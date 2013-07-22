@@ -87,6 +87,8 @@ for kBase = 1 : length(filebase)
 end
 
 scatter(pooledDp(:, 1), pooledDp(:, 2), 'b', marker);
+xlim([0, 1]);
+ylim([0, 1]);
 hold on;
 axis tight;
 scatter(pooledDp(:, 1), pooledDp(:, 3), 'r', marker);
@@ -96,3 +98,4 @@ legend('1 - 2', '1 - 3', '2 - 3','Location', 'NorthWest');
 set(gca, 'FontSize', 14);
 keyboard;
 end
+

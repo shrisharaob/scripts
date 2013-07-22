@@ -4,15 +4,20 @@ function out = BatchProcess(funcHandle, varargin)
 % '', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0
 % evaluate func for all filebases
 
-    [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE, options] = ...
-        DefaultArgs(varargin, {'', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0, []});
+    [datasetType, roi, arena, IF_LOAD_GT, funcArgs, type, IF_SAVE, options, fbList] = ...
+        DefaultArgs(varargin, {'', {'CA3'}, {'bigSquare'}, 0, {}, 'passFb', 0, [], []});
 
     switch datasetType
       case 'kenji'
-        searchStruct.roi = roi;
-        searchStruct.arena = arena;
-        matches = SearchKenji(searchStruct);
-        filebases = unique(matches(:, 1));
+        if isempty(fbList)
+            searchStruct.roi = roi;
+            searchStruct.arena = arena;
+            matches = SearchKenji(searchStruct);
+            filebases = unique(matches(:, 1));
+        else
+            filebases = fbList(:);
+            
+        end
         %   matches = matches(strcmp(matches(:, 1), filebase), :);
         % trialNames = matches(:, 2);
 
@@ -36,7 +41,11 @@ function out = BatchProcess(funcHandle, varargin)
     for i = 1 : length(filebases);
         switch datasetType
           case 'kenji'
-            trialNames = matches(strcmp(matches(:,1), filebases(i)), 2);
+            if isempty(fbList)
+                trialNames = matches(strcmp(matches(:,1), filebases(i)), 2);
+            else
+                trialNames = TrialNames(filebases{i}, datasetType, roi, arena);
+            end
           case 'MTA'
             trialNames = MTATrialNames(filebases{i});
         end
@@ -60,7 +69,7 @@ function out = BatchProcess(funcHandle, varargin)
                         else
                             feval(funcHandle, filebases{i}, funcArgs{:});
                         end
-                        %if lTr == 1
+                        % if lTr == 1
                         %    fp = fopen(['~/data/analysis/kenji/', func2str(funcHandle)], 'a');
                         %   fprintf(fp, ['\n', repmat('*',1 ,60), '\n' gt.filebase ]);
                         %end
@@ -157,11 +166,10 @@ function out = BatchProcess(funcHandle, varargin)
         out.poolArray = poolArray;
     end
     if IF_SAVE
-        save(['~/data/analysis/', datasetType, '.' func2str(funcHandle), '.', poolVar , GenFiletag(arena, roi) 'mat'], 'fout');
+        save(['~/data/analysis/', datasetType, '.', func2str(funcHandle), '.', poolVar , GenFiletag(arena, roi) 'mat'], 'fout');
     end
 %     if IF_SAVE
 %         save([gt.paths.analysis, func2str(funcHandle), GenFiletag(roi, arena),   'mat'], '');
 %     end
-
     fclose('all');
 end
