@@ -1,5 +1,4 @@
-
-    function ccgSegsA2B2A = CCGofSegments(trial, varargin)
+function ccgSegsA2B2A = CCGofSegments(trial, varargin)
     % ccgSegs = CcgOfSegments(trial, varargin)
     % epochs = cell (1 x nPairs) 
     % epochs : dir epochs returned by ProjectAonB

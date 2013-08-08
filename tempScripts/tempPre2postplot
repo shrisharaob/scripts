@@ -1,0 +1,9 @@
+bar([1, 1.1], sum(y), 'barwidth', .3, 'FaceColor', 'k')
+ hold on
+ set(gca, 'xticklabel', {'Pre', 'Post'})
+ set(gca, 'xtick', [1, 1.1])
+ hold on
+ line([1, 1.1], [2.25, 2.25], 'color', 'k')
+ line([1, 1], [2.25 2.20], 'color', 'k')
+ line([1.1, 1.1], [2.25 2.20], 'color', 'k')
+ plot(1.05, 2.33, '*k')

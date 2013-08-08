@@ -25,7 +25,8 @@
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter] = DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 5, [], 84});
+    [cellCluIdx, IS_COUNTOUR, IF_WAITFORBTNPRESS, nContours, contourColor, mazeDiameter] = ...
+        DefaultArgs(varargin, {pfObject.acceptedUnits, 0, 0, 1, [], 84});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
     if ~IS_COUNTOUR
@@ -60,8 +61,8 @@
                 catch err
                 end
                 subplot(1,2,2)
-                rateMap = pfObject.rateMap{linIdx};
-                imagesc(pfObject.xBin,pfObject.yBin,rateMap);
+                rateMap = pfObject.rateMap{linIdx(mCell)};
+                imagesc(pfObject.xBin,pfObject.yBin,rateMap); colormap('Hot');
                 text(pfObject.xBin(1) + 30 ,pfObject.yBin(end) - 30, num2str(max(rateMap(:))),'color','w','FontWeight', 'bold');
                 set(gca,'YDir','normal');
                 hold on;
@@ -77,7 +78,7 @@
         end
     else
         %         if(iscell(pfObject))
-        rateThreshPar = 0.707;
+        rateThreshPar = 0.2;
         colors = GenColormap(nCells);
         IS_AUTO_COLOR =0;
         if isempty(contourColor), IS_AUTO_COLOR = 1; end
@@ -91,9 +92,9 @@
                 smoothedRateMap = pfObject.smoothRateMap(:,:,idx2);
                 maxRate = max(smoothedRateMap(:));
                 if nContours == 1
-                    contour(pfObject.xbin,pfObject.ybin, smoothedRateMap,[maxRate, maxRate].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[maxRate, maxRate].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
                 else
-                    contour(pfObject.xbin,pfObject.ybin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(.707 * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
                 end
                 hold on;
                 if strcmp(pfObject.mazeName, 'cof')

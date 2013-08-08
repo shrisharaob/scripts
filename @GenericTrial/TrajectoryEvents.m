@@ -1,7 +1,7 @@
 function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, varargin)
 % trajEvntPeriods = TrajectoryEvents(gt, varargin) @sample fs
 
-    fprintf('\n traj evnts \n')
+    fprintf('\n traj evnts ...')
     trajEvntPeriods = [];
     pars = [];
     if isempty(gt.pfObject), gt.LoadPF; end
@@ -13,6 +13,7 @@ function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, v
     if ~FileExists([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']), IF_COMPUTE = 1; end
     if ~IF_COMPUTE
         load([gt.paths.analysis, gt.filebase, '.', state, '.' gt.trialName, '.', preOrPost, '.', mfilename, '.mat']);
+        fprintf('done ! \n');
         return;
     end
     sts  = gt.SleepPeriods(gt.sampleRate);

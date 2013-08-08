@@ -129,11 +129,16 @@ classdef GenericTrial < handle
                             if isempty(trialName)
                                 mtaTrial = MTATrial(fileBase, [], 'all');
                                 trialNames = mtaTrial.list_trialNames;
-                                disp(trialNames);
-                                trialName = input('trial name :' ,'s');
-                                genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, [],trialName));
+                                if length(trialNames) == 1
+                                    genericTrial.Convert2Generic(mtaTrial);
+                                else
+                                    disp(trialNames);
+                                    trialName = input('trial name :' ,'s');
+                                    tempMtr = MTATrial(fileBase, {},trialName);
+                                    genericTrial = genericTrial.Convert2Generic(tempMtr);
+                                end
                             else
-                                genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, [],trialName));
+                                genericTrial = genericTrial.Convert2Generic(MTATrial(fileBase, {},trialName));
                             end
                         elseif DirExists('~/data/kenji/', fileBase)
                             genericTrial.datasetType = 'kenji';
@@ -336,7 +341,11 @@ classdef GenericTrial < handle
                     genericTrial.states{i}.statePeriods = anyTrialObj.Bhv.States{i}.state;
                 end
             end
-            load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
+            if FileExists([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat'])
+                load([genericTrial.paths.analysis, genericTrial.filebase, '.SelectCells.mat']);
+            else
+                SelectCells(genericTrial, [], [], [], 'compute');
+            end
             genericTrial.pyrCluIdx = linearPyrCluIdx;
         case 'GenericTrial'
             genericTrial = anyTrialObj;

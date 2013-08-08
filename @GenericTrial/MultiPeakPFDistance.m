@@ -1,11 +1,11 @@
 function out = MultiPeakPFDistance(gt, roi, arena, varargin)
 % out = MultiPeakPFDistance(gpf, occupancy, varargin)
 % [cellPairs, IF_SMRM, IF_COMPUTE_CCG, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
-
+    
     if isempty(gt.pfObject), gt.LoadPF; end
     gpf = gt.pfObject;
-    %    defClu = gpf.acceptedUnits;
-    defClu = gt.LoadCommonClus(roi, arena);
+    %    defClu = intersect(gt.LoadCommonClus(roi, arena), gpf.sparsity < 0.4);
+    defClu = gpf.acceptedUnits(gpf.sparsity < 0.35);
     out.pkDist = [];
     if isempty(defClu), return; end
     if length(defClu) < 2, return; end

@@ -22,6 +22,7 @@ function [decodedPos, err] = DecodePos(gt, varargin)
     switch type
       case 'compute'
         if isempty(gt.res), gt.LoadCR; end
+        if isempty(gt.pfObject), gt.LoadPF; end
         fprintf('\n computing instantaneous firing rate... ')
         [sc, winEdges, xyInWin] = GetSpikeCounts(gt, binSize,  state, cluId, binOverlap);
         switch dim

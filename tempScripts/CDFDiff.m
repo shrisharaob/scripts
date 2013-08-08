@@ -1,7 +1,7 @@
-function CDFDiff(gt, varargin)
-
+function out = CDFDiff(gt, varargin)
+% 
     [prePost, minCellsInSeq] = DefaultArgs(varargin, {'pre', 5});
-
+    out = [];
     temp = gt.TemplateMatch(0, minCellsInSeq, prePost);
     switch prePost
       case 'pre'
@@ -11,8 +11,9 @@ function CDFDiff(gt, varargin)
         tm.EvntCorrs = temp.postEvntCorrs;
         tm.Surrogate = temp.postSurrogate;
     end
-    [dataCDF, xAx] = ecdf(tm.EvntCorrs);
-    surCorrs = reshape(tm.Surrogate, 1e3, []);
+if length(tm.EvntCorrs) < 10, return; end
+    [dataCDF, xAx] = ecdf(-abs(tm.EvntCorrs));
+    surCorrs = reshape(-abs(tm.Surrogate), 1e3, []);
     [nResample, nEvents] = size(surCorrs);
     shuffleCDF = nan(length(unique(xAx)), nResample);
     for ii = 1 : nResample
@@ -32,16 +33,17 @@ function CDFDiff(gt, varargin)
         shuffCDF(:, ii) = sy;
     end
 
+
     %% 
-    figure;
-    for kk = 1 : nResample
-        %        sHdl = stairs(xAx(2:end), shuffCDF(:, kk), 'Color', [.85, .85, .85]);
-        sHdl = plot(xAx(2:end), shuffCDF(:, kk), '.','Color', [.85, .85, .85]);
-        hold on
-    end
-    dHdl =  stairs(xAx(2:end), dataCDF(2:end), 'r');
-    mHdl = stairs(xAx(2:end), median(shuffCDF, 2), 'c');
-    legend([ dHdl, sHdl, mHdl], {'data', 'shuffle', 'median'}, 'Location', 'NorthWest');
+%     figure;
+%     for kk = 1 : nResample
+%         %        sHdl = stairs(xAx(2:end), shuffCDF(:, kk), 'Color', [.85, .85, .85]);
+%         sHdl = plot(xAx(2:end), shuffCDF(:, kk), '.','Color', [.85, .85, .85]);
+%         hold on
+%     end
+%     dHdl =  stairs(xAx(2:end), dataCDF(2:end), 'r');
+%     mHdl = stairs(xAx(2:end), median(shuffCDF, 2), 'c');
+%     legend([ dHdl, sHdl, mHdl], {'data', 'shuffle', 'median'}, 'Location', 'NorthWest');
     
     %% pval
     for kk = 1 : length(xAx) - 1
@@ -50,14 +52,17 @@ function CDFDiff(gt, varargin)
         pVal(kk) = sum(cc(be <= dataCDF(kk), kk)) ./ sum(cc(:, kk));
     end
     pVal(pVal == 0) = nan;
-    figure;
-    h1 = plot(xAx(2:end), pVal, '*-')
-    xlabel('Correlation Value');
-    ylabel('p-vallue');
-    grid on;
-    linHdl1 = line(xlim, [.025, .025], 'Color', 'g');
-    linHdl2 = line(xlim, [.05, .05], 'Color', 'r');
-    legend([linHdl2, linHdl1], {'0.05', '0.025'}, 'location', 'NorthWest');
+    out.pVal = [xAx(2:end), pVal(:)];
+    out.pValVec = pVal(:)';
+    h1 = plot(xAx(2:end), pVal, '*-', 'color', [.8, .8, .8]);
+    hold on;
+    return;
+%     xlabel('Correlation Value');
+%     ylabel('p-vallue');
+%     grid on;
+%     linHdl1 = line(xlim, [.025, .025], 'Color', 'g');
+%     linHdl2 = line(xlim, [.05, .05], 'Color', 'r');
+%     legend([linHdl2, linHdl1], {'0.05', '0.025'}, 'location', 'NorthWest');
 
     %% 
     figure;

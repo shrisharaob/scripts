@@ -2,7 +2,7 @@ function out = Remapping(filebase, datasetType, varargin)
 % Remapping(filebase, arena, roi, cluIdx, IF_PLOT)
 
     [roi, arena, cluIdx, IF_PLOT, IF_REPORTFIG, sparsityThresh] = ...
-        DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, [], 0, 0, 0.4});
+        DefaultArgs(varargin, {{'CA3'}, {'bigSquare'}, [], 0, 0, 0.1});
     out = {};
 %   kenjiSearch.roi = roi;
 %   kenjiSearch.arena = arena;
@@ -18,7 +18,8 @@ function out = Remapping(filebase, datasetType, varargin)
         gt.LoadPF;
         cluIdx = gt.pfObject.acceptedUnits(gt.pfObject.sparsity < sparsityThresh);
         if kTr == 1 
-            load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
+            %load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
+            commonClus = FindCommonClu(gt.filebase, [], roi, arena, sparsityThresh);
             commonClus = intersect(commonClus, cluIdx);
         end
         if length(commonClus) < 2, return; end

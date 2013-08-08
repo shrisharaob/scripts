@@ -2,15 +2,16 @@ function pkDistAB = PoolPeakDist(varargin)
 % pkDistAB = PoolPeakDist(varargin)
 % [IF_COMPUTE, datasetType, roi, inArenaPair]
   [IF_COMPUTE, IF_PLOT, datasetType, roi, inArenaPair] = ...
-        DefaultArgs(varargin, {0, 0,'kenji', 'CA3', {'bigSquare'}});
+        DefaultArgs(varargin, {0, 0,'kenji', 'CA3', {'bigSquare', 'linear'}});
 
     if IF_COMPUTE
         options.poolVar = 'pkDist';
-        if FileExists(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, arena), 'mat'])
-            temp = load(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, arena), 'mat'], 'pkDist')
-            pkDist = temp.pkDist;
-        else
-            pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', roi, inArenaPair, 1, {roi, inArenaPair, [], 1, 0}, 'pool', 0, options);
+        if FileExists(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, inArenaPair), 'mat'])
+           temp = load(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, inArenaPair), 'mat'], 'pkDist')
+           pkDist = temp.pkDist;
+         else
+             pkDist = BatchProcess(@MultiPeakPFDistance, 'kenji', roi, inArenaPair, 1, {roi, inArenaPair, [], 1, 0}, 'pool', 0, options);
+             save(['~/data/analysis/kenji/PooledMultiPkDistance', GenFiletag(roi, inArenaPair), 'mat'], 'pkDist');;
         end
         fb = pkDist.poolArrayId(:, 1);
         arenas = pkDist.poolArrayId(:, 3);
@@ -45,14 +46,13 @@ function pkDistAB = PoolPeakDist(varargin)
         load(['~/data/analysis/', datasetType, '/', mfilename, GenFiletag(roi, inArenaPair), 'mat']);
         if IF_PLOT
             figure;
-            plot(pkDistAB(:, 1), pkDistAB(:, 2), '*');
+            plot(pkDistAB(:, 1), pkDistAB(:, 2), '.k');
             hold on;
             line([min(min(xlim, ylim)), max(max(xlim, ylim))], [min(min(xlim, ylim)), max(max(xlim, ylim))], 'color', 'k');
             axis square;
-            xlabel(['pk distance in  ' inArenaPair{1}, ' (pixels)']);
-            ylabel(['pk distance in  ' inArenaPair{2}, ' (pixels)']);
+            xlabel(['Distance of Peaks in  ' inArenaPair{1}, ' (pixels)']);
+            ylabel(['Distance of Peaks in  ' inArenaPair{2}, ' (pixels)']);
             title(roi);
-            grid on;
         end
     end
 end

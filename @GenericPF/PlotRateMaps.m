@@ -14,7 +14,8 @@ function PlotRateMaps(pfObject, varargin)
        elClu = nan(length(linearCluIdx), 2);
     end
 
-    [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
+    [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx] = ...
+        DefaultArgs(varargin, { 0, 0, 0, 1, [], 84, pfObject.acceptedUnits});
     mazeDiameter = mazeDiameter * 10;
     nCells = length(cellCluIdx);
     if ~IF_CONTOUR
@@ -40,12 +41,13 @@ function PlotRateMaps(pfObject, varargin)
                         yAxis = pfObject.yBin;
                         IN_CM = false; 
                     end
-                    imagescnan({xAxis, yAxis, rateMap});
+                    %imagescnan({xAxis, yAxis, rateMap});colormap('hot')
+                    imagesc(xAxis, yAxis, rateMap); colormap('hot'); axis square;
                     xAxis = xlim; % recenter to 0 
                     yAxis = ylim; 
-                    colorbar;
+                    %                    colorbar;
                     set(gca,'YDir','normal');
-                    text(xAxis(end) - xAxis(end) * 2 / 10 ,yAxis(end) - yAxis(end) * 2 / 10, num2str(max(rateMap(:))),'color','k','FontWeight', 'bold', 'fontsize', 14);
+                    text(xAxis(end) - xAxis(end) * 3 / 10 ,yAxis(end) - yAxis(end) * 2 / 10, num2str(max(rateMap(:)), '%.1f'),'color','w','FontWeight', 'bold', 'fontsize', 8);
                     hold on;
                     if IN_CM
                         xlabel('cm');
@@ -55,8 +57,8 @@ function PlotRateMaps(pfObject, varargin)
                         ylabel('pixels');
                     end
                     if strcmp(pfObject.maze.name, 'cof')
-                        centerX = range(xlim) / 2;
-                        centerY = range(ylim) / 2;
+                        centerX = 0; %range(xlim) / 2;
+                        centerY = 0; %range(ylim) / 2;
                         DrawCircle(centerX, centerY, mazeDiameter / 2,'w');
                     end
                     title(['clu #', num2str(cellCluIdx(mCell))]);
@@ -82,19 +84,19 @@ function PlotRateMaps(pfObject, varargin)
                 maxRate = max(smoothedRateMap(:));
                 rateThreshPar = 3 * std(smoothedRateMap(:));
                 if nContours == 1
-                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[1, 1].*rateThreshPar, 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,[1, 1].* rateThreshPar, 'Color', contourColor);
                     hold on;
                 else
-                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(rateThreshPar  * maxRate, maxRate, nContours), 'Color', contourColor, 'LineWidth', 2);
+                    contour(pfObject.xBin,pfObject.yBin, smoothedRateMap,linspace(rateThreshPar  * maxRate, maxRate, nContours), 'Color', contourColor);
                 end
                 if IF_CONTOUR == 2, hold on; end
                 if strcmp(pfObject.maze.name, 'cof')
                     DrawCircle(0,0, mazeDiameter / 2,'k');
                 end
                 if strcmp(pfObject.datasetType, 'MTA')
-                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k'); % x an y are reversed in Justins code
+                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k', 'MarkerSize', 2.5); % x an y are reversed in Justins code
                 else
-                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k');
+                    plot(pfObject.pkLoc(idx2, 1), pfObject.pkLoc(idx2, 2), '*k', 'MarkerSize', 2.5);
                 end
                 grid on;
                 if IF_WAITFORBTNPRESS, waitforbuttonpress; clf;end

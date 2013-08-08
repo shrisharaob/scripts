@@ -1,10 +1,10 @@
-function FindCommonClu(varargin)
+function commonClus = FindCommonClu(varargin)
 % this script returns clusters which are active acros trials in all filebases
 % [filebases, datasetType,roi, arena, sparsityThresh]
 % filebases - cell array containing list of fbs    
      
-    [filebases, datasetType,roi, arena, sparsityThresh] = ...
-        DefaultArgs(varargin, {{}, 'kenji', {'CA3'}, {'bigSquare'}, 0.35});
+    [filebases, datasetType,roi, arena, sparsityThresh, OVERWITE] = ...
+        DefaultArgs(varargin, {{}, 'kenji', {'CA3'}, {'bigSquare'}, 0.3, 0});
   
 
     switch datasetType
@@ -43,8 +43,9 @@ function FindCommonClu(varargin)
                     fprintf('error  !!!!! \n');
                 end
             end
-            save([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat'], 'commonClus');
-            commonClus
+            if OVERWITE
+                save([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat'], 'commonClus');
+            end
         end
     end
 end

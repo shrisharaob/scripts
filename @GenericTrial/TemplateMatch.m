@@ -9,7 +9,7 @@ function out = TemplateMatch(gt, varargin);
       case 'compute'
         sqTemplate = SeqTemplate(gt); % returns template struct
         clus2Select = union(sqTemplate.fwdSortedClu, sqTemplate.rvrsSortedClu);
-        [evntPeriods, params] = gt.TrajectoryEvents(0, preOrPost, [], clus2Select, [], [], overlap);
+        [evntPeriods, params] = gt.TrajectoryEvents(1, preOrPost, [], clus2Select, [], [], overlap);
         if size(evntPeriods, 1) > 0
             [res, clu] = gt.LoadStateRes('SWS');
             fwdPair = [];

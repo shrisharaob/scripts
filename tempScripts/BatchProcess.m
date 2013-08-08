@@ -76,8 +76,11 @@ function out = BatchProcess(funcHandle, varargin)
                         %fprintf(fp, ['\n ::: '  gt.trialName]);
                         %fclose(fp)
                     catch err
-                        fprintf('error');
-                        keyboard;
+                        fprintf(['!!  ' err.message '\n']);
+                        try 
+                            matlabpool close;
+                        catch
+                        end
                     end
                 end
                 if IF_SAVE
@@ -118,8 +121,19 @@ function out = BatchProcess(funcHandle, varargin)
             fprintf(['\n ********* filebase: %s ************** \n'], filebases{i});
             try
                 fout =feval(funcHandle, filebases{i}, funcArgs{:});
+                if ~isempty(options)
+                    poolCounter = poolCounter + 1;
+                    if isempty(fout), continue; end
+                    if isempty(eval(['fout.' poolVar])), continue; end
+                    nRowsOld = size(poolArray, 1);
+                    eval(['poolArray = [poolArray; fout.' poolVar '];']);
+                    eval(['nRows = size(fout.', poolVar, ', 1);']);
+                    %if strcmp(datasetType, 'kenji'), tArena = SearchKenji(trialNames{lTr}); end
+                    %tArena = tArena{2};
+                    %RpoolArrayId = [poolArrayId; {filebases{i}, trialNames{lTr}, tArena ,[1 : nRows] + nRowsOld}];
+                end
             catch err
-                
+                keyboard;
                 fprintf('error .......  !!!!!!');
             end
     
@@ -153,23 +167,24 @@ function out = BatchProcess(funcHandle, varargin)
                         tArena = tArena{2};
                         poolArrayId = [poolArrayId; {filebases{i}, trialNames{lTr}, tArena ,[1 : nRows] + nRowsOld}];
                     catch err
-                        keyboard;
-                        fprintf('error');
+                        fprintf([err.message, '\n']);
+                        try
+                            matlabpool close
+                        catch
+                            fprintf([err.message, '\n']); 
+                        end
                     end
                 end
             end
         end
         
     end
-    if strcmp(type, 'pool')
+    if strcmp(type, 'pool') | ~isempty(options)
         out.poolArrayId = poolArrayId;
         out.poolArray = poolArray;
     end
     if IF_SAVE
         save(['~/data/analysis/', datasetType, '.', func2str(funcHandle), '.', poolVar , GenFiletag(arena, roi) 'mat'], 'fout');
     end
-%     if IF_SAVE
-%         save([gt.paths.analysis, func2str(funcHandle), GenFiletag(roi, arena),   'mat'], '');
-%     end
     fclose('all');
 end

@@ -7,7 +7,6 @@ function PairWiseDist(varargin)
         %loads outCntrs
             load(['~/data/analysis/', datasetType, '/Contours', GenFiletag(roi, arena), 'mat']);
     end
-keyboard;
     for mArena = 1 : length(arena)
         inCntrs = cntrs{mArena}; 
         [tcntrs, selectedClus, allFbs, processedFbs] = StableCntrs(inCntrs(:,1), roi, arena{mArena});
@@ -18,7 +17,6 @@ keyboard;
         outCntrs{mArena} = tcntrs;
         clear tcntrs;
     end
-keyboard;
 %    for mArena = 1 : length(arena)
       for kBase = 1 : length(allFbs)
             nArenas = length(arena);
@@ -42,7 +40,6 @@ keyboard;
             end
       end
         %   end
-keyboard;
     for mArena = 1 : length(arena)
         switch datasetType
           case 'kenji'

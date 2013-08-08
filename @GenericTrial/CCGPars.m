@@ -3,12 +3,18 @@ function out = CCGPars(gt, varargin)
 % compute ccg for specified cell pairs in  the trial
 
     [type, cluId, roi, arena, binSize, maxTimeLag, ccgSmthFactor, jitterWinSiz, nResamples, alpha] = ...
-        DefaultArgs(varargin, {'display', [], 'CA3', 'bigSquare', 10e-3, 2000e-3, 0.03, 10, 1e2, 5e-2});
+        DefaultArgs(varargin, {'display', [], 'CA3', 'bigSquare', 10e-3, 2000e-3, 0.03, 10, 0, 5e-2});
 
+    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']), type = 'compute'; end
     switch type
       case 'compute'
-        if isempty(cluId), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
-        else commonClus = cluId; end
+        switch gt.datasetType
+            case 'kenji'
+              if isempty(cluId), load([gt.paths.analysis, gt.filebase, GenFiletag(roi, arena), 'commonClus.mat']);
+              else commonClus = cluId; end
+              case 'MTA'
+                commonClus = cluId;
+        end
         if isempty(gt.clu), gt = gt.LoadCR; end
         [res, clu] = gt.LoadStateRes('RUN', 1);
         if length(commonClus) > 1
@@ -43,8 +49,7 @@ function out = CCGPars(gt, varargin)
             pRes1 = pRes(pClu == cellPairs(lPair, 1));
             pRes2 = pRes(pClu == cellPairs(lPair, 2));
             jitter = @(jitterWinSiz, x) round((- jitterWinSiz / 2) + round(jitterWinSiz) .* rand(size(x))); 
-            
-            if IF_RESAMPLE
+            if nResamples
                 for kResample  = 1 : nResamples % use 1s scram
                     jitteredRes1 = pRes1 + jitter(jitterWinSiz, pRes1);
                     jitteredRes2 = pRes2 + jitter(jitterWinSiz, pRes2);
@@ -60,26 +65,35 @@ function out = CCGPars(gt, varargin)
         end
         % out.IS_SIGNF = out.pVal < alpha ./ (2 * halfBins + 1);
         out.ccgTimeAx = ccgTimeAx;
+        out.cellPairs = cellPairs;
         out.smthCCG = ccgSmooth;
         out.smthTAx  = tt;
         out.period = T;
         out.offset = offset;
         out.firstPeak = firstPeak;
-        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
+        save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'out');
+      
       case 'display'
-        load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
+
+   load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat'], 'out');
+keyboard;     
+
         figure;
-        for kCellPair = 1 : length(out.ccg);
+        cellPairs = nchoosek(gt.pfObject.acceptedUnits(gt.pfObject.sparsity < .1), 2);
+        idx = find(ismember(out.cellPairs, cellPairs, 'rows'));
+        for kCellPair = 1 : length(idx);
             subplot(2, 2, 1);
-            bar(out.ccgTimeAx, out.ccg{kCellPair}(:, 1, 2), 'FaceColor', 'k');
+            bar(out.ccgTimeAx, out.ccg{idx(kCellPair)}(:, 1, 2), 'FaceColor', 'k'); axis tight;
             hold on;
-            plot(tt, out.ccgSmooth(:, kCellPair), 'r');
+            plot(out.smthTAx, out.smthCCG(:, idx(kCellPair)), 'r'); axis tight;
             subplot(2, 2, 2);
-            bar(out.ccgTimeAx, out.ccg{kCellPair}(:, 1, 1), 'FaceColor', 'k');
+            bar(out.ccgTimeAx, out.ccg{idx(kCellPair)}(:, 1, 1), 'FaceColor', 'k'); axis tight;
             subplot(2, 2, 3);
-            bar(out.ccgTimeAx, out.ccg{kCellPair}(:, 2, 2), 'FaceColor', 'k');
+            bar(out.ccgTimeAx, out.ccg{idx(kCellPair)}(:, 2, 2), 'FaceColor', 'k'); axis tight;
             subplot(2,2,4);
-            gt.pfObject.PlotRateMaps(1, 0, 1, [],[],[], cellPairs(kCellPair, :));
+            gt.pfObject.PlotRateMaps(1, 0, 1, [],[],[], out.cellPairs(idx(kCellPair), :));
+            waitforbuttonpress;
+            clf;
         end
     end
 end

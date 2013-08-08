@@ -1,24 +1,27 @@
 function out =  CofiringVsDist(gt, varargin)
 % CofiringVsDist(gt, varargin)
 % script to relate pk distances and cofiring likelihood
+%-----
+% pool syntax cfsout = BatchProcess(@CofiringVsDist, 'kenji', 'CA3', 'bigSquare', 1, {'post', roi, arena}, 'pool', 1, struct('poolVar', 'cfVsPkDist'));
 
     [prePost, IF_PLOT, type, roi, arena, nResample] = ...
         DefaultArgs(varargin, {'pre', 0, 'load','CA3', 'bigSquare', 500});
-    %    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']), type = 'compute'; end
+    %if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.', mfilename, '.mat']), type = 'compute'; end
     switch type
         case 'compute'
           out = [];
           disp('computing');
-          pairCofiring = PairReactivation(gt, prePost, 'compute', nResample);
+          pairCofiring = PairReactivation(gt, prePost, 'load', nResample);
           if ~isempty(pairCofiring)
               cluId = unique(pairCofiring.cellPairs(:));
-              pks = gt.MultiPeakPFDistance(roi, arena); close gcf;
+              pks = gt.MultiPeakPFDistance(roi, arena ); close gcf;
+              if isempty(pks.pkDist), return; end
               cmnClus = intersect(pks.cluId, cluId);
               cellIds = pks.cluId;
               if length(cmnClus) > 1
                   myPairs = nchoosek(cmnClus, 2);
-                  cntrPeaks = pks.cntrPeaks;%(ismember(pks.cluId, cmnClu));
-                  cntrVertices = pks.cntrVertices;%(ismember(pks.cluId, cmnClu));
+                  cntrPeaks = pks.cntrPeaks; %(ismember(pks.cluId, cmnClu));
+                  cntrVertices = pks.cntrVertices; %(ismember(pks.cluId, cmnClu));
                   validCntrCnt = 0;
                   for mCellPair = 1 : size(myPairs, 1)
                       cntrA = cntrVertices{cellIds == myPairs(mCellPair, 1)}; 
@@ -35,6 +38,8 @@ function out =  CofiringVsDist(gt, varargin)
                           for kCntrPr = 1 : size(cntrPairs, 1)
                               validCntrCnt = validCntrCnt + 1;
                               probCofiringSleep(validCntrCnt) = pairCofiring.cofiringAbvChance(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
+                              dataCofiring(validCntrCnt) = pairCofiring.dataCofiring(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
+                              chanceLvlProb(validCntrCnt) = pairCofiring.chanceLvlProb(ismember(pairCofiring.cellPairs, myPairs(mCellPair, :), 'rows'));
                               pkDistAB(validCntrCnt) = norm( pkA(cntrPairs(kCntrPr, 1), :) - pkB(cntrPairs(kCntrPr, 2), :));
                               selectedCellpairs(validCntrCnt, :) = myPairs(mCellPair, :);
                               pkAB(validCntrCnt, :) = [pkA(cntrPairs(kCntrPr, 1), :) , pkB(cntrPairs(kCntrPr, 2), :)];
@@ -42,12 +47,12 @@ function out =  CofiringVsDist(gt, varargin)
                       end
                   end
                   if validCntrCnt > 0
-                      out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:)];
-                      save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
+                      out.cfVsPkDist = [pkDistAB(:), probCofiringSleep(:), dataCofiring(:), chanceLvlProb(:)];
+                      save([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.', mfilename, '.mat'], 'out');
                       fprintf('\n DONE... \n');
                   else
                       fprintf('\n no valid cntr pairs \n');
-                  end
+                   end
               else
                   out = [];
                   fprintf('\n no common pairs active both in run and sleep \n ');
@@ -55,22 +60,23 @@ function out =  CofiringVsDist(gt, varargin)
           end          
 
       case 'load'
-        if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']);
-            load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'], 'out');
+        if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost,'.', mfilename, '.mat']);
+            load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost,'.', mfilename, '.mat'], 'out');
+            %out.cfVsPkDist(out.cfVsPkDist(:, 2) == 0, :) = nan;
             if IF_PLOT
-                % hist2(out.cfVsPkDist);
                 if ~isempty(out)
                     plot(out.cfVsPkDist(:, 1), out.cfVsPkDist(:, 2), '*');
                     axis square;
-                    ylim([0, 1]);
+                    xlim([0, max(xlim)]);
                     grid on;
                     title('SWS');
-                    xlabel('peak Dist (px)');
-                    ylabel('cofiring probablity');
+                    xlabel('Peak Distance (px)');
+                    ylabel('Cofiring Probablity');
                     reportfig(gcf, [mfilename, '.', char(prePost)] , 0, [gt.filebase, '    ', gt.trialName, '  roi : ' roi, '  arena : ' arena]);
                 end
             end
         else, out = [];
+            
         end
     end
 end

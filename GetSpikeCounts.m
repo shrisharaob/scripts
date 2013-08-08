@@ -33,7 +33,6 @@ function [sc, winEdges, varargout] = GetSpikeCounts(trial, varargin)
     for mWin = 1 : nWins
         for kClu = 1 : nClus
             kRes  = res(clu == cluIdx(kClu));
-            % sc(kClu, mWin) = histc(kRes, winEdges(mWin, :));
             sc(kClu, mWin) = sum(kRes >= winEdges(mWin, 1)  & kRes <= winEdges(mWin, 2));
         end
         if winEdges(mWin, 2) <= size(xy, 1)

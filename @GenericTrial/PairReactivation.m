@@ -5,9 +5,11 @@ function out = PairReactivation(gt, varargin)
     out = [];
     [prePost, type, nResample, IF_PLOT, winSize, overlap ] = ...
         DefaultArgs(varargin, {'pre', 'load', 0, false, 100e-3, 0});
-
+    %%
+    load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat'], 'out');
+    %if ~all(isfield(out, {'cellPairs', 'chanceLvlProb', 'dataCofiring', 'cofiringAbvChance'})), type = 'compute'; end
     if isempty(gt.pfObject), gt.LoadPF; end
-    if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']), type = 'compute'; end
+    %if ~FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']), type = 'compute'; end
     switch type
       case 'compute'
         [sleepRes, sleepClu] = gt.LoadStateRes('SWS', [], [], [], 1, prePost);
@@ -28,10 +30,6 @@ function out = PairReactivation(gt, varargin)
         sleepClu = sleepClu(resIdx);
         %% cofiring events in sleep
         sleepRes = sleepRes ./ gt.sampleRate;
-        %          %% TEST
-        %         sleepRes = sleepRes(1:1e3);
-        %         sleepClu = sleepClu(1:1e3);
-        
         binEdges = [[sleepRes(1) : winSize * (1 - overlap) : sleepRes(end)]',  [sleepRes(1) + winSize : winSize * (1 - overlap) : sleepRes(end) + winSize]'];
         nSleepBins = size(binEdges, 1) - 1;
         IS_EVNT_BIN_SLEEP = false(nPairs, nSleepBins);
@@ -78,6 +76,7 @@ function out = PairReactivation(gt, varargin)
       case 'load'
         if FileExists([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat'])
             load([gt.paths.analysis, gt.filebase, '.', gt.trialName, '.', prePost, '.' mfilename, '.mat']);
+            out.cofiringAbvChance =  out.dataCofiring - out.chanceLvlProb;
         else, out = [];
         end
     end

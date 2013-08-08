@@ -26,7 +26,7 @@ avgVector = [];
         load([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), mfilename, '.mat']);
         avgVector = mean(popVec, 4);
         sRateMaps = sq(gt.pfObject.smoothRateMap(:, :, ismember(gt.pfObject.acceptedUnits, commonClus)));
-        dotProd = [];%atan(dp(sRateMaps(:), pv));
+        dotProd = atan(dp(sRateMaps(:), popVec));
                      %popVec = pv;
         return;
     end
@@ -80,7 +80,7 @@ avgVector = [];
         out.popVec = sparse(popVec);
         out.clu = commonClus;
         out.rateMap = rm;
-        out.dotProd = atan(dp(sRateMaps(:), out.popVec)  ./ nClus);  % normalize dp by the number of cells 
+        out.dotProd = atan(dp(sRateMaps(:), out.popVec)) ; %  ./ nClus);  % normalize dp by the number of cells 
         save([gt.paths.analysis, gt.filebase, '.' gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'out', '-v7.3');
         %save([gt.paths.analysis, gt.filebase, '.', gt.trialName, GenFiletag(roi, arena), 'CHUNKS.', num2str(nChunks), '.', mfilename, '.mat'], 'popVec', 'dotProd','-v7.3');
         popVec = out.popVec;

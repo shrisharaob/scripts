@@ -3,7 +3,7 @@ function ccgAllcells(trial, pfPars, varargin)
     % varargin [IF_REPORT_FIG, pairs2analyse, IF_SAVE]
     [IF_REPORT_FIG, pairs2analyse, IF_SAVE, trialName] = DefaultArgs(varargin, {0, [1:size(pfPars.selectedPairs, 1)],1, 'crt1'});
     cellPairs = pfPars.selectedPairs(pairs2analyse, :);
-    load(['~/data/analysis/' trial.name '/' trial.name '.SelectedPyrCells.mat']);
+    load(['~/data/analysis/' trial.name '/' trial.name '.SelectCells.mat']);
     nPairs = size(cellPairs, 1);
     if nPairs ~= 0 & ~isempty(nPairs)
 
@@ -71,10 +71,10 @@ function ccgAllcells(trial, pfPars, varargin)
                 elCluStr =[ '(El, Clu) : (' num2str(elClus(1,1)) ',' num2str(elClus(1,2)) ') (' num2str(elClus(2,1)) ',' num2str(elClus(2,2)) ') \n'];
                 reportfig(gcf, [trial.name '_ccgs_' trial.trialName ], 0, ['cell pair ' elCluStr  'T:' num2str(T(kPair))  'tOffset: ' num2str(offset(kPair)) 'firstPeak: ' num2str(firstPeak) ], [],0)
             else
-%                 waitforbuttonpress
-                disp(['T =' num2str(T(kPair))])
-                disp(['Offset =' num2str(offset(kPair))])
-                lowPassPkTime(kPair)
+                 waitforbuttonpress
+%                disp(['T =' num2str(T(kPair))])
+%               disp(['Offset =' num2str(offset(kPair))])
+%               lowPassPkTime(kPair)
             end
             if kPair ~= nPairs
                 clf;

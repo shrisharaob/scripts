@@ -13,7 +13,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
       case  'MTA'
         mtaTrial = MTATrial(gt.filebase, [], gt.trialName);
         if strcmp(state, 'RUN')
-            state = 'walk'; 
+            state = {'walk'}; 
         else
             error('\n no %s state in filebase %s', state, gt.filebase); 
         end
@@ -22,6 +22,9 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         %posStatePeriods = round(statePeriods .* gt.trackingSampleRate ./ gt.lfpSampleRate) + 1;
         statePeriods = round(statePeriods .* gt.sampleRate ./ gt.lfpSampleRate) + 1;
         trialStartTime_pos = 0;
+        varargout{1} = SelectPeriods(sq(gt.position(:,markerNo,:)), gt.goodPosPeriods, 'c');
+        [res, resIdx] = SelectPeriods(gt.res, ConvertFs(statePeriods, gt.lfpSampleRate, gt.sampleRate), 'd', 1, IF_SQUASH);
+        clu = gt.clu(resIdx);
       case 'default'
         statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]);
         % posStatePeriods = round(statePeriods .* gt.trackingSampleRate  ./ gt.lfpSampleRate) + 1;
@@ -32,6 +35,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
         if ~strcmp(state, 'trajEvnts'),
             statePeriods = load([gt.paths.data, gt.filebase '.sts.', state]); % @lfp fs
         end
+        markerNo = 1;
         switch state
           case 'SWS'
             varargout = {[], []};
@@ -57,7 +61,7 @@ function [res, clu, varargout] = LoadStateRes(gt, varargin)
             clu = gt.clu(resIdx);
             varargout = {[], []};
           case 'RUN'
-            markerNo = 1;
+         
             statePeriods = IntersectRanges(statePeriods, gt.trialPeriods);
             trialStartTime_pos =  ConvertFs(gt.trialPeriods(1, 1), gt.lfpSampleRate, gt.trackingSampleRate);
             if IF_INGOODPOS
