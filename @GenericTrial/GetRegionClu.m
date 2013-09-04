@@ -1,11 +1,10 @@
 function regionClu = GetRegionClu(trial, roi, varargin)
-% regionClu = GetRegionClu(trial, roi, varargin)    
-% returns the cluster ids in the regions specified
-    % roi - cell array containing the regions or char str 
-% IF_CAT - concatinates all the clusters into a singel vector, else
-% returns roi clus in different cells 
-%[IF_CAT] = DefaultArgs(varargin, {0});
-
+    % regionClu = GetRegionClu(trial, roi, varargin)    
+    % returns the cluster ids in the regions specified
+    % -----
+    % Inputs:
+    %     roi - cell array containing the regions or char string
+        
 
     if ~iscell(roi) == 1
         roi = cellstr(roi);

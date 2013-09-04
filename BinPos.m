@@ -1,8 +1,8 @@
 function out = BinPos(trial,varargin)
-%     % occupancy = Occupancy(trial,varargin)
-%     % Justin's code
+% out = BinPos(trial,varargin)
+% Justin's code
 % accepts position data as input, default set to trial.position
-
+% 
     [Nbin,Smooth,type, states, pos, pos_shuffle] = DefaultArgs(varargin,{50, 0.03,'xy', {'head', 'theta'}, [], 0});
     
 %     [stsp stateLabel] = trial.trialPeriods(states);

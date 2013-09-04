@@ -1,4 +1,5 @@
 function ComputePFPars(gpf)
+% ComputePFPars(gpf)
 
     gt = GenericTrial(gpf.filebase, gpf.trialName);
     if isempty(gpf.trialSubType)

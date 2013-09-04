@@ -1,6 +1,17 @@
 function out = TemplateMatch(gt, varargin);
-% out = Template-Match(gt, ragging);
-% [resemble, proposed]
+    % out = Template-Match(gt, ragging);
+    % Template matching analysis for cell sequences on linear track
+    % the significance of a sequence is computed by scrambling the cell
+    % ids in the template
+    % -------
+    % Inputs:
+    %     IF_PLOT
+    %     minCellsInSeq
+    %     preOrPost  
+    %     nResample
+    %     type
+    %     overlap,
+    %     alpha
 
     [IF_PLOT, minCellsInSeq, preOrPost, nResample, type, overlap, alpha] = ...
         DefaultArgs(varargin, {false, 2, 'pre', 1e3, 'load', 0.5, 0.025});

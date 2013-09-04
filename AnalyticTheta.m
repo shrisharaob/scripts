@@ -1,4 +1,12 @@
 function [ThPh, ThAmp] = AnalyticTheta(gt, varargin)
+    % [ThPh, ThAmp] = AnalyticTheta(gt, varargin)
+    % returns theta phase and amplitude of the analytical lfp signal
+    %
+    % -------
+    % Inputs:
+    %    channel    - channel to use
+    %    fRange     - set frequency range of theta
+    %    IF_COMPUTE - overwrite ?  
 
     [channel, fRange, IF_COMPUTE] = DefaultArgs(varargin, {1, [4 12], 0});
     

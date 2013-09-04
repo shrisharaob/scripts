@@ -1,7 +1,9 @@
 function genericTrial  = Load(genericTrial, loadProperty, varargin)
     % general load function for Generictrial class
     % returns GenericTrial object with specified fields loaded
-    % loadProperty - cell array {{'<load property1 name>', '<arg1>', '<arg2>'}, {<load property2 name>', '<arg1>', '<arg2>'}}
+% -------
+% Inputs:
+%     loadProperty - cell array {{'<load property1 name>', '<arg1>', '<arg2>'}, {<load property2 name>', '<arg1>', '<arg2>'}}
 
     nPropsToLoad = length(loadProperty);
     for kProperty = 1 : nPropsToLoad
@@ -13,7 +15,6 @@ function genericTrial  = Load(genericTrial, loadProperty, varargin)
                     mtaPFObj = LoadMTAPFObject(genericTrial.filebase, genericTrial.trialName);
                     genericTrial.pfObject = GenericPF(mtaPFObj);
                 else
-% keyboard;
                 if isempty(genericTrial.trialName)
                          error(['\n trial name not specified  !!! ' ...
                                 '\n']);  

@@ -1,10 +1,19 @@
 classdef GenericPF
-% general Place field class
-% [datasetType, trialName, IF_OVERWRITE, state, markerNo, smoothSigma] 
-% Defaults :  {'default', 'df', 0, 'RUN', 1, 0.03 px});  
-%-------
-    % History:
-    %  Shrisha - Created
+% general Place field class and methods to vvisualize and compute
+% place field parameters
+% -------
+% Inputs:
+%    datasetType
+%    trialName
+%    IF_OVERWRITE
+%    state
+%    markerNo
+%    smoothSigma
+%
+%    Defaults :  {'default', 'df', 0, 'RUN', 1, 0.03 px});  
+% -------
+% History:
+%  Shrisha - Created
     
     properties (SetAccess = protected, GetAccess = public)
         % tag identifying the type of dataset

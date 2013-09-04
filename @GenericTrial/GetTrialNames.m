@@ -1,4 +1,6 @@
 function trialNames = GetTrialNames(gt, varargin)
+    % trialNames = GetTrialNames(gt, varargin)
+    % returns trial namespresent in the filebase
 
     switch gt.datasetType
         case 'zhenya'

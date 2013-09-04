@@ -1,7 +1,22 @@
 classdef GenericTrial < handle
-    % class to structure general recording data
-    %
-    %-------
+    % Class to organize hippocampal recording data, including methods
+    % for unit analysis. The tree structure used for organizing
+    % data depends on the dataset type. In general, the raw data is
+    % stored in the ~/<dataset type>/data folder and all results
+    % are saved to the ~/<dataset>/analysis folder. For MTA data,
+    % the original tree structure is adopted for compatibility. 
+    % -------
+    % Usage:
+    % trial = GenericTrial('filebase', 'trialname');
+    % trial = GenericTrial('filebase');
+    % the trialname is prompted if not specified, all the
+    % trialnames are displayed for convenience
+    % -------
+    % Conventions:
+    %    variables - start with lower case letters
+    %        exception, logical variables have all upper case letters
+    %    methods - start with upper case letters
+    % -------   
     % History:
     %  Shrisha - Created
     

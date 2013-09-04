@@ -1,5 +1,18 @@
 function [trajEvntPeriods, pars] = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, varargin)
-% trajEvntPeriods = TrajectoryEvents(gt, varargin) @sample fs
+    % trajEvntPeriods = TrajectoryEvents(gt, IF_COMPUTE, preOrPost, varargin) @sample fs
+    % returns periods with population events defined as a minimum
+    % number of cells firing within a time window; preceeded and
+    % followed by a minimum interval of silence
+    % -------
+    % Inputs:
+    %    IF_COMPUTE
+    %    preOrPost
+    %    state
+    %    clus2Select
+    %    minEvntCells
+    %    binSize
+    %    overlap
+    %     minSilenceWin  
 
     fprintf('\n traj evnts ...')
     trajEvntPeriods = [];

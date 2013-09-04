@@ -1,6 +1,19 @@
 function pfPars = FindPFPars(arg, varargin)
-% pfPars = FindPFPars(trial/pfObject, varargin)
-% varargin - [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy]
+    % pfPars = FindPFPars(trial/pfObject, varargin)
+    % returns structure containing place field parameters useful for
+    % further analysis
+    % -------
+    % Input:
+    %     pyrCluIdx
+    %     trialName
+    %     smoothFactor
+    %     IF_OVERWRITE
+    %     states
+    %     absThresh
+    %     nSTD
+    %     maxSparsity
+    %     minCoherence
+    %     maxEntropy
     
     if nargin < 1, help FindPFPars; return; end
     [pyrCluIdx, trialName, smoothFactor, IF_OVERWRITE, states, absThresh, nSTD, maxSparsity, minCoherence, maxEntropy] ...

@@ -1,6 +1,18 @@
 function out = PairReactivation(gt, varargin)
-% out = PairReactivation(gt, varargin)
-% returns pairwise reactivation likelihood
+    % out = PairReactivation(gt, varargin)
+    % returns pairwise reactivation likelihood
+    % the liklihood is defined as the ratio of the number of times each
+    % pair cofires within a time window and the total number of time
+    % windows, to control for firing rate changes, the chance level
+    % cofiring likelihood is computed by resampling 
+    % -------
+    % Inputs:
+    %     prePost   
+    %     type
+    %     nResample 
+    %     IF_PLOT
+    %     winSize 
+    %     overlap
 
     out = [];
     [prePost, type, nResample, IF_PLOT, winSize, overlap ] = ...

@@ -1,7 +1,19 @@
 function out = CCGPars(gt, varargin)
-% out = CCG(gt, varargin)
-% compute ccg for specified cell pairs in  the trial
-
+    % out = CCG(gt, varargin)
+    % compute ccg for specified cell pairs in  the trial
+    %
+    % varargs :
+    %     type          - {'display', 'compute'} 
+    %     cluId         - cluster id
+    %     roi           - {CA3, CA1}
+    %     arena         - {linear, bigSquare, midSquare}, power set
+    %     binSize       - bin size for ccg
+    %     maxTimeLag    - maximum time lag of spike times to consider 
+    %     ccgSmthFactor - std of gaussian window
+    %     jitterWinSiz  - spike jitter window size for resampling 
+    %     nResamples    - number of resamples
+    %     alpha         - significance level
+    
     [type, cluId, roi, arena, binSize, maxTimeLag, ccgSmthFactor, jitterWinSiz, nResamples, alpha] = ...
         DefaultArgs(varargin, {'display', [], 'CA3', 'bigSquare', 10e-3, 2000e-3, 0.03, 10, 0, 5e-2});
 

@@ -1,6 +1,19 @@
 function out = MultiPeakPFDistance(gt, roi, arena, varargin)
-% out = MultiPeakPFDistance(gpf, occupancy, varargin)
-% [cellPairs, IF_SMRM, IF_COMPUTE_CCG, nSTD, areaThreshFactor, occThreshFac, state, binSize, maxTimeLag, IF_PLOT] = ...
+    % out = MultiPeakPFDistance(gpf, occupancy, varargin)
+    % returns cell array of structures with fields containing the place
+    % field centers, sub fields centers and corresponding contours 
+    % -------
+    % Inputs:
+    %     cellPairs
+    %     IF_SMRM
+    %     IF_COMPUTE_CCG
+    %     nSTD
+    %     areaThreshFactor 
+    %     occThreshFac
+    %     state
+    %     binSize
+    %     maxTimeLag
+    %     IF_PLOT
     
     if isempty(gt.pfObject), gt.LoadPF; end
     gpf = gt.pfObject;

@@ -1,6 +1,6 @@
 function smoothRateMap = AdaptiveSmoothRM(gt,  varargin)
-% smoothRateMap = SmoothRM(gt,  varargin)
-% adaptive smoothing - Skagg's 1996, Hippocampus
+    % smoothRateMap = SmoothRM(gt,  varargin)
+    % adaptive smoothing - Skagg's 1996, Hippocampus
     if isempty(gt.pfObject), gt.LoadPF; end
     defClus = gt.pfObject.acceptedUnits;
     [type, IF_REPORTFIG, cluIdx, alpha, nBins, state, smoothFactor] = ...

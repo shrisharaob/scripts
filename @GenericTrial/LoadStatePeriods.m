@@ -1,7 +1,11 @@
 function statePeriods = LoadStatePeriods(gt, varargin)
-% statePeriods = LoadStatePeriods(gt, varargin)
-% [state, fs, IF_INGOODPOS]
-% loads the specified state periods @lfp fs
+    % statePeriods = LoadStatePeriods(gt, varargin)
+    % returns state periods in the specified sample rate
+    % -------
+    % Inputs:
+    %    state
+    %    fs           - sample rate
+    %    IF_INGOODPOS - if only periods with valid positions should be loaded
 
     [state, fs, IF_INGOODPOS] = DefaultArgs(varargin, {'RUN', 0, 1});
 

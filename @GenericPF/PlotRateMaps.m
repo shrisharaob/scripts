@@ -1,7 +1,16 @@
 function PlotRateMaps(pfObject, varargin)
-% PlotPlaceFields(pfObject, varargin)
-% varargin - [ IF_CONTOUR, IF_WAITFORBTNPRESS, IF_Srmap, nContours, contourColor, mazeDiameter, cellCluIdx]
-% IF_contour {0, 1, 2}
+    % PlotPlaceFields(pfObject, varargin)
+    %
+    % -------
+    % Inputs:
+    %     IF_CONTOUR          -  {0, 1, 2}, contour plot ?
+    %     IF_WAITFORBTNPRESS  
+    %     IF_Srmap            - plot smoothed rate maps ?
+    %     nContours           - number of contours
+    %     contourColor          
+    %     mazeDiameter        - in cm, for circular maze
+    %     cellCluIdx          - cluster ids to plot
+
     if nargin<1, help PlotPlaceFields; return; end
   
     filebase = pfObject.filebase;

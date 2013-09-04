@@ -1,9 +1,18 @@
 function [res, clu, varargout] = LoadStateRes(gt, varargin)
-% [res, clu, pos, posStatePeriods] = LoadStateRes(gt, varargin)
-% [state, IF_INGOODPOS, fs, posInPeriods] = {0, 0}
-% IF_INGOODPOS : logical, res only in good pos periods loaded
-% fs : convert res to fs
-% loads clu res for the specified state
+    %  [res, clu, pos, posStatePeriods] = LoadStateRes(gt, varargin)
+    %  loads clu res for the specified state
+    % -------
+    % Inputs:
+    %     state
+    %     IF_INGOODPOS  - logical, res only in good pos periods loaded
+    %     fs            - sample rate of loaded res
+    %     posInPeriods  - cell, load res for periods; used for loading
+    %                     res only inside certain place fields
+    %     IF_SQUASH     
+    %     prePost       - {[], 'pre', 'post'}, if only pre or post
+    %                     trial sleep res is to be loaded
+
+
 
     [state, IF_INGOODPOS, fs, posInPeriods, IF_SQUASH, prePost] = DefaultArgs(varargin, {'RUN', 1, 0, [], 0, []});
 

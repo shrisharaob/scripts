@@ -1,8 +1,12 @@
 function linPos = LinearizePos(gt, varargin);
-% linPos = LinearizePos(gt, varargin);
+    % linPos = LinearizePos(gt, varargin);
+    % returns linear position
+    % -------
+    % Inputs:
+    %    markerNo
+    %    state     
 
-
-    switch gt.datasetType
+   switch gt.datasetType
       case 'kenji'
         defMarker = 1;
       case 'MTA'

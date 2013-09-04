@@ -1,6 +1,16 @@
 function rateMap1D  = Compute1DRateMap(gt, IF_COMPUTE, varargin)
-% rateMap1D  = Compute1DRateMap(gt, res, linPos, varargin)
-% res in tracking sample rate
+    % rateMap1D  = Compute1DRateMap(gt, IF_COMPUTE, varargin)
+    % computes 1D place fields in a linear maze
+    % -------
+    % Inputs:
+    %    IF_COMPUTE  - overwrite
+    %    cluId       - cluster ids to consider
+    %    nBins       - number of spatial bins
+    %    smoothSigma - std of gaussian kernal used to compute smooth PF
+    %    posRange    - range of linear positions to consider
+    % ------
+    % Outputs:
+    %    rateMap1D -  cell 1-by-nClus
 
     if ~IF_COMPUTE & FileExists([gt.paths.analysis,  gt.filebase, '.', gt.trialName, '.', mfilename, '.mat'])
         load([gt.paths.analysis,  gt.filebase, '.', gt.trialName, '.', mfilename, '.mat']);

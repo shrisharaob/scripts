@@ -1,5 +1,5 @@
 function pos = LoadPos(gt, state)
-
+% loads position data 
 
     switch gt.datasetType
       case 'kenji'

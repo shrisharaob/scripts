@@ -1,9 +1,23 @@
 function [decodedPos, err] = DecodePos(gt, varargin)
-% [pos, predErr] = DecodePos(gt, varargin)
-% [binSize, IF_REPORTFIG, type, state, ratemaps, cluId, binOverlap]
-% {200e-3, 0, 'display', 'RUN', defRateMaps, defCluId, 0}
-% decode position 
-% gt - GenericTrial Object
+    % [pos, predErr] = DecodePos(gt, varargin)
+    % Baysean decoding of position from spike times and average rate
+    % maps, Ref. Zhang et. al 2013, J. Neurophys
+    % -------
+    % Inputs: 
+    %     binSize      - in seconds, time window within which all spikes are considered
+    %     type         - {'display', 'compute'}
+    %     cluId        - units to consider
+    %     dim          - dimension of the space to decode
+    %     state        - {'SWS', 'RUN'}
+    %     IF_REPORTFIG 
+    %     ratemaps     - nXBins-by-nYBins-by-nClus
+    %     binOverlap   - fraction of time bin overlap for moving window
+    %     markerNo     - marker to use for computing error 
+    % -------
+    % Outputs:
+    %    decodedPos 
+    %    err        - Euclidean distace between decoded position and
+    %                 the marker position
 
     if isempty(gt.pfObject), gt.LoadPF; end
     defCluId = gt.pfObject.acceptedUnits;
