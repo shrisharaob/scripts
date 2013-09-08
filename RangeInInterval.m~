@@ -1,4 +1,0 @@
-function y = RangeInInterval(rng, interval)
-% y = RangeInInterval(rng, interval)
-
-    
