@@ -1,0 +1,20 @@
+
+list = importdata('~/data/kenji/list');
+load('~/data/kenji/Beh_time_ind.mat');
+
+fp = fopen('logKenji.txt','w');
+for i = 1 : length(list)
+nonSleepTrials{i} = Beh(~strcmp(Beh(:,5) ,'sleep') & strcmp(Beh(:,2),list{i}) , 4);
+if ~isempty(nonSleepTrials{i})
+    subTrialNames = length(nonSleepTrials{i});
+    for kSubTr = 1 : length(subTrialNames)
+        system(['ln -s ~/data/kenji/whl/', subTrialNames{kSubTr}]);
+    end
+end
+end
+
+for k = 1 : length(whos)
+trialPeriods =[0; cumsum(str2num(char(Beh(strcmp(Beh(:,2),genericTrial.filebase), 7))))];
+trialPeriods = [trialPeriods(1:end-1), trialPeriods(2:end)];
+trialPeriods = trialPeriods .* genericTrial.lfpSampleRate; % trialPeriods @lfp fs
+end

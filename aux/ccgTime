@@ -1,0 +1,9 @@
+
+[ccgPks,ccgPkLoc] = findpeaks(zzr);
+
+
+
+ccgPeriod = median(diff(tr(ccgPkLoc)));
+tRescaledCcgPks = mod(tr(ccgPkLoc), ccgPeriod);
+
+linRegCoeff = polyfit(tRescaledCcgPks, 
